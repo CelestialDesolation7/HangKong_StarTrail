@@ -4,6 +4,22 @@
              xmlns:local="clr-namespace:HangKong_StarTrail"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <!-- 主题颜色 -->
+            <Color x:Key="DeepSpaceBlue">#0B0E17</Color>
+            <Color x:Key="StarLightGold">#FFD700</Color>
+            <Color x:Key="CelestialBlue">#4169E1</Color>
+            <Color x:Key="RedGiantRed">#FF4500</Color>
+            <Color x:Key="StarLightWhite">#F0F0F0</Color>
+            <Color x:Key="StarDustGray">#A0A0A0</Color>
+            
+            <!-- 画刷 -->
+            <SolidColorBrush x:Key="DeepSpaceBlueBrush" Color="{StaticResource DeepSpaceBlue}"/>
+            <SolidColorBrush x:Key="StarLightGoldBrush" Color="{StaticResource StarLightGold}"/>
+            <SolidColorBrush x:Key="CelestialBlueBrush" Color="{StaticResource CelestialBlue}"/>
+            <SolidColorBrush x:Key="RedGiantRedBrush" Color="{StaticResource RedGiantRed}"/>
+            <SolidColorBrush x:Key="StarLightWhiteBrush" Color="{StaticResource StarLightWhite}"/>
+            <SolidColorBrush x:Key="StarDustGrayBrush" Color="{StaticResource StarDustGray}"/>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
