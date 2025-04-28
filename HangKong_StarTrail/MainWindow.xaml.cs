@@ -60,8 +60,8 @@ public partial class MainWindow : Window
 
     private void StartLearning_Click(object sender, RoutedEventArgs e)
     {
-        // 将来连接到学习模块
-        MessageBox.Show("学习宇宙知识功能尚未实现，敬请期待！", "星穹轨道", MessageBoxButton.OK, MessageBoxImage.Information);
+        var knowledgeBaseForm = new KnowledgeBaseForm();
+        knowledgeBaseForm.Show();
     }
 
     private void OpenSettings_Click(object sender, RoutedEventArgs e)
@@ -73,6 +73,22 @@ public partial class MainWindow : Window
     private void Exit_Click(object sender, RoutedEventArgs e)
     {
         Application.Current.Shutdown();
+    }
+
+    private void OpenStarTrail_Click(object sender, RoutedEventArgs e)
+    {
+        // 打开恒星轨迹界面
+    }
+
+    private void OpenGalaxy_Click(object sender, RoutedEventArgs e)
+    {
+        // 打开星系结构界面
+    }
+
+    private void OpenKnowledgeBase_Click(object sender, RoutedEventArgs e)
+    {
+        var knowledgeBaseForm = new KnowledgeBaseForm();
+        knowledgeBaseForm.Show();
     }
 
     #endregion
