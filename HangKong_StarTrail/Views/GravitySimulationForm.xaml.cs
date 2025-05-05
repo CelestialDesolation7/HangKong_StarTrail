@@ -136,5 +136,10 @@ namespace HangKong_StarTrail.Views
             }
             return IntPtr.Zero;
         }
+
+        private void ExitSimulationBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }

@@ -9,14 +9,15 @@
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         
-        xmlns:hc="https://handyorg.github.io/handycontrol" x:Class="HangKong_StarTrail.Views.GravitySimulationForm"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        x:Class="HangKong_StarTrail.Views.GravitySimulationForm"
         
         mc:Ignorable="d"
         Height="600" Width="1000" WindowStartupLocation="CenterScreen" AllowsTransparency="True"
         Background="Transparent" WindowStyle="None">
 
 
-    <Border CornerRadius="25 25 25 25" Background="#FF2D2D30" BorderBrush="Gray" BorderThickness="5,5,5,5" 
+    <Border Background="#FF2D2D30" BorderBrush="Gray" BorderThickness="2" 
             MouseLeftButtonDown="Grid_MouseLeftButtonDown" >
         <Grid MouseLeftButtonDown="Grid_MouseLeftButtonDown">
             <Grid.ColumnDefinitions>
@@ -27,91 +28,146 @@
             </Grid.ColumnDefinitions>
 
             <!-- 左侧面板（美化版） -->
-            <Border Grid.Column="0" CornerRadius="23 0 0 23" Padding="15">
+            <Border Grid.Column="0" Padding="15">
+                
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                         <GradientStop Color="#343155" Offset="0"/>
                         <GradientStop Color="#3B2158" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
+                
+                <hc:ScrollViewer VerticalScrollBarVisibility="Hidden">
+                    <StackPanel Orientation="Vertical">
 
-                <StackPanel>
-                    <!-- 通用样式资源可提取到 ResourceDictionary 中 -->
-                    <StackPanel.Resources>
-                        <Style TargetType="TextBlock" x:Key="LabelStyle">
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="FontFamily" Value="Arial"/>
-                            <Setter Property="FontSize" Value="16"/>
-                            <Setter Property="FontWeight" Value="Bold"/>
-                            <Setter Property="VerticalAlignment" Value="Center"/>
-                            <Setter Property="Margin" Value="5"/>
-                        </Style>
-                        <Style TargetType="hc:ContextMenuButton" x:Key="ActionButtonStyle">
-                            <Setter Property="Height" Value="40"/>
-                            <Setter Property="Margin" Value="5"/>
-                            <Setter Property="MinWidth" Value="100"/>
-                        </Style>
-                        <Style TargetType="hc:TextBox" x:Key="InputTextBoxStyle"
-                               BasedOn="{StaticResource {x:Type hc:TextBox}}">
-                            <Setter Property="Background" Value="{x:Null}"/>
-                            <Setter Property="Margin" Value="10,0"/>
-                            <Setter Property="BorderBrush" Value="#FFBE79D8"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="SelectionTextBrush" Value="#FFBE79D8"/>
-                            <Setter Property="BorderThickness" Value="2"/>
-                            <Setter Property="FontSize" Value="20"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                        </Style>
-                    </StackPanel.Resources>
+                        <!-- 退出和重置按钮 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 0 0 8">
+                            <!-- 退出按钮 -->
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="0 0 10 0" x:Name="ExitSimulationBtn" Click="ExitSimulationBtn_Click">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="SignOut" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="退出" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
 
-                    <!-- 操作面板标题 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <fa:ImageAwesome Icon="Sliders" Foreground="White" Height="30" Margin="5"/>
-                        <TextBlock Style="{StaticResource LabelStyle}" FontSize="22" Text="操作面板"/>
+                            <!-- 重置按钮 -->
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 10 0" x:Name="ResetSimulationBtn">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Undo" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="重置" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <!-- 聚焦按钮 -->
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0" x:Name="FocusResetBtn">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Bullseye" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="聚焦" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        
+                        <!-- 操作面板标题 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <fa:ImageAwesome Icon="Sliders" Foreground="White" Height="30" Margin="5"/>
+                            <TextBlock Style="{StaticResource LabelStyle}" FontSize="22" Text="操作面板"/>
+                        </StackPanel>
+
+                        <!-- 仿真时间速度 -->
+                        <Button x:Name="TimeStepSettingBtn" Style="{StaticResource IconTextButtonStyle}" Margin="10 0 10 0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <fa:ImageAwesome Icon="Tachometer" Width="25" Height="20" Margin="5" Foreground="White"/>
+                                <TextBlock Style="{StaticResource LabelStyle}" Text="时间流速"/>
+                            </StackPanel>
+                        </Button>
+
+                        <hc:PreviewSlider x:Name="SimulationTimeStepSlider" Margin="10,0" Height="30"/>
+
+                        <!-- 添加 / 删除天体 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="0 0 10 0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Plus" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="添加天体" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Minus" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="删除天体" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- 天体速度设置 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <fa:ImageAwesome Icon="Rocket" Foreground="White" Height="20" Margin="5"/>
+                            <TextBlock Style="{StaticResource LabelStyle}" Text="天体速度"/>
+                        </StackPanel>
+                        <hc:TextBox Style="{StaticResource InputTextBoxStyle}" x:Name="VelocityIOTextBox"/>
+
+                        <!-- 天体质量设置 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <fa:ImageAwesome Icon="BalanceScale" Foreground="White" Height="20" Margin="5"/>
+                            <TextBlock Style="{StaticResource LabelStyle}" Text="天体质量"/>
+                        </StackPanel>
+                        <hc:TextBox Style="{StaticResource InputTextBoxStyle}" x:Name="MassIOTextBox"/>
+
+                        <!-- 天体位置设置 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <fa:ImageAwesome Icon="Map" Foreground="White" Height="20" Margin="5"/>
+                            <TextBlock Style="{StaticResource LabelStyle}" Text="天体位置"/>
+                        </StackPanel>
+                        <hc:TextBox Style="{StaticResource InputTextBoxStyle}" x:Name="PositionIOTextBox"/>
+
+                        <!-- 当前观察对象 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <fa:ImageAwesome Icon="Eye" Foreground="White" Height="20" Margin="5"/>
+                            <TextBlock Style="{StaticResource LabelStyle}" Text="当前观察对象"/>
+                        </StackPanel>
+                        <hc:TextBox Style="{StaticResource InputTextBoxStyle}" AutomationProperties.HelpText="cesqwiybx" x:Name="FocusIOTextBox"/>
+
+                        <!-- 时间流向控制/轨迹显示模式 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 8 0 8">
+                            <Button x:Name="TimeReverseBtn" Style="{StaticResource IconTextButtonStyle}" Margin="0 0 10 0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Backward" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="时间反向" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="TrajectoryModeBtn" Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Random" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="显示轨迹" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- 加载预设/导出预设 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 8 0 8">
+                            <Button x:Name="LoadPresetBtn" Style="{StaticResource IconTextButtonStyle}" Margin="0 0 10 0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Upload" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="加载预设" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="ExportPresetBtn" Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Download" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="导出预设" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="当前帧数 0 FPS" HorizontalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="天体总量 0 个" HorizontalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="仿真时间 0 天" HorizontalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="变速总量 0 m/s" HorizontalAlignment="Center"/>
+
                     </StackPanel>
-
-                    <!-- 仿真时间速度 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <fa:ImageAwesome Icon="Tachometer" Foreground="White" Height="20" Margin="5"/>
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="时间流速"/>
-                    </StackPanel>
-
-                    <hc:PreviewSlider Margin="10,0" Height="30"/>
-
-                    <!-- 添加 / 删除天体 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <hc:ContextMenuButton Style="{StaticResource ActionButtonStyle}" Content="添加天体"/>
-                        <hc:ContextMenuButton Style="{StaticResource ActionButtonStyle}" Content="删除天体"/>
-                    </StackPanel>
-
-                    <!-- 天体速度设置 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <fa:ImageAwesome Icon="Rocket" Foreground="White" Height="20" Margin="5"/>
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="天体速度"/>
-                    </StackPanel>
-                    <hc:TextBox Style="{StaticResource InputTextBoxStyle}"/>
-
-                    <!-- 天体质量设置 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <fa:ImageAwesome Icon="BalanceScale" Foreground="White" Height="20" Margin="5"/>
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="天体质量"/>
-                    </StackPanel>
-                    <hc:TextBox Style="{StaticResource InputTextBoxStyle}"/>
-
-                    <!-- 天体位置设置 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <fa:ImageAwesome Icon="Map" Foreground="White" Height="20" Margin="5"/>
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="天体位置"/>
-                    </StackPanel>
-                    <hc:TextBox Style="{StaticResource InputTextBoxStyle}"/>
-
-                    <!-- 当前观察对象 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <fa:ImageAwesome Icon="Eye" Foreground="White" Height="20" Margin="5"/>
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="当前观察对象"/>
-                    </StackPanel>
-                    <hc:TextBox Style="{StaticResource InputTextBoxStyle}" AutomationProperties.HelpText="cesqwiybx"/>
-                </StackPanel>
+                    
+                </hc:ScrollViewer>
             </Border>
 
             <!-- 左右之间的分割控件 -->
@@ -126,7 +182,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- 画布 -->
-                <Border CornerRadius="0 23 0 0" Margin="0 0 0 0">
+                <Border Margin="0">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                             <GradientStop Color="#3E3A65" Offset="0"/>
@@ -140,16 +196,36 @@
                 <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="#222"/>
 
                 <!-- 表格面板 -->
-                <Border Grid.Row="2" CornerRadius="0 0 23 0" Padding="10">
+                <Border Grid.Row="2" Padding="10">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                             <GradientStop Color="#3B2F56" Offset="0"/>
                             <GradientStop Color="#2D2547" Offset="1"/>
                         </LinearGradientBrush>
                     </Border.Background>
-                    <lvc:CartesianChart x:Name="monitorChart" />
-                </Border>
 
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <lvc:CartesianChart x:Name="VelocityTimeChart"
+                            SyncContext="{Binding Sync}"
+                            Series="{Binding Series}"
+                            XAxes="{Binding XAxes}"
+                            Grid.Column="0">
+                        </lvc:CartesianChart>
+
+                        <lvc:CartesianChart x:Name="ForceTimeChart"
+                            SyncContext="{Binding Sync}"
+                            Series="{Binding Series}"
+                            XAxes="{Binding XAxes}"
+                            Grid.Column="1">
+                        </lvc:CartesianChart>
+                    </Grid>
+                    
+                </Border>
 
             </Grid>
         </Grid>

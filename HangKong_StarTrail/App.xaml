@@ -25,6 +25,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <ResourceDictionary Source="/StyleResources/SimulationFormResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
         </ResourceDictionary>

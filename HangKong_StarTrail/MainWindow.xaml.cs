@@ -46,8 +46,9 @@ public partial class MainWindow : Window
     private void StartExploration_Click(object sender, RoutedEventArgs e)
     {
         var gravitySimulationForm = new Views.GravitySimulationForm();
-        gravitySimulationForm.ShowDialog();
-        // Hide();
+        gravitySimulationForm.Closed += (s, args) => this.Show(); // 确保关闭时显示主窗口
+        gravitySimulationForm.Show();
+        this.Hide();
     }
 
     private void LoadScene_Click(object sender, RoutedEventArgs e)

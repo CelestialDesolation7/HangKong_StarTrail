@@ -21,13 +21,17 @@ namespace HangKong_StarTrail.Models
 
         public void RenderBodies()
         {
+            
             // 1. 保存画布状态
             _canvas.Save();
 
-            // 2. 创建裁剪路径（只右上角为圆角，其余为直角）
-            float radius = 35;
             float w = _info.Width;
             float h = _info.Height;
+
+            /*
+            // 2. 创建裁剪路径（只右上角为圆角，其余为直角）
+            float radius = 35;
+            
 
             var path = new SKPath();
             path.MoveTo(0, 0);
@@ -39,6 +43,7 @@ namespace HangKong_StarTrail.Models
 
             // 3. 应用裁剪
             _canvas.ClipPath(path, SKClipOperation.Intersect, antialias: true);
+            */
 
             // 4. 开始绘制内容（例如一个背景渐变）
             using var paint = new SKPaint
