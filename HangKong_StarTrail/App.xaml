@@ -20,6 +20,15 @@
             <SolidColorBrush x:Key="RedGiantRedBrush" Color="{StaticResource RedGiantRed}"/>
             <SolidColorBrush x:Key="StarLightWhiteBrush" Color="{StaticResource StarLightWhite}"/>
             <SolidColorBrush x:Key="StarDustGrayBrush" Color="{StaticResource StarDustGray}"/>
+            
+            <!--HandyControl-->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
         </ResourceDictionary>
+        
     </Application.Resources>
+
 </Application>

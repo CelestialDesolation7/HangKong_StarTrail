@@ -1,0 +1,157 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        
+        xmlns:local="clr-namespace:HangKong_StarTrail.Views"
+        xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        
+        xmlns:hc="https://handyorg.github.io/handycontrol" x:Class="HangKong_StarTrail.Views.GravitySimulationForm"
+        
+        mc:Ignorable="d"
+        Height="600" Width="1000" WindowStartupLocation="CenterScreen" AllowsTransparency="True"
+        Background="Transparent" WindowStyle="None">
+
+
+    <Border CornerRadius="25 25 25 25" Background="#FF2D2D30" BorderBrush="Gray" BorderThickness="5,5,5,5" 
+            MouseLeftButtonDown="Grid_MouseLeftButtonDown" >
+        <Grid MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="5"/>
+                <!-- 左右侧之间的分割线 -->
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧面板（美化版） -->
+            <Border Grid.Column="0" CornerRadius="23 0 0 23" Padding="15">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#343155" Offset="0"/>
+                        <GradientStop Color="#3B2158" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+
+                <StackPanel>
+                    <!-- 通用样式资源可提取到 ResourceDictionary 中 -->
+                    <StackPanel.Resources>
+                        <Style TargetType="TextBlock" x:Key="LabelStyle">
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontFamily" Value="Arial"/>
+                            <Setter Property="FontSize" Value="16"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="5"/>
+                        </Style>
+                        <Style TargetType="hc:ContextMenuButton" x:Key="ActionButtonStyle">
+                            <Setter Property="Height" Value="40"/>
+                            <Setter Property="Margin" Value="5"/>
+                            <Setter Property="MinWidth" Value="100"/>
+                        </Style>
+                        <Style TargetType="hc:TextBox" x:Key="InputTextBoxStyle"
+                               BasedOn="{StaticResource {x:Type hc:TextBox}}">
+                            <Setter Property="Background" Value="{x:Null}"/>
+                            <Setter Property="Margin" Value="10,0"/>
+                            <Setter Property="BorderBrush" Value="#FFBE79D8"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="SelectionTextBrush" Value="#FFBE79D8"/>
+                            <Setter Property="BorderThickness" Value="2"/>
+                            <Setter Property="FontSize" Value="20"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </StackPanel.Resources>
+
+                    <!-- 操作面板标题 -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <fa:ImageAwesome Icon="Sliders" Foreground="White" Height="30" Margin="5"/>
+                        <TextBlock Style="{StaticResource LabelStyle}" FontSize="22" Text="操作面板"/>
+                    </StackPanel>
+
+                    <!-- 仿真时间速度 -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <fa:ImageAwesome Icon="Tachometer" Foreground="White" Height="20" Margin="5"/>
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="时间流速"/>
+                    </StackPanel>
+
+                    <hc:PreviewSlider Margin="10,0" Height="30"/>
+
+                    <!-- 添加 / 删除天体 -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <hc:ContextMenuButton Style="{StaticResource ActionButtonStyle}" Content="添加天体"/>
+                        <hc:ContextMenuButton Style="{StaticResource ActionButtonStyle}" Content="删除天体"/>
+                    </StackPanel>
+
+                    <!-- 天体速度设置 -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <fa:ImageAwesome Icon="Rocket" Foreground="White" Height="20" Margin="5"/>
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="天体速度"/>
+                    </StackPanel>
+                    <hc:TextBox Style="{StaticResource InputTextBoxStyle}"/>
+
+                    <!-- 天体质量设置 -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <fa:ImageAwesome Icon="BalanceScale" Foreground="White" Height="20" Margin="5"/>
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="天体质量"/>
+                    </StackPanel>
+                    <hc:TextBox Style="{StaticResource InputTextBoxStyle}"/>
+
+                    <!-- 天体位置设置 -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <fa:ImageAwesome Icon="Map" Foreground="White" Height="20" Margin="5"/>
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="天体位置"/>
+                    </StackPanel>
+                    <hc:TextBox Style="{StaticResource InputTextBoxStyle}"/>
+
+                    <!-- 当前观察对象 -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <fa:ImageAwesome Icon="Eye" Foreground="White" Height="20" Margin="5"/>
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="当前观察对象"/>
+                    </StackPanel>
+                    <hc:TextBox Style="{StaticResource InputTextBoxStyle}" AutomationProperties.HelpText="cesqwiybx"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 左右之间的分割控件 -->
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#222"/>
+
+            <!-- 右侧面板：包含动画显示和数据表格 -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="4*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 画布 -->
+                <Border CornerRadius="0 23 0 0" Margin="0 0 0 0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#3E3A65" Offset="0"/>
+                            <GradientStop Color="#473765" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <skia:SKElement x:Name="animationCanva" PaintSurface="OnPaintSurface" Margin="0,0,0,0"/>
+                </Border>
+
+                <!-- 动画和数据监控器的分割线 -->
+                <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="#222"/>
+
+                <!-- 表格面板 -->
+                <Border Grid.Row="2" CornerRadius="0 0 23 0" Padding="10">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#3B2F56" Offset="0"/>
+                            <GradientStop Color="#2D2547" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <lvc:CartesianChart x:Name="monitorChart" />
+                </Border>
+
+
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

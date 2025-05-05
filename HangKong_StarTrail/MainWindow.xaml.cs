@@ -12,9 +12,6 @@ using System.Windows.Media.Animation;
 
 namespace HangKong_StarTrail;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow : Window
 {
     public MainWindow()
@@ -48,8 +45,9 @@ public partial class MainWindow : Window
 
     private void StartExploration_Click(object sender, RoutedEventArgs e)
     {
-        // 将来连接到主界面
-        MessageBox.Show("启动探索之旅功能尚未实现，敬请期待！", "星穹轨道", MessageBoxButton.OK, MessageBoxImage.Information);
+        var gravitySimulationForm = new Views.GravitySimulationForm();
+        gravitySimulationForm.ShowDialog();
+        // Hide();
     }
 
     private void LoadScene_Click(object sender, RoutedEventArgs e)
