@@ -447,29 +447,29 @@
                             </Canvas>
                         </Canvas>
 
-                        <!-- 动态行星系统 -->
+                        <!-- 动态行星系统 - 重新调整位置 -->
                         <Canvas ClipToBounds="True">
                             <!-- 轨道路径定义(不可见但供动画使用) -->
                             <Path x:Name="OrbitPath1" Visibility="Hidden">
                                 <Path.Data>
-                                    <EllipseGeometry Center="485,330" RadiusX="120" RadiusY="120"/>
+                                    <EllipseGeometry Center="475,330" RadiusX="120" RadiusY="120"/>
                                 </Path.Data>
                             </Path>
                             
                             <Path x:Name="OrbitPath2" Visibility="Hidden">
                                 <Path.Data>
-                                    <EllipseGeometry Center="485,330" RadiusX="180" RadiusY="180"/>
+                                    <EllipseGeometry Center="475,330" RadiusX="180" RadiusY="180"/>
                                 </Path.Data>
                             </Path>
                             
                             <Path x:Name="OrbitPath3" Visibility="Hidden">
                                 <Path.Data>
-                                    <EllipseGeometry Center="485,330" RadiusX="240" RadiusY="240"/>
+                                    <EllipseGeometry Center="475,330" RadiusX="240" RadiusY="240"/>
                                 </Path.Data>
                             </Path>
                             
                             <!-- 中心恒星 -->
-                            <Ellipse x:Name="CenterStar" Width="60" Height="60" Canvas.Left="455" Canvas.Top="300">
+                            <Ellipse x:Name="CenterStar" Width="60" Height="60" Canvas.Left="445" Canvas.Top="300">
                                 <Ellipse.Fill>
                                     <RadialGradientBrush>
                                         <GradientStop Color="#FFD700" Offset="0"/>
@@ -493,11 +493,11 @@
                             </Ellipse>
                             
                             <!-- 行星轨道1 - 可见虚线 -->
-                            <Ellipse Width="240" Height="240" Canvas.Left="365" Canvas.Top="210" 
+                            <Ellipse Width="240" Height="240" Canvas.Left="355" Canvas.Top="210" 
                                     Stroke="#44FFFFFF" StrokeThickness="1" StrokeDashArray="2,2" 
                                     Fill="Transparent"/>
                             
-                            <!-- 行星1 -->
+                            <!-- 行星1 - 蓝色行星 -->
                             <Ellipse x:Name="Planet1" Width="20" Height="20" Canvas.Left="485" Canvas.Top="210">
                                 <Ellipse.Fill>
                                     <RadialGradientBrush>
@@ -529,11 +529,11 @@
                             </Ellipse>
                             
                             <!-- 行星轨道2 - 可见虚线 -->
-                            <Ellipse Width="360" Height="360" Canvas.Left="305" Canvas.Top="150" 
+                            <Ellipse Width="360" Height="360" Canvas.Left="295" Canvas.Top="150" 
                                     Stroke="#44FFFFFF" StrokeThickness="1" StrokeDashArray="3,3" 
                                     Fill="Transparent"/>
                             
-                            <!-- 行星2 -->
+                            <!-- 行星2 - 红色行星 -->
                             <Ellipse x:Name="Planet2" Width="24" Height="24" Canvas.Left="485" Canvas.Top="150">
                                 <Ellipse.Fill>
                                     <RadialGradientBrush>
@@ -565,11 +565,11 @@
                             </Ellipse>
                             
                             <!-- 行星轨道3 - 可见虚线 -->
-                            <Ellipse Width="480" Height="480" Canvas.Left="245" Canvas.Top="90" 
+                            <Ellipse Width="480" Height="480" Canvas.Left="235" Canvas.Top="90" 
                                     Stroke="#44FFFFFF" StrokeThickness="1" StrokeDashArray="4,4" 
                                     Fill="Transparent"/>
                             
-                            <!-- 行星3 -->
+                            <!-- 行星3 - 绿色行星 -->
                             <Ellipse x:Name="Planet3" Width="16" Height="16" Canvas.Left="485" Canvas.Top="90">
                                 <Ellipse.Fill>
                                     <RadialGradientBrush>
