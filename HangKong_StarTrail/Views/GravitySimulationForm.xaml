@@ -21,7 +21,7 @@
             MouseLeftButtonDown="Grid_MouseLeftButtonDown" >
         <Grid MouseLeftButtonDown="Grid_MouseLeftButtonDown">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*" MaxWidth="300"/>
                 <ColumnDefinition Width="5"/>
                 <!-- 左右侧之间的分割线 -->
                 <ColumnDefinition Width="3*"/>
