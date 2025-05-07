@@ -3,7 +3,7 @@ using System.Windows.Input;
 using HangKong_StarTrail.Models;
 using HangKong_StarTrail.Services;
 
-namespace HangKong_StarTrail
+namespace HangKong_StarTrail.Views
 {
     public partial class KnowledgeBaseForm : Window
     {

@@ -10,7 +10,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Media.Animation;
 
-namespace HangKong_StarTrail;
+namespace HangKong_StarTrail.Views;
 
 public partial class MainWindow : Window
 {
@@ -45,7 +45,7 @@ public partial class MainWindow : Window
 
     private void StartExploration_Click(object sender, RoutedEventArgs e)
     {
-        var gravitySimulationForm = new Views.GravitySimulationForm();
+        var gravitySimulationForm = new GravitySimulationForm();
         gravitySimulationForm.Closed += (s, args) => this.Show(); // 确保关闭时显示主窗口
         gravitySimulationForm.Show();
         this.Hide();
