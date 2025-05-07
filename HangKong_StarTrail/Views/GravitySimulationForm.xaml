@@ -223,6 +223,8 @@
                             XAxes="{Binding XAxes}"
                             Grid.Column="1">
                         </lvc:CartesianChart>
+                        
+                        
                     </Grid>
                     
                 </Border>
