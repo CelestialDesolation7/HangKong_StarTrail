@@ -13,7 +13,7 @@
         x:Class="HangKong_StarTrail.Views.GravitySimulationForm"
         
         mc:Ignorable="d"
-        Height="600" Width="1000" WindowStartupLocation="CenterScreen" AllowsTransparency="True"
+        Height="720" Width="1280" WindowStartupLocation="CenterScreen" AllowsTransparency="True"
         Background="Transparent" WindowStyle="None">
 
 

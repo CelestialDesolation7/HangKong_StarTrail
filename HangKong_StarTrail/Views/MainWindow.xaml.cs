@@ -51,22 +51,10 @@ public partial class MainWindow : Window
         this.Hide();
     }
 
-    private void LoadScene_Click(object sender, RoutedEventArgs e)
-    {
-        // 将来连接到场景加载界面
-        MessageBox.Show("载入已有场景功能尚未实现，敬请期待！", "星穹轨道", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
     private void StartLearning_Click(object sender, RoutedEventArgs e)
     {
         var knowledgeBaseForm = new KnowledgeBaseForm();
         knowledgeBaseForm.Show();
-    }
-
-    private void OpenSettings_Click(object sender, RoutedEventArgs e)
-    {
-        // 将来连接到设置界面
-        MessageBox.Show("系统设置功能尚未实现，敬请期待！", "星穹轨道", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void Exit_Click(object sender, RoutedEventArgs e)
