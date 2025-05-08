@@ -19,7 +19,7 @@ public partial class App : Application
         base.OnStartup(e);
 
         // 创建并显示启动画面
-        SplashScreen splashScreen = new SplashScreen();
+        AppSplashScreen splashScreen = new AppSplashScreen();
         this.MainWindow = splashScreen;
         splashScreen.Show();
 

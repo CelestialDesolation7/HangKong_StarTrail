@@ -19,11 +19,11 @@ namespace HangKong_StarTrail.Views
     /// <summary>
     /// SplashScreen.xaml 的交互逻辑
     /// </summary>
-    public partial class SplashScreen : Window
+    public partial class AppSplashScreen : Window
     {
-        private DispatcherTimer _loadingTimer;
-        private DispatcherTimer _animationTimer;
-        private DispatcherTimer _particleTimer;
+        private DispatcherTimer _loadingTimer = null!;
+        private DispatcherTimer _animationTimer = null!;
+        private DispatcherTimer _particleTimer = null!;
         private Random _random = new Random();
         
         // 加载进度
@@ -63,7 +63,7 @@ namespace HangKong_StarTrail.Views
             "我们都是星尘。 ——卡尔·萨根"
         };
 
-        public SplashScreen()
+        public AppSplashScreen()
         {
             InitializeComponent();
             
@@ -163,7 +163,7 @@ namespace HangKong_StarTrail.Views
             this.Close();
         }
 
-        private void LoadingTimer_Tick(object sender, EventArgs e)
+        private void LoadingTimer_Tick(object? sender, EventArgs e)
         {
             // 更新加载进度显示
             if (_currentProgress < _targetProgress)
@@ -174,7 +174,7 @@ namespace HangKong_StarTrail.Views
             }
         }
 
-        private void AnimationTimer_Tick(object sender, EventArgs e)
+        private void AnimationTimer_Tick(object? sender, EventArgs e)
         {
             // 更新3D模型旋转角度
             EarthRotation.Angle += _earthRotationSpeed;
@@ -183,7 +183,7 @@ namespace HangKong_StarTrail.Views
             RingRotation.Angle += _ringRotationSpeed;
         }
 
-        private void ParticleTimer_Tick(object sender, EventArgs e)
+        private void ParticleTimer_Tick(object? sender, EventArgs e)
         {
             // 更新粒子位置
             UpdateParticles();
@@ -409,7 +409,7 @@ namespace HangKong_StarTrail.Views
     // 粒子系统的粒子类
     public class Particle
     {
-        public UIElement Element { get; set; }
+        public Ellipse Element { get; set; } = null!;
         public double VelocityX { get; set; }
         public double VelocityY { get; set; }
         public double Size { get; set; }
