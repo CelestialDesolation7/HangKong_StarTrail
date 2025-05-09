@@ -25,9 +25,9 @@ namespace HangKong_StarTrail.Views
     /// </summary>
     public partial class AppSplashScreen : Window
     {
-        private DispatcherTimer _loadingTimer = null!;
-        private DispatcherTimer _animationTimer = null!;
-        private DispatcherTimer _particleTimer = null!;
+        private DispatcherTimer _loadingTimer = new DispatcherTimer();
+        private DispatcherTimer _animationTimer = new DispatcherTimer();
+        private DispatcherTimer _particleTimer = new DispatcherTimer();
         private Random _random = new Random();
         private AxisAngleRotation3D? _sunRotationTransform;
         
@@ -44,7 +44,7 @@ namespace HangKong_StarTrail.Views
 
         // 加载状态标志
         private bool _isLoadingCompleted = false;
-        private TextBlock _pressAnyKeyText = null!;
+        private TextBlock _pressAnyKeyText = new TextBlock();
 
         // 加载文本列表
         private List<string> _loadingMessages = new List<string>
@@ -835,7 +835,7 @@ namespace HangKong_StarTrail.Views
         // 粒子系统的粒子类
         public class Particle
         {
-            public Ellipse Element { get; set; } = null!;
+            public Ellipse Element { get; set; } = new Ellipse();
             public double VelocityX { get; set; }
             public double VelocityY { get; set; }
             public double Size { get; set; }

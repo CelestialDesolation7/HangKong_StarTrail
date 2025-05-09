@@ -65,6 +65,9 @@ namespace HangKong_StarTrail.Services
             }
             catch (Exception ex)
             {
+                // 记录异常信息
+                System.Diagnostics.Debug.WriteLine($"初始化KnowledgeService时出错: {ex.Message}");
+                
                 // 初始化失败时使用默认的内存数据
                 _dbPath = string.Empty;
                 _connectionString = string.Empty;
@@ -153,7 +156,7 @@ namespace HangKong_StarTrail.Services
             return _knowledgeItems.FindAll(item => item.IsFavorite);
         }
 
-        public KnowledgeItem GetItemById(string id)
+        public KnowledgeItem? GetItemById(string id)
         {
             return _knowledgeItems.Find(item => item.Id == id);
         }
@@ -276,20 +279,41 @@ namespace HangKong_StarTrail.Services
 
         private KnowledgeItem ReadKnowledgeItem(SQLiteDataReader reader)
         {
-            return new KnowledgeItem
+            var item = new KnowledgeItem
             {
-                Id = reader["Id"].ToString(),
-                Title = reader["Title"].ToString(),
-                Category = reader["Category"].ToString(),
-                Content = reader["Content"].ToString(),
-                ImagePath = reader["ImagePath"].ToString(),
-                CreatedDate = DateTime.Parse(reader["CreatedDate"].ToString()),
-                LastModifiedDate = DateTime.Parse(reader["LastModifiedDate"].ToString()),
-                IsFavorite = Convert.ToBoolean(reader["IsFavorite"]),
-                Tags = reader["Tags"]?.ToString()?.Split(','),
-                VideoUrl = reader["VideoUrl"].ToString(),
-                RelatedItems = reader["RelatedItems"]?.ToString()?.Split(',')
+                Id = reader["Id"]?.ToString() ?? string.Empty,
+                Title = reader["Title"]?.ToString() ?? string.Empty,
+                Category = reader["Category"]?.ToString() ?? string.Empty,
+                Content = reader["Content"]?.ToString() ?? string.Empty,
+                ImagePath = reader["ImagePath"]?.ToString(),
+                IsFavorite = Convert.ToBoolean(reader["IsFavorite"])
             };
+
+            if (reader["CreatedDate"] != null && reader["CreatedDate"] != DBNull.Value)
+            {
+                item.CreatedDate = DateTime.Parse(reader["CreatedDate"].ToString()!);
+            }
+
+            if (reader["LastModifiedDate"] != null && reader["LastModifiedDate"] != DBNull.Value)
+            {
+                item.LastModifiedDate = DateTime.Parse(reader["LastModifiedDate"].ToString()!);
+            }
+
+            var tagsString = reader["Tags"]?.ToString();
+            if (!string.IsNullOrEmpty(tagsString))
+            {
+                item.Tags = tagsString.Split(',');
+            }
+
+            item.VideoUrl = reader["VideoUrl"]?.ToString();
+
+            var relatedItemsString = reader["RelatedItems"]?.ToString();
+            if (!string.IsNullOrEmpty(relatedItemsString))
+            {
+                item.RelatedItems = relatedItemsString.Split(',');
+            }
+
+            return item;
         }
 
         private void SetCommandParameters(SQLiteCommand command, KnowledgeItem item)
