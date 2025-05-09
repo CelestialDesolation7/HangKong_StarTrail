@@ -236,6 +236,37 @@
                                 </Button.Triggers>
                             </Button>
                             
+                            <!-- 星际智者按钮 -->
+                            <Button Content="星际智者" Style="{StaticResource MainButtonStyle}" Click="OpenAIChat_Click" Margin="0,20,0,0">
+                                <Button.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#3B2F56" Offset="0"/>
+                                        <GradientStop Color="#5A4887" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Button.Background>
+                                <Button.Effect>
+                                    <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#5A4887" Opacity="0.5"/>
+                                </Button.Effect>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <fontAwesome:FontAwesome Icon="Comments" Margin="0,0,10,0"/>
+                                            <TextBlock Text="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                                <Button.Triggers>
+                                    <EventTrigger RoutedEvent="Button.Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1" BeginTime="0:0:0.2"/>
+                                                <ThicknessAnimation Storyboard.TargetProperty="Margin" From="0,10,0,0" To="0,20,0,0" Duration="0:0:0.5" BeginTime="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            
                             <Button Content="退出系统" Style="{StaticResource MainButtonStyle}" Click="Exit_Click" Margin="0,20,0,0">
                                 <Button.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">

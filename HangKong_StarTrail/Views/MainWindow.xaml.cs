@@ -76,10 +76,36 @@ namespace HangKong_StarTrail.Views
             // 打开星系结构界面
         }
 
+        /// <summary>
+        /// 学习宇宙知识按钮点击事件
+        /// </summary>
         private void OpenKnowledgeBase_Click(object sender, RoutedEventArgs e)
         {
-            var knowledgeBaseForm = new KnowledgeBaseForm();
-            knowledgeBaseForm.Show();
+            try
+            {
+                KnowledgeBaseForm knowledgeBaseForm = new KnowledgeBaseForm();
+                knowledgeBaseForm.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开知识库界面时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 星际智者按钮点击事件
+        /// </summary>
+        private void OpenAIChat_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ChatWindow chatWindow = new ChatWindow();
+                chatWindow.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开星际智者界面时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         #endregion
