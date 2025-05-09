@@ -10,67 +10,39 @@ namespace HangKong_StarTrail.Models
 {
     public class Renderer
     {
-        private readonly SKCanvas _canvas;
-        private readonly SKImageInfo _info;
+        public Renderer() { }
 
-        public Renderer(SKCanvas canvas, SKImageInfo info)
+        public void RenderBodies(List<Body> bodies, SKCanvas canvas)
         {
-            _canvas = canvas;
-            _info = info;
-        }
-
-        public void RenderBodies()
-        {
-            
-            // 1. 保存画布状态
-            _canvas.Save();
-
-            float w = _info.Width;
-            float h = _info.Height;
-
-            /*
-            // 2. 创建裁剪路径（只右上角为圆角，其余为直角）
-            float radius = 35;
-            
-
-            var path = new SKPath();
-            path.MoveTo(0, 0);
-            path.LineTo(w - radius, 0);
-            path.ArcTo(radius, radius, 0, SKPathArcSize.Small, SKPathDirection.Clockwise, w, radius);
-            path.LineTo(w, h);
-            path.LineTo(0, h);
-            path.Close();
-
-            // 3. 应用裁剪
-            _canvas.ClipPath(path, SKClipOperation.Intersect, antialias: true);
-            */
-
-            // 4. 开始绘制内容（例如一个背景渐变）
-            using var paint = new SKPaint
+            foreach (var body in bodies)
             {
-                Shader = SKShader.CreateLinearGradient(
-                    new SKPoint(0, 0),
-                    new SKPoint(0, h),
-                    new SKColor[] { SKColors.MidnightBlue, SKColors.DarkSlateBlue },
-                    null,
-                    SKShaderTileMode.Clamp),
-                IsAntialias = true
-            };
+                using var paint = new SKPaint
+                {
+                    Color = new SKColor(
+                        body.DisplayColor.R,
+                        body.DisplayColor.G,
+                        body.DisplayColor.B,
+                        body.DisplayColor.A),
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Fill
+                };
 
-            _canvas.DrawRect(0, 0, w, h, paint);
-
-            // 5. 恢复画布状态
-            _canvas.Restore();
+                canvas.DrawCircle(
+                    (float)body.DisplayPosition.X,
+                    (float)body.DisplayPosition.Y,
+                    body.RenderRadius,
+                    paint);
+            }
         }
 
-        public void RenderTrajectory()
+        public void RenderTrajectory(List<Body> bodies, SKCanvas canvas)
         {
-            // Demo中暂不实现
+            // TODO: 实现轨迹渲染
         }
 
-        public void RenderText()
+        public void RenderText(List<Body> bodies, SKCanvas canvas)
         {
-            // Demo中暂不实现
+            // TODO: 实现文本渲染
         }
     }
 }

@@ -30,6 +30,18 @@
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
     </Style>
 
+    <Style TargetType="hc:ComboBox" x:Key="InputComboBoxStyle"
+        BasedOn="{StaticResource {x:Type hc:ComboBox}}">
+        <Setter Property="Background" Value="{x:Null}"/>
+        <Setter Property="Margin" Value="10,0"/>
+        <Setter Property="BorderBrush" Value="#FFBE79D8"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="SelectionTextBrush" Value="#FFBE79D8"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+
     <Style TargetType="Button" x:Key="IconTextButtonStyle">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="White"/>
