@@ -57,8 +57,8 @@ namespace HangKong_StarTrail.Views
 
         private void StartLearning_Click(object sender, RoutedEventArgs e)
         {
-            var knowledgeBaseForm = new KnowledgeBaseForm();
-            knowledgeBaseForm.Show();
+            var knowledgeForm = new KnowledgeBaseForm();
+            knowledgeForm.Show();
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
