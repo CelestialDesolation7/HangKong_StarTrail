@@ -6,12 +6,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Documents;
 using System.Windows.Data;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using HangKong_StarTrail.Services;
+using HangKong_StarTrail.Models;
 using System.Globalization;
 
 namespace HangKong_StarTrail.Views

@@ -139,8 +139,8 @@ namespace HangKong_StarTrail.Services
                 // 解析响应
                 var jsonResponse = JsonDocument.Parse(responseContent);
                 var choices = jsonResponse.RootElement.GetProperty("choices");
-                var message = choices[0].GetProperty("message");
-                var content = message.GetProperty("content").GetString();
+                var responseMessage = choices[0].GetProperty("message");
+                var content = responseMessage.GetProperty("content").GetString();
 
                 return content ?? "无法获取回复内容";
             }
