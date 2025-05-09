@@ -19,25 +19,13 @@
 
     <Window.Resources>
         <!-- 材质资源 -->
-        <DiffuseMaterial x:Key="BluePlanetMaterial">
+        <DiffuseMaterial x:Key="SunMaterialKey">
             <DiffuseMaterial.Brush>
-                <ImageBrush ImageSource="/HangKong_StarTrail;component/StyleResources/Images/earth_texture.jpg" />
+                <SolidColorBrush Color="Orange" />
             </DiffuseMaterial.Brush>
         </DiffuseMaterial>
         
-        <DiffuseMaterial x:Key="RedPlanetMaterial">
-            <DiffuseMaterial.Brush>
-                <ImageBrush ImageSource="/HangKong_StarTrail;component/StyleResources/Images/mars_texture.jpg" />
-            </DiffuseMaterial.Brush>
-        </DiffuseMaterial>
-        
-        <DiffuseMaterial x:Key="SunMaterial">
-            <DiffuseMaterial.Brush>
-                <ImageBrush ImageSource="/HangKong_StarTrail;component/StyleResources/Images/sun_texture.jpg" />
-            </DiffuseMaterial.Brush>
-        </DiffuseMaterial>
-        
-        <SolidColorBrush x:Key="RingBrush" Color="#A0DDFF"/>
+        <!-- SolidColorBrush x:Key="RingBrush" Color="#A0DDFF"/ -->
         
         <!-- 信息卡片样式 -->
         <Style x:Key="InfoCardStyle" TargetType="Border">
@@ -189,20 +177,20 @@
                             Margin="350,0,0,0">
                     <!-- 相机设置 -->
                     <Viewport3D.Camera>
-                        <PerspectiveCamera x:Name="Camera" Position="0,0,6" LookDirection="0,0,-1" 
-                                          UpDirection="0,1,0" FieldOfView="45" />
+                        <PerspectiveCamera x:Name="Camera" Position="0,0,4" LookDirection="0,0,-1" 
+                                          UpDirection="0,1,0" FieldOfView="60" />
                     </Viewport3D.Camera>
                     
                     <!-- 灯光设置 -->
                     <ModelVisual3D>
                         <ModelVisual3D.Content>
-                            <DirectionalLight Color="#FFFFFF" Direction="-1,-1,-1" />
+                            <DirectionalLight Color="#FFFFFF" Direction="-0.5,-0.5,-1" />
                         </ModelVisual3D.Content>
                     </ModelVisual3D>
                     
                     <ModelVisual3D>
                         <ModelVisual3D.Content>
-                            <AmbientLight Color="#333344" />
+                            <AmbientLight Color="#444455" />
                         </ModelVisual3D.Content>
                     </ModelVisual3D>
                     
@@ -211,134 +199,20 @@
                         <ModelVisual3D.Content>
                             <GeometryModel3D>
                                 <GeometryModel3D.Geometry>
-                                    <MeshGeometry3D x:Name="SunMesh"
-                                                   Positions="-1,-1,0  1,-1,0  1,1,0  -1,1,0"
-                                                   TriangleIndices="0,1,2 0,2,3"
-                                                   TextureCoordinates="0,1 1,1 1,0 0,0"/>
+                                    <MeshGeometry3D x:Name="SunMesh"/>
                                 </GeometryModel3D.Geometry>
                                 <GeometryModel3D.Material>
-                                    <DiffuseMaterial>
-                                        <DiffuseMaterial.Brush>
-                                            <RadialGradientBrush>
-                                                <GradientStop Color="#FFDD44" Offset="0"/>
-                                                <GradientStop Color="#FF8800" Offset="1"/>
-                                            </RadialGradientBrush>
-                                        </DiffuseMaterial.Brush>
-                                    </DiffuseMaterial>
+                                    <StaticResource ResourceKey="SunMaterialKey"/>
                                 </GeometryModel3D.Material>
                                 <GeometryModel3D.Transform>
                                     <Transform3DGroup>
-                                        <ScaleTransform3D ScaleX="0.5" ScaleY="0.5" ScaleZ="0.5"/>
+                                        <ScaleTransform3D ScaleX="1" ScaleY="1" ScaleZ="1"/>
                                         <RotateTransform3D>
                                             <RotateTransform3D.Rotation>
-                                                <AxisAngleRotation3D x:Name="SunRotation" Axis="0,1,0" Angle="0"/>
-                                            </RotateTransform3D.Rotation>
-                                        </RotateTransform3D>
-                                        <TranslateTransform3D OffsetX="-2" OffsetY="0" OffsetZ="-5"/>
-                                    </Transform3DGroup>
-                                </GeometryModel3D.Transform>
-                            </GeometryModel3D>
-                        </ModelVisual3D.Content>
-                    </ModelVisual3D>
-                    
-                    <!-- 地球模型 -->
-                    <ModelVisual3D x:Name="EarthModel">
-                        <ModelVisual3D.Content>
-                            <GeometryModel3D>
-                                <GeometryModel3D.Geometry>
-                                    <MeshGeometry3D x:Name="SphereMesh"/>
-                                </GeometryModel3D.Geometry>
-                                <GeometryModel3D.Material>
-                                    <MaterialGroup>
-                                        <DiffuseMaterial>
-                                            <DiffuseMaterial.Brush>
-                                                <ImageBrush ImageSource="/HangKong_StarTrail;component/StyleResources/Images/earth_texture.jpg"/>
-                                            </DiffuseMaterial.Brush>
-                                        </DiffuseMaterial>
-                                    </MaterialGroup>
-                                </GeometryModel3D.Material>
-                                <GeometryModel3D.Transform>
-                                    <Transform3DGroup>
-                                        <ScaleTransform3D ScaleX="1.3" ScaleY="1.3" ScaleZ="1.3"/>
-                                        <RotateTransform3D>
-                                            <RotateTransform3D.Rotation>
-                                                <AxisAngleRotation3D x:Name="EarthRotation" Axis="0,1,0" Angle="0"/>
-                                            </RotateTransform3D.Rotation>
-                                        </RotateTransform3D>
-                                        <RotateTransform3D>
-                                            <RotateTransform3D.Rotation>
-                                                <AxisAngleRotation3D Axis="1,0,0" Angle="23"/>
+                                                <AxisAngleRotation3D x:Name="SunRotation" Axis="0,1,0.1" Angle="0"/>
                                             </RotateTransform3D.Rotation>
                                         </RotateTransform3D>
                                         <TranslateTransform3D OffsetX="0" OffsetY="0" OffsetZ="0"/>
-                                    </Transform3DGroup>
-                                </GeometryModel3D.Transform>
-                            </GeometryModel3D>
-                        </ModelVisual3D.Content>
-                    </ModelVisual3D>
-                    
-                    <!-- 地球光环 -->
-                    <ModelVisual3D x:Name="EarthRingModel">
-                        <ModelVisual3D.Content>
-                            <GeometryModel3D>
-                                <GeometryModel3D.Geometry>
-                                    <MeshGeometry3D x:Name="RingMesh"/>
-                                </GeometryModel3D.Geometry>
-                                <GeometryModel3D.Material>
-                                    <MaterialGroup>
-                                        <DiffuseMaterial Brush="{StaticResource RingBrush}"/>
-                                        <EmissiveMaterial>
-                                            <EmissiveMaterial.Brush>
-                                                <SolidColorBrush Color="#405580" Opacity="0.5"/>
-                                            </EmissiveMaterial.Brush>
-                                        </EmissiveMaterial>
-                                    </MaterialGroup>
-                                </GeometryModel3D.Material>
-                                <GeometryModel3D.Transform>
-                                    <Transform3DGroup>
-                                        <ScaleTransform3D ScaleX="2.1" ScaleY="2.1" ScaleZ="0.01"/>
-                                        <RotateTransform3D>
-                                            <RotateTransform3D.Rotation>
-                                                <AxisAngleRotation3D x:Name="RingRotation" Axis="0,1,0" Angle="0"/>
-                                            </RotateTransform3D.Rotation>
-                                        </RotateTransform3D>
-                                        <RotateTransform3D>
-                                            <RotateTransform3D.Rotation>
-                                                <AxisAngleRotation3D Axis="1,0,0" Angle="75"/>
-                                            </RotateTransform3D.Rotation>
-                                        </RotateTransform3D>
-                                        <TranslateTransform3D OffsetX="0" OffsetY="0" OffsetZ="0"/>
-                                    </Transform3DGroup>
-                                </GeometryModel3D.Transform>
-                            </GeometryModel3D>
-                        </ModelVisual3D.Content>
-                    </ModelVisual3D>
-                    
-                    <!-- 火星模型 -->
-                    <ModelVisual3D x:Name="MarsModel">
-                        <ModelVisual3D.Content>
-                            <GeometryModel3D>
-                                <GeometryModel3D.Geometry>
-                                    <MeshGeometry3D x:Name="MarsMesh"/>
-                                </GeometryModel3D.Geometry>
-                                <GeometryModel3D.Material>
-                                    <MaterialGroup>
-                                        <DiffuseMaterial>
-                                            <DiffuseMaterial.Brush>
-                                                <ImageBrush ImageSource="/HangKong_StarTrail;component/StyleResources/Images/mars_texture.jpg"/>
-                                            </DiffuseMaterial.Brush>
-                                        </DiffuseMaterial>
-                                    </MaterialGroup>
-                                </GeometryModel3D.Material>
-                                <GeometryModel3D.Transform>
-                                    <Transform3DGroup>
-                                        <ScaleTransform3D ScaleX="0.7" ScaleY="0.7" ScaleZ="0.7"/>
-                                        <RotateTransform3D>
-                                            <RotateTransform3D.Rotation>
-                                                <AxisAngleRotation3D x:Name="MarsRotation" Axis="0,1,0" Angle="0"/>
-                                            </RotateTransform3D.Rotation>
-                                        </RotateTransform3D>
-                                        <TranslateTransform3D OffsetX="3" OffsetY="0" OffsetZ="-3"/>
                                     </Transform3DGroup>
                                 </GeometryModel3D.Transform>
                             </GeometryModel3D>

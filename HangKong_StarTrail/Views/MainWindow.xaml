@@ -320,15 +320,15 @@
                                     </EventTrigger>
                                 </Ellipse.Triggers>
                             </Ellipse>
-                            
+                    
                             <Ellipse Canvas.Left="300" Canvas.Top="100" Width="750" Height="450" Opacity="0.15">
-                                <Ellipse.Fill>
-                                    <RadialGradientBrush>
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
                                         <GradientStop Color="#5F9FFF" Offset="0"/>
                                         <GradientStop Color="#3A55AA" Offset="0.4"/>
-                                        <GradientStop Color="Transparent" Offset="1"/>
-                                    </RadialGradientBrush>
-                                </Ellipse.Fill>
+                                <GradientStop Color="Transparent" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
                                 <Ellipse.Effect>
                                     <BlurEffect Radius="25"/>
                                 </Ellipse.Effect>
@@ -349,16 +349,16 @@
                                         </BeginStoryboard>
                                     </EventTrigger>
                                 </Ellipse.Triggers>
-                            </Ellipse>
-                            
+                    </Ellipse>
+                    
                             <!-- 额外的小型星云 -->
                             <Ellipse Canvas.Left="50" Canvas.Top="350" Width="250" Height="150" Opacity="0.12">
-                                <Ellipse.Fill>
-                                    <RadialGradientBrush>
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
                                         <GradientStop Color="#FF9FDF" Offset="0"/>
-                                        <GradientStop Color="Transparent" Offset="1"/>
-                                    </RadialGradientBrush>
-                                </Ellipse.Fill>
+                                <GradientStop Color="Transparent" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
                                 <Ellipse.Effect>
                                     <BlurEffect Radius="15"/>
                                 </Ellipse.Effect>
@@ -474,8 +474,8 @@
                                         </BeginStoryboard>
                                     </EventTrigger>
                                 </Ellipse.Triggers>
-                            </Ellipse>
-                        </Canvas>
+                    </Ellipse>
+                </Canvas>
 
                         <!-- 主标题 - 优化布局和效果 -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -487,9 +487,9 @@
                                         <GradientStop Color="#FFD700" Offset="1"/>
                                     </LinearGradientBrush>
                                 </TextBlock.Foreground>
-                                <TextBlock.Effect>
+                        <TextBlock.Effect>
                                     <DropShadowEffect ShadowDepth="3" Direction="315" Color="#000000" BlurRadius="6" Opacity="0.8"/>
-                                </TextBlock.Effect>
+                        </TextBlock.Effect>
                                 <TextBlock.Triggers>
                                     <EventTrigger RoutedEvent="TextBlock.Loaded">
                                         <BeginStoryboard>
@@ -504,13 +504,13 @@
                                 <TextBlock.RenderTransform>
                                     <ScaleTransform ScaleX="1" ScaleY="1" CenterX="160" CenterY="32"/>
                                 </TextBlock.RenderTransform>
-                            </TextBlock>
+                    </TextBlock>
                             
                             <TextBlock Text="恒星运行与宇宙知识可视化系统" FontFamily="Microsoft YaHei" FontSize="26" Foreground="#F5F5F5" 
                                     TextAlignment="Center" Margin="0,0,0,50">
-                                <TextBlock.Effect>
+                        <TextBlock.Effect>
                                     <DropShadowEffect ShadowDepth="2" Direction="315" Color="#000000" BlurRadius="4" Opacity="0.7"/>
-                                </TextBlock.Effect>
+                        </TextBlock.Effect>
                                 <TextBlock.Triggers>
                                     <EventTrigger RoutedEvent="TextBlock.Loaded">
                                         <BeginStoryboard>
@@ -521,7 +521,7 @@
                                         </BeginStoryboard>
                                     </EventTrigger>
                                 </TextBlock.Triggers>
-                            </TextBlock>
+                    </TextBlock>
                             
                             <Border CornerRadius="30" Width="400" Opacity="0.85" Margin="0,0,0,0">
                                 <Border.Background>
@@ -551,7 +551,7 @@
                                     </TextBlock.RenderTransform>
                                 </TextBlock>
                             </Border>
-                        </StackPanel>
+                </StackPanel>
                     </Grid>
                 </Border>
             </Grid>

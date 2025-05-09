@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,11 @@
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc5.4" />
     <PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.0-preview.1.2" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
+  </ItemGroup>
+
+  <!-- 确保行星纹理图片被包含为资源 -->
+  <ItemGroup>
+    <Resource Include="StyleResources\Images\planets\*.jpg" />
   </ItemGroup>
 
 </Project>
