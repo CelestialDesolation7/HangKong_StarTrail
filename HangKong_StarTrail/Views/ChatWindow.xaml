@@ -120,8 +120,8 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="10,10,2,10"/>
             <Setter Property="Padding" Value="15,10"/>
-            <Setter Property="Margin" Value="10,5,80,5"/>
-            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="80,5,10,5"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
             <Setter Property="Effect">
                 <Setter.Value>
                     <DropShadowEffect ShadowDepth="2" Direction="315" Opacity="0.2" BlurRadius="4"/>
@@ -134,8 +134,8 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="10,10,10,2"/>
             <Setter Property="Padding" Value="15,10"/>
-            <Setter Property="Margin" Value="80,5,10,5"/>
-            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="10,5,80,5"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="Effect">
                 <Setter.Value>
                     <DropShadowEffect ShadowDepth="2" Direction="315" Opacity="0.2" BlurRadius="4"/>

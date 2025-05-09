@@ -51,7 +51,23 @@ namespace HangKong_StarTrail.Services
                     string apiKeyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "api_key.txt");
                     if (File.Exists(apiKeyPath))
                     {
-                        _apiKey = File.ReadAllText(apiKeyPath).Trim();
+                        // 读取API密钥并清除所有空白字符（包括换行符、空格等）
+                        _apiKey = File.ReadAllText(apiKeyPath)
+                            .Replace("\r", "")
+                            .Replace("\n", "")
+                            .Replace(" ", "")
+                            .Trim();
+                        
+                        // 确保移除了注释行
+                        if (_apiKey.Contains("#"))
+                        {
+                            var lines = _apiKey.Split(new[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
+                            if (lines.Length > 0)
+                            {
+                                // 取最后一个非空部分，通常是实际的API密钥
+                                _apiKey = lines[lines.Length - 1].Trim();
+                            }
+                        }
                     }
                 }
 
@@ -124,7 +140,11 @@ namespace HangKong_StarTrail.Services
                 
                 // 创建请求
                 var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+                
+                // 确保API密钥没有换行符或其他非法字符
+                string sanitizedApiKey = _apiKey.Trim();
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sanitizedApiKey);
 
                 // 发送请求
                 var response = await _httpClient.PostAsync(ApiUrl, httpContent);
