@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Windows.Media.Animation;
 using System.IO;
 using System.Diagnostics;  // 添加用于日志记录
 using Path = System.IO.Path; // 明确指定使用System.IO下的Path
@@ -40,6 +41,10 @@ namespace HangKong_StarTrail.Views
 
         // 3D动画控制
         private double _sunRotationSpeed = 0.05;
+
+        // 加载状态标志
+        private bool _isLoadingCompleted = false;
+        private TextBlock _pressAnyKeyText = null!;
 
         // 加载文本列表
         private List<string> _loadingMessages = new List<string>
@@ -114,11 +119,89 @@ namespace HangKong_StarTrail.Views
                 {
                     Debug.WriteLine($"设置引言时出错: {ex.Message}");
                 }
+
+                // 添加键盘事件监听
+                this.KeyDown += AppSplashScreen_KeyDown;
+                this.MouseDown += AppSplashScreen_MouseDown;
+
+                // 创建"按任意键继续"文本
+                CreatePressAnyKeyText();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"启动屏幕构造函数中出现异常: {ex.Message}");
                 MessageBox.Show($"启动屏幕初始化失败: {ex.Message}\n\n{ex.StackTrace}", "初始化错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CreatePressAnyKeyText()
+        {
+            try
+            {
+                _pressAnyKeyText = new TextBlock
+                {
+                    Text = "加载中...",
+                    FontSize = 18,
+                    Foreground = new SolidColorBrush(Colors.White),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    Margin = new Thickness(0, 0, 0, 20),
+                    Opacity = 0 // 初始不可见
+                };
+
+                // 添加闪烁动画
+                DoubleAnimation blinkAnimation = new DoubleAnimation
+                {
+                    From = 1,
+                    To = 0.4,
+                    Duration = TimeSpan.FromSeconds(0.8),
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever
+                };
+
+                // 获取主Grid并添加文本
+                if (this.Content is Grid mainGrid)
+                {
+                    Grid.SetRow(_pressAnyKeyText, mainGrid.RowDefinitions.Count - 1);
+                    Grid.SetColumnSpan(_pressAnyKeyText, mainGrid.ColumnDefinitions.Count);
+                    mainGrid.Children.Add(_pressAnyKeyText);
+                    Debug.WriteLine("已添加按任意键继续提示文本");
+                }
+                else
+                {
+                    Debug.WriteLine("警告: 无法获取主Grid");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"创建按任意键提示文本时出错: {ex.Message}");
+            }
+        }
+
+        private void AppSplashScreen_KeyDown(object sender, KeyEventArgs e)
+        {
+            // 如果加载完成且按任意键，则跳转到主界面
+            if (_isLoadingCompleted)
+            {
+                Debug.WriteLine("检测到按键，跳转到主界面");
+                e.Handled = true;
+                FinishLoading();
+            }
+        }
+
+        private void AppSplashScreen_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // 如果加载完成且点击鼠标，则跳转到主界面
+            if (_isLoadingCompleted)
+            {
+                Debug.WriteLine("检测到鼠标点击，跳转到主界面");
+                e.Handled = true;
+                FinishLoading();
+            }
+            else if (e.ButtonState == MouseButtonState.Pressed)
+            {
+                // 如果未加载完成，允许拖动窗口
+                DragMove();
             }
         }
 
@@ -187,19 +270,17 @@ namespace HangKong_StarTrail.Views
                 
                 // 完成加载后更新状态
                 UpdateTextSafely(LoadingStatusText, "加载完成");
-                UpdateTextSafely(StatusText, "系统准备就绪，正在启动主界面...");
+                UpdateTextSafely(StatusText, "系统准备就绪，点击任意键继续...");
                 
                 // 确保进度达到100%
                 _currentProgress = 100;
                 UpdateProgressSafely(100);
+
+                // 显示"按任意键继续"提示
+                ShowPressAnyKeyPrompt();
                 
-                // 等待一会儿后关闭启动屏幕，打开主界面
-                Debug.WriteLine("等待1秒后结束加载...");
-                await Task.Delay(500);
-                Debug.WriteLine("加载模拟完成，准备调用FinishLoading");
-                
-                // 调用FinishLoading完成启动过程
-                FinishLoading();
+                // 标记加载已完成
+                _isLoadingCompleted = true;
             }
             catch (Exception ex)
             {
@@ -210,12 +291,45 @@ namespace HangKong_StarTrail.Views
                 try
                 {
                     Debug.WriteLine("尝试强制完成加载过程...");
-                    FinishLoading();
+                    _isLoadingCompleted = true;
+                    ShowPressAnyKeyPrompt();
                 }
                 catch (Exception innerEx)
                 {
                     Debug.WriteLine($"强制完成加载失败: {innerEx.Message}");
                 }
+            }
+        }
+
+        private void ShowPressAnyKeyPrompt()
+        {
+            try
+            {
+                if (_pressAnyKeyText != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _pressAnyKeyText.Text = "按任意键继续...";
+                        _pressAnyKeyText.Opacity = 1;
+
+                        // 添加闪烁动画
+                        DoubleAnimation blinkAnimation = new DoubleAnimation
+                        {
+                            From = 1,
+                            To = 0.4,
+                            Duration = TimeSpan.FromSeconds(0.8),
+                            AutoReverse = true,
+                            RepeatBehavior = RepeatBehavior.Forever
+                        };
+
+                        _pressAnyKeyText.BeginAnimation(TextBlock.OpacityProperty, blinkAnimation);
+                        Debug.WriteLine("显示'按任意键继续'提示");
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"显示按任意键提示时出错: {ex.Message}");
             }
         }
 

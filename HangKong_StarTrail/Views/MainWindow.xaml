@@ -367,7 +367,7 @@
                             <!-- 宇宙尘埃效果 -->
                             <Rectangle Width="970" Height="670" Opacity="0.3">
                                 <Rectangle.Fill>
-                                    <ImageBrush ImageSource="/HangKong_StarTrail;component/StyleResources/Images/noise_texture.png" 
+                                    <ImageBrush ImageSource="/HangKong_StarTrail;component/StyleResources/Images/planets/sun_texture.jpg" 
                                                 Opacity="0.1" Stretch="UniformToFill"/>
                                 </Rectangle.Fill>
                             </Rectangle>
