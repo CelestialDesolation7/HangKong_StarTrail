@@ -13,6 +13,17 @@
         Background="Transparent">
     
     <Window.Resources>
+        <!-- 定义本地颜色资源，不依赖App.xaml中的资源 -->
+        <Color x:Key="DeepSpaceBlue">#292841</Color>
+        <Color x:Key="StarLightWhite">#F0F0F0</Color>
+        <Color x:Key="HeaderBackground">#1F1E33</Color>
+        <Color x:Key="PanelBackground">#232238</Color>
+        
+        <SolidColorBrush x:Key="DeepSpaceBlueBrush" Color="{StaticResource DeepSpaceBlue}"/>
+        <SolidColorBrush x:Key="StarLightWhiteBrush" Color="{StaticResource StarLightWhite}"/>
+        <SolidColorBrush x:Key="HeaderBackgroundBrush" Color="{StaticResource HeaderBackground}"/>
+        <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{StaticResource PanelBackground}"/>
+        
         <Style x:Key="NavigationButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#4169E1"/>
             <Setter Property="Foreground" Value="White"/>
@@ -87,7 +98,7 @@
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="MinimizeButton" Click="MinimizeButton_Click" Style="{StaticResource IconButtonStyle}">
-                        <fontAwesome:FontAwesome Icon="WindowMinimize" Foreground="{StaticResource StarLightWhiteBrush}" FontSize="14"/>
+                        <fontAwesome:FontAwesome Icon="Minus" Foreground="{StaticResource StarLightWhiteBrush}" FontSize="14"/>
                     </Button>
                     <Button x:Name="CloseButton" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}">
                         <fontAwesome:FontAwesome Icon="Close" Foreground="{StaticResource StarLightWhiteBrush}" FontSize="14"/>
@@ -133,7 +144,7 @@
                         <Button.ContentTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <fontAwesome:FontAwesome Icon="GlobeAfrica" Margin="0,0,10,0"/>
+                                    <fontAwesome:FontAwesome Icon="Globe" Margin="0,0,10,0"/>
                                     <TextBlock Text="{Binding}"/>
                                 </StackPanel>
                             </DataTemplate>
@@ -144,7 +155,7 @@
                         <Button.ContentTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <fontAwesome:FontAwesome Icon="BoltLightning" Margin="0,0,10,0"/>
+                                    <fontAwesome:FontAwesome Icon="Bolt" Margin="0,0,10,0"/>
                                     <TextBlock Text="{Binding}"/>
                                 </StackPanel>
                             </DataTemplate>

@@ -137,7 +137,7 @@
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="MinimizeButton" Click="MinimizeButton_Click" Style="{StaticResource IconButtonStyle}">
-                        <fontAwesome:FontAwesome Icon="WindowMinimize" Foreground="#F0F0F0" FontSize="14"/>
+                        <fontAwesome:FontAwesome Icon="Minus" Foreground="#F0F0F0" FontSize="14"/>
                     </Button>
                     <Button x:Name="CloseButton" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}">
                         <fontAwesome:FontAwesome Icon="Close" Foreground="#F0F0F0" FontSize="14"/>
