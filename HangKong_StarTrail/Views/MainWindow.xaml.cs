@@ -21,89 +21,10 @@ namespace HangKong_StarTrail.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        // 添加星星闪烁的随机定时器
-        private List<DispatcherTimer> starTimers = new List<DispatcherTimer>();
-        private List<UIElement> stars = new List<UIElement>();
-        private Random random = new Random();
-        
         public MainWindow()
         {
             InitializeComponent();
-            InitializeStarAnimation();
             LoadUserProgress();
-        }
-
-        /// <summary>
-        /// 初始化星星闪烁动画效果
-        /// </summary>
-        private void InitializeStarAnimation()
-        {
-            try
-            {
-                // 清除旧定时器
-                foreach (var timer in starTimers)
-                {
-                    timer.Stop();
-                }
-                starTimers.Clear();
-                
-                // 获取画布引用 - 默认假设在XAML中有一个叫StarCanvas的Canvas
-                var starCanvas = this.FindName("StarCanvas") as Canvas;
-                if (starCanvas == null) return;
-                
-                // 限制星星总数
-                const int maxStars = 30;
-                
-                // 使用单个定时器控制所有星星动画，降低UI线程压力
-                var mainStarTimer = new DispatcherTimer
-                {
-                    Interval = TimeSpan.FromMilliseconds(100) // 降低刷新频率
-                };
-                
-                // 创建星星
-                for (int i = 0; i < maxStars; i++)
-                {
-                    double size = 1 + random.NextDouble() * 2.5;
-                    Ellipse star = new Ellipse
-                    {
-                        Width = size,
-                        Height = size,
-                        Fill = Brushes.White,
-                        Opacity = 0.5 + random.NextDouble() * 0.5
-                    };
-                    
-                    // 随机位置
-                    Canvas.SetLeft(star, random.Next(0, (int)starCanvas.ActualWidth));
-                    Canvas.SetTop(star, random.Next(0, (int)starCanvas.ActualHeight));
-                    
-                    starCanvas.Children.Add(star);
-                    stars.Add(star);
-                }
-                
-                // 定时器事件 - 批量处理星星动画
-                mainStarTimer.Tick += (s, e) => {
-                    // 每次只更新部分星星，降低计算负担
-                    int updateCount = random.Next(3, 6);
-                    for (int i = 0; i < updateCount; i++)
-                    {
-                        int index = random.Next(stars.Count);
-                        if (index < stars.Count && stars[index] is Ellipse ellipse)
-                        {
-                            // 随机更新透明度制造闪烁效果
-                            double opacity = 0.3 + (random.NextDouble() * 0.7);
-                            ellipse.Opacity = opacity;
-                        }
-                    }
-                };
-                
-                starTimers.Add(mainStarTimer);
-                mainStarTimer.Start();
-            }
-            catch (Exception ex)
-            {
-                // 记录错误但不影响主程序运行
-                Console.WriteLine($"初始化星星动画出错: {ex.Message}");
-            }
         }
 
         /// <summary>
@@ -123,20 +44,6 @@ namespace HangKong_StarTrail.Views
                 // 记录错误但不影响主程序运行
                 Console.WriteLine($"加载用户进度出错: {ex.Message}");
             }
-        }
-
-        // 窗口关闭时清理资源
-        protected override void OnClosed(EventArgs e)
-        {
-            // 停止所有定时器
-            foreach (var timer in starTimers)
-            {
-                timer.Stop();
-            }
-            starTimers.Clear();
-            stars.Clear();
-            
-            base.OnClosed(e);
         }
 
         #region 窗口控制

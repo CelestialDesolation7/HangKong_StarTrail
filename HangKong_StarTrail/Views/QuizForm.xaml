@@ -2,59 +2,78 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="天文知识测验" Height="600" Width="800"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent">
     
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!-- 标题和进度 -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="天文知识测验" 
-                     FontSize="24" 
-                     FontWeight="Bold"
-                     Margin="0,0,0,10"/>
-            <ProgressBar x:Name="ProgressBar" 
-                        Height="10"
-                        Value="0"/>
-            <TextBlock x:Name="ProgressText" 
-                       HorizontalAlignment="Right"
-                       Margin="0,5,0,0"/>
-        </StackPanel>
-
-        <!-- 问题区域 -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,20">
-            <TextBlock x:Name="QuestionText" 
-                       FontSize="18"
-                       TextWrapping="Wrap"
-                       Margin="0,0,0,20"/>
+    <Grid>
+        <!-- 背景图片 -->
+        <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg" 
+               Stretch="UniformToFill"/>
+               
+        <Border CornerRadius="10" BorderBrush="Gray" BorderThickness="1">
+            <Border.Background>
+                <SolidColorBrush Color="#1A1A2E" Opacity="0.85"/>
+            </Border.Background>
             
-            <ItemsControl x:Name="OptionsList">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <RadioButton Content="{Binding Text}"
-                                    GroupName="Options"
-                                    Margin="0,5,0,0"
-                                    Checked="Option_Checked"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-        <!-- 按钮区域 -->
-        <StackPanel Grid.Row="2" 
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Right">
-            <Button x:Name="PreviousButton" 
-                    Content="上一题" 
-                    Click="PreviousButton_Click"
-                    Margin="0,0,10,0"/>
-            <Button x:Name="NextButton" 
-                    Content="下一题" 
-                    Click="NextButton_Click"/>
-        </StackPanel>
+                <!-- 标题和进度 -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                    <TextBlock Text="天文知识测验" 
+                            FontSize="24" 
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Margin="0,0,0,10"/>
+                    <ProgressBar x:Name="ProgressBar" 
+                                Height="10"
+                                Value="0"/>
+                    <TextBlock x:Name="ProgressText" 
+                            HorizontalAlignment="Right"
+                            Foreground="White"
+                            Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <!-- 问题区域 -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                    <TextBlock x:Name="QuestionText" 
+                            FontSize="18"
+                            TextWrapping="Wrap"
+                            Foreground="White"
+                            Margin="0,0,0,20"/>
+                    
+                    <ItemsControl x:Name="OptionsList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton Content="{Binding Text}"
+                                            GroupName="Options"
+                                            Foreground="White"
+                                            Margin="0,5,0,0"
+                                            Checked="Option_Checked"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- 按钮区域 -->
+                <StackPanel Grid.Row="2" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Right">
+                    <Button x:Name="PreviousButton" 
+                            Content="上一题" 
+                            Click="PreviousButton_Click"
+                            Margin="0,0,10,0"/>
+                    <Button x:Name="NextButton" 
+                            Content="下一题" 
+                            Click="NextButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window> 
