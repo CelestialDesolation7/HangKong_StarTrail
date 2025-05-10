@@ -28,7 +28,7 @@ namespace HangKong_StarTrail.Views
         private void LoadQuestions()
         {
             // 从知识库中随机选择10个问题
-            var allItems = _knowledgeService.GetAllKnowledgeItems();
+            var allItems = _knowledgeService.GetAllItems();
             var random = new Random();
             _questions = allItems
                 .OrderBy(x => random.Next())

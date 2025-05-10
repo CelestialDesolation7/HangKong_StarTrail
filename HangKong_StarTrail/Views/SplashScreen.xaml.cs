@@ -284,7 +284,7 @@ namespace HangKong_StarTrail.Views
                 // 确保进度达到100%
                 _currentProgress = 100;
                 UpdateProgressSafely(100);
-
+                
                 // 显示"按任意键继续"提示
                 ShowPressAnyKeyPrompt();
                 

@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using HangKong_StarTrail.Models;
 using System.Windows;
@@ -93,8 +94,9 @@ namespace HangKong_StarTrail.Services
         /// 获取聊天回复
         /// </summary>
         /// <param name="chatHistory">聊天历史记录</param>
+        /// <param name="cancellationToken">取消令牌</param>
         /// <returns>AI回复内容</returns>
-        public async Task<string> GetChatResponseAsync(List<ChatMessage> chatHistory)
+        public async Task<string> GetChatResponseAsync(List<ChatMessage> chatHistory, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(_apiKey))
             {
@@ -146,8 +148,8 @@ namespace HangKong_StarTrail.Services
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sanitizedApiKey);
 
-                // 发送请求
-                var response = await _httpClient.PostAsync(ApiUrl, httpContent);
+                // 发送请求，并添加取消令牌支持
+                var response = await _httpClient.PostAsync(ApiUrl, httpContent, cancellationToken);
                 string responseContent = await response.Content.ReadAsStringAsync();
 
                 // 检查响应状态
@@ -163,6 +165,11 @@ namespace HangKong_StarTrail.Services
                 var content = responseMessage.GetProperty("content").GetString();
 
                 return content ?? "无法获取回复内容";
+            }
+            catch (OperationCanceledException)
+            {
+                // 请求被取消，直接原样抛出异常
+                throw;
             }
             catch (Exception ex)
             {
