@@ -23,6 +23,8 @@ namespace HangKong_StarTrail.Views
     {
         // 添加星星闪烁的随机定时器
         private List<DispatcherTimer> starTimers = new List<DispatcherTimer>();
+        private List<UIElement> stars = new List<UIElement>();
+        private Random random = new Random();
         
         public MainWindow()
         {
@@ -38,8 +40,64 @@ namespace HangKong_StarTrail.Views
         {
             try
             {
-                // 在实际实现中，这里会随机生成一些星星并添加闪烁效果
-                // 此处为简化实现，实际应用中可以使用Canvas.Children动态生成
+                // 清除旧定时器
+                foreach (var timer in starTimers)
+                {
+                    timer.Stop();
+                }
+                starTimers.Clear();
+                
+                // 获取画布引用 - 默认假设在XAML中有一个叫StarCanvas的Canvas
+                var starCanvas = this.FindName("StarCanvas") as Canvas;
+                if (starCanvas == null) return;
+                
+                // 限制星星总数
+                const int maxStars = 30;
+                
+                // 使用单个定时器控制所有星星动画，降低UI线程压力
+                var mainStarTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(100) // 降低刷新频率
+                };
+                
+                // 创建星星
+                for (int i = 0; i < maxStars; i++)
+                {
+                    double size = 1 + random.NextDouble() * 2.5;
+                    Ellipse star = new Ellipse
+                    {
+                        Width = size,
+                        Height = size,
+                        Fill = Brushes.White,
+                        Opacity = 0.5 + random.NextDouble() * 0.5
+                    };
+                    
+                    // 随机位置
+                    Canvas.SetLeft(star, random.Next(0, (int)starCanvas.ActualWidth));
+                    Canvas.SetTop(star, random.Next(0, (int)starCanvas.ActualHeight));
+                    
+                    starCanvas.Children.Add(star);
+                    stars.Add(star);
+                }
+                
+                // 定时器事件 - 批量处理星星动画
+                mainStarTimer.Tick += (s, e) => {
+                    // 每次只更新部分星星，降低计算负担
+                    int updateCount = random.Next(3, 6);
+                    for (int i = 0; i < updateCount; i++)
+                    {
+                        int index = random.Next(stars.Count);
+                        if (index < stars.Count && stars[index] is Ellipse ellipse)
+                        {
+                            // 随机更新透明度制造闪烁效果
+                            double opacity = 0.3 + (random.NextDouble() * 0.7);
+                            ellipse.Opacity = opacity;
+                        }
+                    }
+                };
+                
+                starTimers.Add(mainStarTimer);
+                mainStarTimer.Start();
             }
             catch (Exception ex)
             {
@@ -67,24 +125,74 @@ namespace HangKong_StarTrail.Views
             }
         }
 
+        // 窗口关闭时清理资源
+        protected override void OnClosed(EventArgs e)
+        {
+            // 停止所有定时器
+            foreach (var timer in starTimers)
+            {
+                timer.Stop();
+            }
+            starTimers.Clear();
+            stars.Clear();
+            
+            base.OnClosed(e);
+        }
+
         #region 窗口控制
 
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            try
             {
-                this.DragMove();
+                // 确保鼠标左键按下时才能拖动窗口
+                if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
+                {
+                    // 确保窗口处于正常状态
+                    if (this.WindowState == WindowState.Normal || this.WindowState == WindowState.Maximized)
+                    {
+                        this.DragMove();
+                    }
+                    
+                    // 标记事件已处理，防止冒泡
+                    e.Handled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不影响程序运行
+                Console.WriteLine($"窗口拖动时出错: {ex.Message}");
             }
         }
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            try
+            {
+                this.WindowState = WindowState.Minimized;
+                
+                // 标记事件已处理
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"最小化窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            try
+            {
+                Application.Current.Shutdown();
+                
+                // 标记事件已处理
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"关闭应用程序时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         #endregion

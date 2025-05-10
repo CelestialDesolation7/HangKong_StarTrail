@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using HangKong_StarTrail.Models;
 using HangKong_StarTrail.Services;
 
@@ -266,6 +267,33 @@ namespace HangKong_StarTrail.Views
             {
                 Debug.WriteLine($"收藏操作出错: {ex.Message}");
                 MessageBox.Show($"处理收藏操作时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 标题栏拖动事件
+        /// </summary>
+        private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                // 确保鼠标左键按下时才能拖动窗口
+                if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
+                {
+                    // 确保窗口处于正常状态
+                    if (this.WindowState == WindowState.Normal || this.WindowState == WindowState.Maximized)
+                    {
+                        this.DragMove();
+                    }
+                    
+                    // 标记事件已处理，防止冒泡
+                    e.Handled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不影响程序运行
+                Debug.WriteLine($"窗口拖动时出错: {ex.Message}");
             }
         }
     }

@@ -39,13 +39,13 @@ public partial class App : Application
             Debug.WriteLine("正在创建启动画面...");
             
             // 创建并显示启动画面
-            /*
+            
             AppSplashScreen splashScreen = new AppSplashScreen();
             this.MainWindow = splashScreen;
             splashScreen.Show();
             
             Debug.WriteLine("启动画面已显示");
-            */
+            
         }
         catch (Exception ex)
         {

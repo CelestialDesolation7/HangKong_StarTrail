@@ -116,7 +116,7 @@
         </Style>
     </Window.Resources>
 
-    <Border CornerRadius="10" BorderBrush="Gray" BorderThickness="2" MouseLeftButtonDown="TitleBar_MouseDown">
+    <Border CornerRadius="10" BorderBrush="Gray" BorderThickness="2">
         <Border.Background>
             <SolidColorBrush Color="#FF2D2D30"/>
         </Border.Background>
@@ -127,7 +127,7 @@
             </Grid.RowDefinitions>
 
             <!-- 标题栏 -->
-            <Grid Grid.Row="0" Background="#1F1E33" MouseDown="TitleBar_MouseDown">
+            <Grid Grid.Row="0" Background="#1F1E33" MouseLeftButtonDown="TitleBar_MouseDown">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -374,10 +374,12 @@
                         </LinearGradientBrush>
                     </Border.Background>
                     <Grid>
-                        <!-- 宇宙背景星空效果（保留现有效果） -->
-                <Canvas>
-                            <!-- 改进的星云效果 - 多层次星云 -->
-                            <Ellipse Canvas.Left="-150" Canvas.Top="50" Width="800" Height="600" Opacity="0.18">
+                        <!-- 宇宙背景星空效果（简化版） -->
+                        <Canvas x:Name="StarCanvas" Panel.ZIndex="0">
+                            <!-- 星星会由代码动态生成 -->
+                            
+                            <!-- 简化的星云效果 - 减少层次和模糊半径 -->
+                            <Ellipse Canvas.Left="-150" Canvas.Top="50" Width="800" Height="600" Opacity="0.15">
                                 <Ellipse.Fill>
                                     <RadialGradientBrush>
                                         <GradientStop Color="#9F5FFF" Offset="0"/>
@@ -386,185 +388,26 @@
                                     </RadialGradientBrush>
                                 </Ellipse.Fill>
                                 <Ellipse.Effect>
-                                    <BlurEffect Radius="30"/>
+                                    <BlurEffect Radius="15"/>
                                 </Ellipse.Effect>
-                                <Ellipse.RenderTransform>
-                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                </Ellipse.RenderTransform>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" 
-                                                                From="1" To="1.05" Duration="0:0:15" 
-                                                                AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" 
-                                                                From="1" To="1.05" Duration="0:0:15" 
-                                                                AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
                             </Ellipse>
                     
-                            <Ellipse Canvas.Left="300" Canvas.Top="100" Width="750" Height="450" Opacity="0.15">
-                        <Ellipse.Fill>
-                            <RadialGradientBrush>
+                            <Ellipse Canvas.Left="300" Canvas.Top="100" Width="750" Height="450" Opacity="0.12">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush>
                                         <GradientStop Color="#5F9FFF" Offset="0"/>
                                         <GradientStop Color="#3A55AA" Offset="0.4"/>
-                                <GradientStop Color="Transparent" Offset="1"/>
-                            </RadialGradientBrush>
-                        </Ellipse.Fill>
-                                <Ellipse.Effect>
-                                    <BlurEffect Radius="25"/>
-                                </Ellipse.Effect>
-                                <Ellipse.RenderTransform>
-                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                </Ellipse.RenderTransform>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" 
-                                                                From="1" To="1.03" Duration="0:0:20" BeginTime="0:0:2"
-                                                                AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" 
-                                                                From="1" To="1.03" Duration="0:0:20" BeginTime="0:0:2"
-                                                                AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                    </Ellipse>
-                    
-                            <!-- 额外的小型星云 -->
-                            <Ellipse Canvas.Left="50" Canvas.Top="350" Width="250" Height="150" Opacity="0.12">
-                        <Ellipse.Fill>
-                            <RadialGradientBrush>
-                                        <GradientStop Color="#FF9FDF" Offset="0"/>
-                                <GradientStop Color="Transparent" Offset="1"/>
-                            </RadialGradientBrush>
-                        </Ellipse.Fill>
+                                        <GradientStop Color="Transparent" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
                                 <Ellipse.Effect>
                                     <BlurEffect Radius="15"/>
                                 </Ellipse.Effect>
                             </Ellipse>
-                            
-                            <!-- 宇宙尘埃效果 -->
-                            <Rectangle Width="970" Height="670" Opacity="0.3">
-                                <Rectangle.Fill>
-                                    <ImageBrush ImageSource="/HangKong_StarTrail;component/StyleResources/Images/planets/sun_texture.jpg" 
-                                                Opacity="0.1" Stretch="UniformToFill"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                            
-                            <!-- 小星星点缀（改进的分布） -->
-                            <!-- 第一组星星 - 较大且明亮 -->
-                            <Ellipse Canvas.Left="100" Canvas.Top="50" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.9"/>
-                            <Ellipse Canvas.Left="240" Canvas.Top="120" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                            <Ellipse Canvas.Left="500" Canvas.Top="80" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                            <Ellipse Canvas.Left="720" Canvas.Top="160" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.9"/>
-                            <Ellipse Canvas.Left="620" Canvas.Top="370" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                            <Ellipse Canvas.Left="380" Canvas.Top="420" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.9"/>
-                            <Ellipse Canvas.Left="180" Canvas.Top="400" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.9"/>
-                            <Ellipse Canvas.Left="800" Canvas.Top="250" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                            
-                            <!-- 第二组星星 - 中等大小 -->
-                            <Ellipse Canvas.Left="170" Canvas.Top="100" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="320" Canvas.Top="80" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="420" Canvas.Top="130" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="630" Canvas.Top="100" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="520" Canvas.Top="300" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="280" Canvas.Top="350" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="460" Canvas.Top="450" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="750" Canvas.Top="380" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            
-                            <!-- 第三组星星 - 最小且最暗 -->
-                            <Ellipse Canvas.Left="120" Canvas.Top="150" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="230" Canvas.Top="200" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="350" Canvas.Top="150" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="450" Canvas.Top="250" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="580" Canvas.Top="180" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="650" Canvas.Top="220" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="350" Canvas.Top="280" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="430" Canvas.Top="320" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="540" Canvas.Top="390" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="600" Canvas.Top="430" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="680" Canvas.Top="300" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="750" Canvas.Top="330" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="800" Canvas.Top="410" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="140" Canvas.Top="320" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="220" Canvas.Top="280" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="270" Canvas.Top="420" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            
-                            <!-- 高亮闪烁星 - 更多变化和随机效果 -->
-                            <Ellipse Canvas.Left="180" Canvas.Top="120" Width="3.5" Height="3.5" Fill="#FFFFFF">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="6" Color="White" Opacity="0.8"/>
-                                </Ellipse.Effect>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.3" Duration="0:0:2" AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" From="0.8" To="0.3" Duration="0:0:2" AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                            </Ellipse>
-                            
-                            <Ellipse Canvas.Left="420" Canvas.Top="230" Width="4" Height="4" Fill="#FFFFFF">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="8" Color="#B0E0FF" Opacity="0.9"/>
-                                </Ellipse.Effect>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.2" Duration="0:0:3" AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" From="8" To="4" Duration="0:0:3" AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                            </Ellipse>
-                            
-                            <Ellipse Canvas.Left="620" Canvas.Top="180" Width="3.5" Height="3.5" Fill="#FFFFFF">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="7" Color="#FFE0B0" Opacity="0.8"/>
-                                </Ellipse.Effect>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.4" Duration="0:0:2.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" From="7" To="3" Duration="0:0:2.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                            </Ellipse>
-                            
-                            <Ellipse Canvas.Left="300" Canvas.Top="350" Width="3" Height="3" Fill="#FFFFFF">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="6" Color="#E0B0FF" Opacity="0.8"/>
-                                </Ellipse.Effect>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.3" Duration="0:0:3.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" From="0.8" To="0.2" Duration="0:0:3.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                    </Ellipse>
-                </Canvas>
+                        </Canvas>
 
-                        <!-- 主内容布局更新 -->
-                        <Grid>
+                        <!-- 主内容布局更新，简化动画和效果 -->
+                        <Grid Panel.ZIndex="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" /> <!-- 顶部快速导航区 -->
                                 <RowDefinition Height="*" /> <!-- 中央欢迎区 -->
@@ -635,7 +478,7 @@
                                         </LinearGradientBrush>
                                     </TextBlock.Foreground>
                                     <TextBlock.Effect>
-                                        <DropShadowEffect ShadowDepth="3" Direction="315" Color="#000000" BlurRadius="6" Opacity="0.8"/>
+                                        <DropShadowEffect ShadowDepth="2" Direction="315" Color="#000000" BlurRadius="3" Opacity="0.6"/>
                                     </TextBlock.Effect>
                                     <TextBlock.Triggers>
                                         <EventTrigger RoutedEvent="TextBlock.Loaded">
@@ -656,7 +499,7 @@
                                 <TextBlock Text="恒星运行与宇宙知识可视化系统" FontFamily="Microsoft YaHei" FontSize="26" Foreground="#F5F5F5" 
                                         TextAlignment="Center" Margin="0,0,0,40">
                                     <TextBlock.Effect>
-                                        <DropShadowEffect ShadowDepth="2" Direction="315" Color="#000000" BlurRadius="4" Opacity="0.7"/>
+                                        <DropShadowEffect ShadowDepth="1" Direction="315" Color="#000000" BlurRadius="2" Opacity="0.5"/>
                                     </TextBlock.Effect>
                                     <TextBlock.Triggers>
                                         <EventTrigger RoutedEvent="TextBlock.Loaded">
@@ -679,7 +522,7 @@
                                         </LinearGradientBrush>
                                     </Border.Background>
                                     <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#5F5FEE" Opacity="0.2"/>
+                                        <DropShadowEffect ShadowDepth="0" BlurRadius="8" Color="#5F5FEE" Opacity="0.15"/>
                                     </Border.Effect>
                                     <TextBlock Text="点击上方卡片或左侧按钮开始您的宇宙探索之旅" FontFamily="Microsoft YaHei" FontSize="18" Foreground="#E0E0E0" 
                                             TextAlignment="Center" Margin="20,15,20,15">
@@ -709,7 +552,7 @@
                                         </LinearGradientBrush>
                                     </Border.Background>
                                     <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#000000" Opacity="0.5"/>
+                                        <DropShadowEffect ShadowDepth="0" BlurRadius="8" Color="#000000" Opacity="0.4"/>
                                     </Border.Effect>
                                     <StackPanel Margin="15">
                                         <TextBlock Text="今日宇宙概览" FontSize="20" Foreground="#FFD700" Margin="0,0,0,10"/>

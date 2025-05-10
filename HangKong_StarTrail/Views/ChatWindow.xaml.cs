@@ -624,8 +624,26 @@ namespace HangKong_StarTrail.Views
         /// </summary>
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
-                this.DragMove();
+            try
+            {
+                // 确保鼠标左键按下时才能拖动窗口
+                if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
+                {
+                    // 确保窗口处于正常状态
+                    if (this.WindowState == WindowState.Normal || this.WindowState == WindowState.Maximized)
+                    {
+                        this.DragMove();
+                    }
+                    
+                    // 标记事件已处理，防止冒泡
+                    e.Handled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不影响程序运行
+                Console.WriteLine($"窗口拖动时出错: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -633,7 +651,17 @@ namespace HangKong_StarTrail.Views
         /// </summary>
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            try
+            {
+                this.WindowState = WindowState.Minimized;
+                
+                // 标记事件已处理
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"最小化窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         /// <summary>

@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
         
         <!-- 顶部标题栏 -->
-        <Border Grid.Row="0" Background="#0F0F1E">
+        <Border Grid.Row="0" Background="#0F0F1E" MouseLeftButtonDown="TitleBar_MouseDown">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -267,12 +267,19 @@
                               Background="Transparent"
                               BorderThickness="0"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                              SelectionChanged="KnowledgeListView_SelectionChanged">
+                              SelectionChanged="KnowledgeListView_SelectionChanged"
+                              VirtualizingStackPanel.IsVirtualizing="True"
+                              VirtualizingStackPanel.VirtualizationMode="Recycling"
+                              VirtualizingStackPanel.CacheLength="5"
+                              ScrollViewer.IsDeferredScrollingEnabled="True"
+                              RenderOptions.ClearTypeHint="Enabled"
+                              RenderOptions.BitmapScalingMode="HighQuality">
                         <ListView.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" 
-                                           ItemWidth="370" 
-                                           ItemHeight="180"/>
+                                <VirtualizingStackPanel Orientation="Horizontal" 
+                                                      Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                      IsVirtualizing="True"
+                                                      VirtualizationMode="Recycling"/>
                             </ItemsPanelTemplate>
                         </ListView.ItemsPanel>
                         <ListView.ItemContainerStyle>
@@ -288,7 +295,7 @@
                                                     Background="#252550"
                                                     CornerRadius="8"
                                                     BorderThickness="0">
-                                                <ContentPresenter Margin="0"/>
+                                                <ContentPresenter Margin="0" CacheMode="BitmapCache"/>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
@@ -320,7 +327,8 @@
                                                Foreground="#E0E0FF"
                                                FontSize="16"
                                                FontWeight="Bold"
-                                               TextWrapping="Wrap"/>
+                                               TextWrapping="Wrap"
+                                               TextOptions.TextFormattingMode="Display"/>
                                     
                                     <!-- 摘要 -->
                                     <TextBlock Grid.Row="1"
@@ -437,12 +445,15 @@
                             <!-- 内容 -->
                             <ScrollViewer Grid.Row="3"
                                           VerticalScrollBarVisibility="Auto"
-                                          HorizontalScrollBarVisibility="Disabled">
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          IsDeferredScrollingEnabled="True">
                                 <TextBlock x:Name="DetailContent"
                                            Foreground="#D0D0F0"
                                            FontSize="16"
                                            TextWrapping="Wrap"
-                                           LineHeight="24"/>
+                                           LineHeight="24"
+                                           TextOptions.TextFormattingMode="Display"
+                                           CacheMode="BitmapCache"/>
                             </ScrollViewer>
                             
                             <!-- 标签列表 -->
