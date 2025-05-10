@@ -17,6 +17,7 @@
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc5.4" />
     <PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.0-preview.1.2" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
+    <PackageReference Include="System.Speech" Version="9.0.4" />
   </ItemGroup>
 
   <!-- 确保行星纹理图片被包含为资源 -->

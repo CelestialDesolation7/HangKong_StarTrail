@@ -90,7 +90,7 @@
 /// <param name="distance">与中心天体距离（m）</param>
 /// <returns>轨道位置坐标</returns>
 public Vector3 CalculateOrbitPosition(double mass, double distance)
-{
+    {
     // TODO: 优化大质量天体计算精度
     ...
 }
