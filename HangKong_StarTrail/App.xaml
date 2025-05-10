@@ -27,6 +27,9 @@
             <SolidColorBrush x:Key="HeaderBackgroundBrush" Color="{StaticResource HeaderBackground}"/>
             <SolidColorBrush x:Key="BorderColorBrush" Color="{StaticResource BorderColor}"/>
             
+            <!-- 背景图片资源 -->
+            <BitmapImage x:Key="BackgroundImage" UriSource="/StyleResources/Images/background.jpg"/>
+            
             <!--HandyControl-->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>

@@ -299,7 +299,7 @@
                 <Border Grid.Column="2">
                     <Grid>
                         <!-- 使用静态背景图片 -->
-                        <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg" 
+                        <Image Source="{StaticResource BackgroundImage}" 
                                Stretch="UniformToFill"/>
 
                         <!-- 主内容布局更新 -->
