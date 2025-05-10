@@ -25,9 +25,9 @@ namespace HangKong_StarTrail.Views
     /// </summary>
     public partial class AppSplashScreen : Window
     {
-        private DispatcherTimer _loadingTimer = null!;
-        private DispatcherTimer _animationTimer = null!;
-        private DispatcherTimer _particleTimer = null!;
+        private DispatcherTimer _loadingTimer = new DispatcherTimer();
+        private DispatcherTimer _animationTimer = new DispatcherTimer();
+        private DispatcherTimer _particleTimer = new DispatcherTimer();
         private Random _random = new Random();
         private AxisAngleRotation3D? _sunRotationTransform;
         
@@ -40,11 +40,11 @@ namespace HangKong_StarTrail.Views
         private const int MaxParticles = 100;
 
         // 3D动画控制
-        private double _sunRotationSpeed = 0.05;
+        private double _sunRotationSpeed = 0.3;
 
         // 加载状态标志
         private bool _isLoadingCompleted = false;
-        private TextBlock _pressAnyKeyText = null!;
+        private TextBlock _pressAnyKeyText = new TextBlock();
 
         // 加载文本列表
         private List<string> _loadingMessages = new List<string>
@@ -244,27 +244,36 @@ namespace HangKong_StarTrail.Views
             {
                 Debug.WriteLine("开始模拟加载过程...");
                 
-                // 模拟各种加载阶段，减少等待时间，加速整个过程
+                // 优化加载阶段时间，提供更好的用户体验
                 Debug.WriteLine("阶段1: 初始化系统核心组件...");
-                await SimulateLoadingPhase(0, 15, "初始化系统核心组件...", 300);
+                await SimulateLoadingPhase(0, 15, "初始化系统核心组件...", 800);
                 UpdateTextSafely(SystemInfoText, "系统核心组件已加载\n准备加载资源文件...");
                 
+                // 在阶段之间添加短暂延迟，使用户能看清每个阶段信息
+                await Task.Delay(300);
+                
                 Debug.WriteLine("阶段2: 加载资源文件...");
-                await SimulateLoadingPhase(15, 35, "加载资源文件...", 300);
+                await SimulateLoadingPhase(15, 35, "加载资源文件...", 1000);
                 UpdateTextSafely(SystemInfoText, "系统资源文件已加载\n准备加载物理引擎...");
                 
+                await Task.Delay(300);
+                
                 Debug.WriteLine("阶段3: 初始化物理引擎...");
-                await SimulateLoadingPhase(35, 65, "初始化物理引擎...", 300);
+                await SimulateLoadingPhase(35, 65, "初始化物理引擎...", 1200);
                 UpdateTextSafely(SystemInfoText, "物理引擎已加载\n准备载入宇宙数据...");
                 UpdateTextSafely(ExplorationInfoText, "物理参数校准中...\n重力场模拟引擎就绪");
                 
+                await Task.Delay(300);
+                
                 Debug.WriteLine("阶段4: 载入宇宙数据...");
-                await SimulateLoadingPhase(65, 85, "载入宇宙数据...", 300);
+                await SimulateLoadingPhase(65, 85, "载入宇宙数据...", 1000);
                 UpdateTextSafely(SystemInfoText, "宇宙数据已加载\n进行最终系统检查...");
                 UpdateTextSafely(ExplorationInfoText, "探测器校准完成\n坐标系统同步完成");
                 
+                await Task.Delay(300);
+                
                 Debug.WriteLine("阶段5: 完成最终准备...");
-                await SimulateLoadingPhase(85, 100, "完成最终准备...", 300);
+                await SimulateLoadingPhase(85, 100, "完成最终准备...", 800);
                 UpdateTextSafely(SystemInfoText, "所有系统检查完毕\n准备就绪");
                 UpdateTextSafely(ExplorationInfoText, "所有系统正常运行\n等待用户指令");
                 
@@ -463,10 +472,34 @@ namespace HangKong_StarTrail.Views
 
         private void AnimationTimer_Tick(object? sender, EventArgs e)
         {
-            // 更新3D模型旋转角度
+            // 更新3D模型旋转角度，添加脉动效果
             if (_sunRotationTransform != null)
             {
                 _sunRotationTransform.Angle += _sunRotationSpeed;
+                
+                // 添加星体脉动效果
+                ModelVisual3D? sunModel = this.FindName("SunModel") as ModelVisual3D;
+                if (sunModel != null && sunModel.Content is GeometryModel3D sunGeometryModel)
+                {
+                    // 获取当前变换
+                    Transform3DGroup? transformGroup = sunGeometryModel.Transform as Transform3DGroup;
+                    if (transformGroup != null)
+                    {
+                        // 查找缩放变换
+                        foreach (Transform3D transform in transformGroup.Children)
+                        {
+                            if (transform is ScaleTransform3D scaleTransform)
+                            {
+                                // 创建脉动效果 (0.95-1.05之间缓慢变化)
+                                double pulseFactor = 1.0 + 0.05 * Math.Sin(_sunRotationTransform.Angle / 20.0);
+                                scaleTransform.ScaleX = pulseFactor;
+                                scaleTransform.ScaleY = pulseFactor;
+                                scaleTransform.ScaleZ = pulseFactor;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -802,7 +835,7 @@ namespace HangKong_StarTrail.Views
         // 粒子系统的粒子类
         public class Particle
         {
-            public Ellipse Element { get; set; } = null!;
+            public Ellipse Element { get; set; } = new Ellipse();
             public double VelocityX { get; set; }
             public double VelocityY { get; set; }
             public double Size { get; set; }

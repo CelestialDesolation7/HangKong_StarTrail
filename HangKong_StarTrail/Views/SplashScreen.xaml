@@ -226,18 +226,36 @@
                     <!-- 在代码中动态添加发光效果 -->
                 </Canvas>
                 
-                <!-- 加载动画指示器 - 位于右下角 -->
-                <Border Width="200" Height="80" HorizontalAlignment="Right" VerticalAlignment="Bottom" 
-                        Margin="0,0,30,30" Background="#20FFFFFF" CornerRadius="10" Padding="15"
+                <!-- 加载动画指示器 - 位于右下角，优化布局和视觉效果 -->
+                <Border Width="220" Height="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+                        Margin="0,0,30,30" Background="#22182638" CornerRadius="10" Padding="15"
                         BorderBrush="#40FFFFFF" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock x:Name="LoadingStatusText" Text="加载中..." Foreground="#F0F0F0" FontSize="14" 
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Row="0" x:Name="LoadingStatusText" Text="加载中..." Foreground="#F0F0F0" FontSize="14" 
                                   Margin="0,0,0,10"/>
-                        <ProgressBar x:Name="LoadingProgressBar" Value="0" Maximum="100" 
-                                    Style="{StaticResource FuturisticProgressBar}"/>
-                        <TextBlock x:Name="LoadingPercentText" Text="0%" Foreground="#D0D0D0" FontSize="12" 
-                                  HorizontalAlignment="Right" Margin="0,5,0,0"/>
-                    </StackPanel>
+                        
+                        <ProgressBar Grid.Row="1" x:Name="LoadingProgressBar" Value="0" Maximum="100" 
+                                    Style="{StaticResource FuturisticProgressBar}" Height="10"
+                                    Margin="0,0,0,10"/>
+                        
+                        <Border Grid.Row="2" Background="#33000000" CornerRadius="4" Padding="5,2" 
+                                HorizontalAlignment="Right" Margin="0,2,0,0">
+                            <TextBlock x:Name="LoadingPercentText" Text="0%" Foreground="#F0F0F0" FontSize="13" 
+                                      FontWeight="SemiBold"/>
+                        </Border>
+                        
+                        <Border Grid.Row="2" BorderBrush="#6064DFDF" BorderThickness="1" CornerRadius="4" 
+                                HorizontalAlignment="Right" Margin="0,2,0,0" Width="{Binding ActualWidth, ElementName=LoadingPercentText, Mode=OneWay}" 
+                                Height="{Binding ActualHeight, ElementName=LoadingPercentText, Mode=OneWay}"
+                                Padding="5,2">
+                        </Border>
+                    </Grid>
                 </Border>
             </Grid>
             

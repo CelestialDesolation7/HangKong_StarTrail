@@ -11,7 +11,7 @@ namespace HangKong_StarTrail.Views
     public partial class QuizForm : Window
     {
         private readonly IKnowledgeService _knowledgeService;
-        private List<QuizQuestion> _questions;
+        private List<QuizQuestion> _questions = new List<QuizQuestion>();
         private int _currentQuestionIndex;
         private Dictionary<int, int> _userAnswers;
         private int _score;
@@ -92,7 +92,7 @@ namespace HangKong_StarTrail.Views
             NextButton.Content = index == _questions.Count - 1 ? "完成" : "下一题";
         }
 
-        private RadioButton FindRadioButtonByIndex(int index)
+        private RadioButton? FindRadioButtonByIndex(int index)
         {
             var container = OptionsList.ItemContainerGenerator.ContainerFromIndex(index) as ContentPresenter;
             return container?.ContentTemplate.FindName("OptionRadioButton", container) as RadioButton;
@@ -167,8 +167,8 @@ namespace HangKong_StarTrail.Views
 
     public class QuizQuestion
     {
-        public string Question { get; set; }
-        public List<string> Options { get; set; }
+        public string Question { get; set; } = string.Empty;
+        public List<string> Options { get; set; } = new List<string>();
         public int CorrectOptionIndex { get; set; }
     }
 } 

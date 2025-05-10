@@ -7,7 +7,7 @@ namespace HangKong_StarTrail.Services
     {
         List<KnowledgeItem> GetAllKnowledgeItems();
         List<KnowledgeItem> GetFavorites();
-        KnowledgeItem GetItemById(string id);
+        KnowledgeItem? GetItemById(string id);
         List<KnowledgeItem> SearchItems(string keyword);
         List<KnowledgeItem> GetItemsByCategory(string category);
         void AddToFavorites(string itemId);

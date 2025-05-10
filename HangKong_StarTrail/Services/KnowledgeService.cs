@@ -14,67 +14,134 @@ namespace HangKong_StarTrail.Services
 
         public KnowledgeService()
         {
-            _dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "knowledge.db");
-            _connectionString = $"Data Source={_dbPath};Version=3;";
-            InitializeDatabase();
-            _knowledgeItems = new List<KnowledgeItem>
+            try
             {
-                new KnowledgeItem
+                string dataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+                // 确保Data目录存在
+                if (!Directory.Exists(dataDir))
                 {
-                    Id = "1",
-                    Title = "恒星的生命周期",
-                    Summary = "恒星从诞生到死亡的完整过程",
-                    Content = "恒星的生命周期包括：星云阶段、原恒星阶段、主序星阶段、红巨星阶段、白矮星阶段等。",
-                    Category = "恒星",
-                    IsFavorite = false
-                },
-                new KnowledgeItem
-                {
-                    Id = "2",
-                    Title = "银河系的结构",
-                    Summary = "银河系的基本组成和结构特征",
-                    Content = "银河系是一个棒旋星系，由核心、旋臂、银晕等部分组成。",
-                    Category = "星系",
-                    IsFavorite = false
-                },
-                new KnowledgeItem
-                {
-                    Id = "3",
-                    Title = "黑洞的形成",
-                    Summary = "黑洞的形成机制和基本特征",
-                    Content = "黑洞是由大质量恒星坍缩形成的，具有极强的引力。",
-                    Category = "宇宙现象",
-                    IsFavorite = false
+                    Directory.CreateDirectory(dataDir);
                 }
-            };
+                
+                _dbPath = Path.Combine(dataDir, "knowledge.db");
+                _connectionString = $"Data Source={_dbPath};Version=3;";
+                InitializeDatabase();
+                _knowledgeItems = new List<KnowledgeItem>
+                {
+                    new KnowledgeItem
+                    {
+                        Id = "1",
+                        Title = "恒星的生命周期",
+                        Summary = "恒星从诞生到死亡的完整过程",
+                        Content = "恒星的生命周期包括：星云阶段、原恒星阶段、主序星阶段、红巨星阶段、白矮星阶段等。",
+                        Category = "恒星",
+                        IsFavorite = false,
+                        CreatedDate = DateTime.Now,
+                        LastModifiedDate = DateTime.Now
+                    },
+                    new KnowledgeItem
+                    {
+                        Id = "2",
+                        Title = "银河系的结构",
+                        Summary = "银河系的基本组成和结构特征",
+                        Content = "银河系是一个棒旋星系，由核心、旋臂、银晕等部分组成。",
+                        Category = "星系",
+                        IsFavorite = false,
+                        CreatedDate = DateTime.Now,
+                        LastModifiedDate = DateTime.Now
+                    },
+                    new KnowledgeItem
+                    {
+                        Id = "3",
+                        Title = "黑洞的形成",
+                        Summary = "黑洞的形成机制和基本特征",
+                        Content = "黑洞是由大质量恒星坍缩形成的，具有极强的引力。",
+                        Category = "宇宙现象",
+                        IsFavorite = false,
+                        CreatedDate = DateTime.Now,
+                        LastModifiedDate = DateTime.Now
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                // 记录异常信息
+                System.Diagnostics.Debug.WriteLine($"初始化KnowledgeService时出错: {ex.Message}");
+                
+                // 初始化失败时使用默认的内存数据
+                _dbPath = string.Empty;
+                _connectionString = string.Empty;
+                _knowledgeItems = new List<KnowledgeItem>
+                {
+                    new KnowledgeItem
+                    {
+                        Id = "1",
+                        Title = "恒星的生命周期",
+                        Summary = "恒星从诞生到死亡的完整过程",
+                        Content = "恒星的生命周期包括：星云阶段、原恒星阶段、主序星阶段、红巨星阶段、白矮星阶段等。",
+                        Category = "恒星",
+                        IsFavorite = false,
+                        CreatedDate = DateTime.Now,
+                        LastModifiedDate = DateTime.Now
+                    },
+                    new KnowledgeItem
+                    {
+                        Id = "2",
+                        Title = "银河系的结构",
+                        Summary = "银河系的基本组成和结构特征",
+                        Content = "银河系是一个棒旋星系，由核心、旋臂、银晕等部分组成。",
+                        Category = "星系",
+                        IsFavorite = false,
+                        CreatedDate = DateTime.Now,
+                        LastModifiedDate = DateTime.Now
+                    },
+                    new KnowledgeItem
+                    {
+                        Id = "3",
+                        Title = "黑洞的形成",
+                        Summary = "黑洞的形成机制和基本特征",
+                        Content = "黑洞是由大质量恒星坍缩形成的，具有极强的引力。",
+                        Category = "宇宙现象",
+                        IsFavorite = false,
+                        CreatedDate = DateTime.Now,
+                        LastModifiedDate = DateTime.Now
+                    }
+                };
+            }
         }
 
         private void InitializeDatabase()
         {
             if (!File.Exists(_dbPath))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(_dbPath));
-                using (var connection = new SQLiteConnection(_connectionString))
+                try
                 {
-                    connection.Open();
-                    using (var command = new SQLiteCommand(connection))
+                    using (var connection = new SQLiteConnection(_connectionString))
                     {
-                        command.CommandText = @"
-                            CREATE TABLE KnowledgeItems (
-                                Id TEXT PRIMARY KEY,
-                                Title TEXT NOT NULL,
-                                Category TEXT NOT NULL,
-                                Content TEXT NOT NULL,
-                                ImagePath TEXT,
-                                CreatedDate TEXT NOT NULL,
-                                LastModifiedDate TEXT NOT NULL,
-                                IsFavorite INTEGER DEFAULT 0,
-                                Tags TEXT,
-                                VideoUrl TEXT,
-                                RelatedItems TEXT
-                            )";
-                        command.ExecuteNonQuery();
+                        connection.Open();
+                        using (var command = new SQLiteCommand(connection))
+                        {
+                            command.CommandText = @"
+                                CREATE TABLE KnowledgeItems (
+                                    Id TEXT PRIMARY KEY,
+                                    Title TEXT NOT NULL,
+                                    Category TEXT NOT NULL,
+                                    Content TEXT NOT NULL,
+                                    ImagePath TEXT,
+                                    CreatedDate TEXT NOT NULL,
+                                    LastModifiedDate TEXT NOT NULL,
+                                    IsFavorite INTEGER DEFAULT 0,
+                                    Tags TEXT,
+                                    VideoUrl TEXT,
+                                    RelatedItems TEXT
+                                )";
+                            command.ExecuteNonQuery();
+                        }
                     }
+                }
+                catch
+                {
+                    // 忽略数据库创建失败，使用内存中的数据
                 }
             }
         }
@@ -89,7 +156,7 @@ namespace HangKong_StarTrail.Services
             return _knowledgeItems.FindAll(item => item.IsFavorite);
         }
 
-        public KnowledgeItem GetItemById(string id)
+        public KnowledgeItem? GetItemById(string id)
         {
             return _knowledgeItems.Find(item => item.Id == id);
         }
@@ -212,20 +279,41 @@ namespace HangKong_StarTrail.Services
 
         private KnowledgeItem ReadKnowledgeItem(SQLiteDataReader reader)
         {
-            return new KnowledgeItem
+            var item = new KnowledgeItem
             {
-                Id = reader["Id"].ToString(),
-                Title = reader["Title"].ToString(),
-                Category = reader["Category"].ToString(),
-                Content = reader["Content"].ToString(),
-                ImagePath = reader["ImagePath"].ToString(),
-                CreatedDate = DateTime.Parse(reader["CreatedDate"].ToString()),
-                LastModifiedDate = DateTime.Parse(reader["LastModifiedDate"].ToString()),
-                IsFavorite = Convert.ToBoolean(reader["IsFavorite"]),
-                Tags = reader["Tags"]?.ToString()?.Split(','),
-                VideoUrl = reader["VideoUrl"].ToString(),
-                RelatedItems = reader["RelatedItems"]?.ToString()?.Split(',')
+                Id = reader["Id"]?.ToString() ?? string.Empty,
+                Title = reader["Title"]?.ToString() ?? string.Empty,
+                Category = reader["Category"]?.ToString() ?? string.Empty,
+                Content = reader["Content"]?.ToString() ?? string.Empty,
+                ImagePath = reader["ImagePath"]?.ToString(),
+                IsFavorite = Convert.ToBoolean(reader["IsFavorite"])
             };
+
+            if (reader["CreatedDate"] != null && reader["CreatedDate"] != DBNull.Value)
+            {
+                item.CreatedDate = DateTime.Parse(reader["CreatedDate"].ToString()!);
+            }
+
+            if (reader["LastModifiedDate"] != null && reader["LastModifiedDate"] != DBNull.Value)
+            {
+                item.LastModifiedDate = DateTime.Parse(reader["LastModifiedDate"].ToString()!);
+            }
+
+            var tagsString = reader["Tags"]?.ToString();
+            if (!string.IsNullOrEmpty(tagsString))
+            {
+                item.Tags = tagsString.Split(',');
+            }
+
+            item.VideoUrl = reader["VideoUrl"]?.ToString();
+
+            var relatedItemsString = reader["RelatedItems"]?.ToString();
+            if (!string.IsNullOrEmpty(relatedItemsString))
+            {
+                item.RelatedItems = relatedItemsString.Split(',');
+            }
+
+            return item;
         }
 
         private void SetCommandParameters(SQLiteCommand command, KnowledgeItem item)
