@@ -23,6 +23,8 @@
   <!-- 确保行星纹理图片被包含为资源 -->
   <ItemGroup>
     <Resource Include="StyleResources\Images\planets\*.jpg" />
+    <Resource Include="StyleResources\Images\*.jpg" />
+    <Resource Include="StyleResources\Images\*.png" />
   </ItemGroup>
 
 </Project>

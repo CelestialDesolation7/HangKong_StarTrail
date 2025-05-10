@@ -21,7 +21,7 @@
             </Grid.RowDefinitions>
             
             <!-- 顶部标题栏 -->
-            <Border Grid.Row="0" Background="#0F0F1E" MouseLeftButtonDown="TitleBar_MouseDown">
+            <Border Grid.Row="0" Background="#0F0F1E99" MouseLeftButtonDown="TitleBar_MouseDown">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -108,7 +108,7 @@
                 </Grid.ColumnDefinitions>
                 
                 <!-- 左侧分类面板 -->
-                <Border Grid.Column="0" Background="#131330">
+                <Border Grid.Column="0" Background="#13133099">
                     <StackPanel Margin="0,20,0,0">
                         <TextBlock Text="知识分类" 
                                    Foreground="#A0A0D0" 
@@ -249,7 +249,7 @@
                 </Border>
                 
                 <!-- 右侧内容区 -->
-                <Border Grid.Column="1" Background="#1A1A2E">
+                <Border Grid.Column="1" Background="#1A1A2E99">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>  <!-- 标题 -->
