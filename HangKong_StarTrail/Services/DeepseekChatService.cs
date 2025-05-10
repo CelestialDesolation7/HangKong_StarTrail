@@ -237,8 +237,14 @@ namespace HangKong_StarTrail.Services
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sanitizedApiKey);
 
                 // 发送请求，获取流式响应
-                using (var response = await _httpClient.PostAsync(ApiUrl, httpContent, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+                using (var request = new HttpRequestMessage(HttpMethod.Post, ApiUrl)
                 {
+                    Content = httpContent
+                })
+                {
+                    // 设置响应头读取模式
+                    var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                    
                     // 检查响应状态
                     if (!response.IsSuccessStatusCode)
                     {

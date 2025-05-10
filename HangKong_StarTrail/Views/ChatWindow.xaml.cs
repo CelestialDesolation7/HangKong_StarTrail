@@ -12,8 +12,10 @@ using HangKong_StarTrail.Models;
 using System.Globalization;
 using System.Text;
 using System.Speech.Synthesis;
+using System.Speech.Recognition;
 using System.Threading;
 using System.IO;
+using System.Linq;
 
 namespace HangKong_StarTrail.Views
 {
@@ -28,10 +30,13 @@ namespace HangKong_StarTrail.Views
         
         // 语音合成器
         private SpeechSynthesizer? _speechSynthesizer;
-        private bool _isSpeechInputActive = false;
         private string _lastAIResponse = string.Empty;
         private CancellationTokenSource? _cancellationTokenSource;
         
+        // 语音识别引擎
+        private SpeechRecognitionEngine? _speechRecognizer;
+        private bool _isListening = false;
+
         // 用于控制流式输出的常量
         private const int NORMAL_CHAR_DELAY = 20; // ms
         private const int PUNCTUATION_DELAY = 100; // ms
@@ -81,6 +86,9 @@ namespace HangKong_StarTrail.Views
                 // 设置语音属性
                 _speechSynthesizer.Rate = 0; // 正常语速
                 _speechSynthesizer.Volume = 100; // 最大音量
+                
+                // 初始化语音识别引擎
+                InitializeSpeechRecognition();
             }
             catch (Exception ex)
             {
@@ -89,10 +97,191 @@ namespace HangKong_StarTrail.Views
                     ReadAloudButton.IsEnabled = false;
                 MessageBox.Show($"语音组件初始化失败: {ex.Message}", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+        
+        /// <summary>
+        /// 初始化语音识别引擎
+        /// </summary>
+        private void InitializeSpeechRecognition()
+        {
+            try
+            {
+                // 创建语音识别引擎，优先使用中文识别
+                RecognizerInfo recognizerInfo = null;
+                
+                // 尝试查找中文识别器
+                foreach (var recognizer in SpeechRecognitionEngine.InstalledRecognizers())
+                {
+                    if (recognizer.Culture.Name.StartsWith("zh-"))
+                    {
+                        recognizerInfo = recognizer;
+                        break;
+                    }
+                }
+                
+                // 如果没有找到中文识别器，使用默认识别器
+                if (recognizerInfo == null && SpeechRecognitionEngine.InstalledRecognizers().Count > 0)
+                {
+                    recognizerInfo = SpeechRecognitionEngine.InstalledRecognizers()[0];
+                }
+                
+                if (recognizerInfo != null)
+                {
+                    _speechRecognizer = new SpeechRecognitionEngine(recognizerInfo);
+                    
+                    // 添加常用天文术语到语法中，提高识别准确度
+                    var builder = new GrammarBuilder();
+                    builder.Culture = recognizerInfo.Culture;
+                    
+                    // 设置为听写模式（不限制词汇）
+                    var dictationGrammar = new DictationGrammar();
+                    dictationGrammar.Name = "Dictation Grammar";
+                    _speechRecognizer.LoadGrammar(dictationGrammar);
+                    
+                    // 添加天文相关术语（可以增强识别准确度）
+                    var choices = new Choices(new string[] {
+                        "星系", "行星", "恒星", "黑洞", "太阳系", "宇宙", "银河系", "地球", 
+                        "火星", "木星", "土星", "金星", "水星", "天王星", "海王星", "冥王星",
+                        "红矮星", "白矮星", "中子星", "超新星", "引力波", "暗物质", "暗能量",
+                        "望远镜", "卫星", "小行星", "彗星", "流星", "星云", "星团"
+                    });
+                    var astronomyGrammar = new Grammar(new GrammarBuilder(choices));
+                    astronomyGrammar.Name = "Astronomy Grammar";
+                    _speechRecognizer.LoadGrammar(astronomyGrammar);
+                    
+                    // 设置事件处理器
+                    _speechRecognizer.SpeechRecognized += SpeechRecognizer_SpeechRecognized;
+                    _speechRecognizer.SpeechRecognitionRejected += SpeechRecognizer_SpeechRecognitionRejected;
+                    _speechRecognizer.SpeechDetected += SpeechRecognizer_SpeechDetected;
+                    
+                    // 启用语音输入按钮
+                    if (SpeechInputButton != null)
+                        SpeechInputButton.IsEnabled = true;
+                }
+                else
+                {
+                    // 没有找到可用的语音识别器，禁用语音输入
+                    if (SpeechInputButton != null)
+                        SpeechInputButton.IsEnabled = false;
+                    
+                    MessageBox.Show("未找到可用的语音识别引擎，语音输入功能不可用", "功能受限", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                // 如果语音识别初始化失败，禁用语音输入按钮
+                if (SpeechInputButton != null)
+                    SpeechInputButton.IsEnabled = false;
+                
+                MessageBox.Show($"语音识别初始化失败: {ex.Message}", "功能受限", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        
+        /// <summary>
+        /// 语音被检测到事件处理
+        /// </summary>
+        private void SpeechRecognizer_SpeechDetected(object sender, SpeechDetectedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                // 更新UI以指示正在接收语音
+                SpeechInputButton.Background = new SolidColorBrush(Color.FromRgb(255, 100, 100));
+            });
+        }
+        
+        /// <summary>
+        /// 语音识别成功事件处理
+        /// </summary>
+        private void SpeechRecognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+            if (e.Result != null && e.Result.Confidence > 0.3) // 设置置信度阈值
+            {
+                string recognizedText = e.Result.Text ?? string.Empty;
+                
+                Dispatcher.Invoke(() =>
+                {
+                    // 将识别的文本添加到输入框中
+                    MessageInput.Text = recognizedText;
+                    
+                    // 如果置信度高，可以自动发送
+                    if (e.Result.Confidence > 0.7 && recognizedText.Length > 3)
+                    {
+                        SendMessage().ConfigureAwait(false);
+                    }
+                    
+                    // 恢复按钮样式
+                    UpdateSpeechButtonStyle(false);
+                });
+            }
+        }
+        
+        /// <summary>
+        /// 语音识别被拒绝事件处理
+        /// </summary>
+        private void SpeechRecognizer_SpeechRecognitionRejected(object sender, SpeechRecognitionRejectedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                // 恢复按钮样式
+                UpdateSpeechButtonStyle(false);
+                
+                // 如果识别失败但有候选项，显示最佳候选项
+                if (e.Result != null && e.Result.Words.Count > 0)
+                {
+                    StringBuilder text = new StringBuilder();
+                    foreach (var word in e.Result.Words)
+                    {
+                        if (word != null && word.Text != null)
+                        {
+                            text.Append(word.Text + " ");
+                        }
+                    }
+                    
+                    if (text.Length > 0)
+                    {
+                        MessageInput.Text = text.ToString().Trim();
+                    }
+                }
+                else
+                {
+                    // 识别完全失败，显示提示
+                    MessageBox.Show("未能识别您的语音，请尝试重新说话或使用键盘输入", "识别失败", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            });
+        }
+        
+        /// <summary>
+        /// 更新语音按钮样式
+        /// </summary>
+        private void UpdateSpeechButtonStyle(bool isListening)
+        {
+            _isListening = isListening;
             
-            // 禁用语音输入按钮，我们将使用简化实现
-            if (SpeechInputButton != null)
-                SpeechInputButton.IsEnabled = false;
+            if (isListening)
+            {
+                // 正在监听状态
+                SpeechInputButton.Background = new SolidColorBrush(Color.FromRgb(80, 200, 120));
+                SpeechInputButton.ToolTip = "正在听取您的语音，点击停止";
+            }
+            else
+            {
+                // 非监听状态
+                SpeechInputButton.Background = new SolidColorBrush(Color.FromRgb(37, 32, 66)) { Opacity = 0.8 };
+                SpeechInputButton.ToolTip = "语音输入";
+                
+                // 停止识别引擎
+                if (_speechRecognizer != null)
+                {
+                    try
+                    {
+                        _speechRecognizer.RecognizeAsyncStop();
+                    }
+                    catch
+                    {
+                        // 忽略停止过程中的错误
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -361,7 +550,36 @@ namespace HangKong_StarTrail.Views
         /// </summary>
         private void SpeechInputButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("语音输入功能尚在开发中，请使用键盘输入", "功能未开放", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (_speechRecognizer == null)
+            {
+                MessageBox.Show("语音识别功能未能初始化，请检查系统是否支持语音识别", "功能不可用", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            try
+            {
+                if (!_isListening)
+                {
+                    // 开始监听
+                    _speechRecognizer.SetInputToDefaultAudioDevice();
+                    _speechRecognizer.RecognizeAsync(RecognizeMode.Multiple);
+                    UpdateSpeechButtonStyle(true);
+                    
+                    // 停止任何正在播放的语音
+                    _speechSynthesizer?.SpeakAsyncCancelAll();
+                }
+                else
+                {
+                    // 停止监听
+                    _speechRecognizer.RecognizeAsyncStop();
+                    UpdateSpeechButtonStyle(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateSpeechButtonStyle(false);
+                MessageBox.Show($"语音识别出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         
         /// <summary>
@@ -428,6 +646,20 @@ namespace HangKong_StarTrail.Views
             
             // 停止语音播放
             _speechSynthesizer?.SpeakAsyncCancelAll();
+            
+            // 停止语音识别
+            if (_speechRecognizer != null)
+            {
+                try
+                {
+                    _speechRecognizer.RecognizeAsyncStop();
+                    _speechRecognizer.Dispose();
+                }
+                catch
+                {
+                    // 忽略关闭过程中的错误
+                }
+            }
             
             // 释放语音资源
             _speechSynthesizer?.Dispose();
