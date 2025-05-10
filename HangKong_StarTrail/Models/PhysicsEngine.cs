@@ -11,31 +11,31 @@ namespace HangKong_StarTrail.Models
 
         public PhysicsEngine() { }
 
-        public void AddBody(Body body)
-        {
-            Bodies.Add(body);
-        }
-
         public void Update(double deltaT)
         {
-            // 更新所有天体的当前受到的力，并以此计算加速度
-            foreach (var body in Bodies)
+            // 并行更新每个天体的受力和加速度
+            Parallel.ForEach(Bodies, body =>
             {
-                if (body.IsCenter) continue;  // 跳过中心天体，继续处理其他天体
-                // 一个天体受到的力是所有其他天体对它的引力之和
-                body.Force = Vector2D.ZeroVector;
+                if (body.IsCenter) return;
+
+                Vector2D totalForce = Vector2D.ZeroVector;
+
                 foreach (var other in Bodies)
                 {
                     if (other == body) continue;
-                    double distance = (body.Position - other.Position).Length;
+                    Vector2D r = other.Position - body.Position;
+                    double distance = r.Length;
+                    if (distance == 0) continue;  // 避免除零
                     double forceMagnitude = G * body.Mass * other.Mass / (distance * distance);
-                    Vector2D forceDirection = (other.Position - body.Position).Normalize();
-
-                    body.Force += forceDirection * forceMagnitude;
+                    Vector2D forceDirection = r.Normalize();
+                    totalForce += forceDirection * forceMagnitude;
                 }
-                body.Acceleration = body.Force / body.Mass;
-            }
-            // 根据DeltaT更新所有天体的速度和位置
+
+                body.Force = totalForce;
+                body.Acceleration = totalForce / body.Mass;
+            });
+
+            // 串行更新速度和位置（因为并不耗时，且可能涉及 UI 的位置同步）
             foreach (var body in Bodies)
             {
                 if (body.IsCenter) continue;
@@ -43,5 +43,6 @@ namespace HangKong_StarTrail.Models
                 body.Position += body.Velocity * deltaT;
             }
         }
+
     }
 }

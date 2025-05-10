@@ -8,13 +8,13 @@ using SkiaSharp;
 
 namespace HangKong_StarTrail.Models
 {
-    public class Renderer
+    public class Renderer(PhysicsEngine _physicsEngine)
     {
-        public Renderer() { }
+        public PhysicsEngine _physicsEngine = _physicsEngine;
 
-        public void RenderBodies(List<Body> bodies, SKCanvas canvas)
+        public void RenderBodies(SKCanvas canvas)
         {
-            foreach (var body in bodies)
+            foreach (var body in _physicsEngine.Bodies)
             {
                 using var paint = new SKPaint
                 {
@@ -35,12 +35,22 @@ namespace HangKong_StarTrail.Models
             }
         }
 
-        public void RenderTrajectory(List<Body> bodies, SKCanvas canvas)
+        public void UpdatePhysics(double deltaT)
+        {
+            _physicsEngine.Update(deltaT);
+        }
+
+        public void AddBody(Body body)
+        {
+            _physicsEngine.Bodies.Add(body);
+        }
+
+        public void RenderTrajectory(SKCanvas canvas)
         {
             // TODO: 实现轨迹渲染
         }
 
-        public void RenderText(List<Body> bodies, SKCanvas canvas)
+        public void RenderText(SKCanvas canvas)
         {
             // TODO: 实现文本渲染
         }

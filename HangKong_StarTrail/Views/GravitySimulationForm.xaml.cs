@@ -20,48 +20,75 @@ using System.Windows.Threading;
 
 namespace HangKong_StarTrail.Views
 {
-    /// <summary>
-    /// GravitySimulationForm.xaml 的交互逻辑
-    /// </summary>
     public partial class GravitySimulationForm : Window
     {
-        private PhysicsEngine _physicsEngine;
-        private Renderer _renderer;
-        private DispatcherTimer _simulationTimer;
-        private double _timeStep = 43200; // 单位：秒，每帧约12小时物理时间
-        private double _pixelToDistanceRatio = 23376e2; // 比例尺，每一个像素代表的物理距离
-        private bool _showTrajectory = false;
-        private Vector2D _canvasCenter;
-        private bool _isSimulationRunning = true; // 默认开始仿真
-        private double _timeScale = 1.0;
-        private bool _isTimeReversed = false;
-        private Vector2D _cameraOffset = Vector2D.ZeroVector;
-        private double _zoomScale = 1.0;
-        private bool _isAddingBody = false;
-        private Body _focusedBody = null;
-        private bool _isVelocitySettingMode = false;
 
+        #region 成员变量
+        // 仿真功能成员
+        private Renderer _renderer; // 渲染器，包含物理引擎作为成员
+        private DispatcherTimer _simulationTimer;   // 物理仿真计时器
+        // 参数设置成员
+        private double _timeStep; // 每帧物理仿真时间步长
+        private bool _showTrajectory = false; // 是否显示轨迹
+        private bool _isSimulationRunning = true; // 是否正在仿真
+        private bool _isTimeReversed = false;   // 是否反向仿真
+        private bool _isAddingBody = false;
+        private bool _isVelocitySettingMode = false;
+        // 画布相关后台成员
+        private double _recommendedScale; // 推荐比例尺
+        private double _zoomFactor = 1.0; // 缩放因子，初始为1
+        private double _pixelToDistanceRatio; // 实际使用的比例尺 = 推荐比例尺 * 缩放因子
+        private Vector2D _canvasCenter; // 画布中心点
+        private Vector2D _cameraOffset = Vector2D.ZeroVector;   // 相机偏移量
+        private double _zoomScale = 1.0;    // 缩放比例
+        private bool _isFrameRendering = false; // 当前帧是否正在渲染
+        private bool _isFrameRequested = false; // 是否请求渲染下一帧
+        private Body? _focusedBody = null;  // 当前聚焦的天体
+        private Point? _lastMousePosition;  // 上次鼠标位置
+        private bool _isMiddleButtonPressed = false;    // 中键是否按下
+        // 调试信息成员
+        private DebugForm.DebugSimulationForm _debugWindow; // 调试窗口
+        private string[] _debugInfo = new string[10]; // 用于存储调试信息的字符串
+        private long[] _universalCounter = new long[10]; // 用于存储全局计数器
+        #endregion
+
+
+        #region 初始化函数
         public GravitySimulationForm()
         {
             InitializeComponent();
             InitializeSimulation();
+            InitializeDebugWindow();
+
+            // 等待控件完成布局后再计算推荐比例尺
+            animationCanva.Loaded += (s, e) =>
+            {
+                _recommendedScale = CalculateRecommendedScale();
+                _debugInfo[4] = $"初始推荐比例尺: {_recommendedScale:F6}";
+                _zoomFactor = 1.0;
+                _pixelToDistanceRatio = _recommendedScale * _zoomFactor;
+                animationCanva.InvalidateVisual();
+            };
         }
 
         private void InitializeSimulation()
         {
-            _physicsEngine = new PhysicsEngine();
-            _renderer = new Renderer();
-            
+            _renderer = new Renderer(new PhysicsEngine());
+
             // 初始化仿真计时器
             _simulationTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(16) // 约60FPS
+                Interval = TimeSpan.FromMilliseconds(8) // 约120FPS
             };
             _simulationTimer.Tick += SimulationTimer_Tick;
             _simulationTimer.Start();
 
             // 初始化画布事件
             animationCanva.PaintSurface += OnPaintSurface;
+            animationCanva.MouseWheel += AnimationCanva_MouseWheel;
+            animationCanva.MouseDown += AnimationCanva_MouseDown;
+            animationCanva.MouseMove += AnimationCanva_MouseMove;
+            animationCanva.MouseUp += AnimationCanva_MouseUp;
 
             // 初始化时间步长滑块
             SimulationTimeStepSlider.Minimum = 0.1;
@@ -92,7 +119,7 @@ namespace HangKong_StarTrail.Views
             // 月球数据
             var moon = new Body(
                 "月球",
-                new Vector2D(384400e3, 0),  // 地月距离（米）
+                new Vector2D(384400e3 / 2, 0),  // 地月距离（米）
                 new Vector2D(0, 1022),      // 月球轨道速度（m/s）
                 7.348e22,                   // 质量（kg）
                 10,                         // 显示半径
@@ -100,29 +127,63 @@ namespace HangKong_StarTrail.Views
                 System.Drawing.Color.Gray
             );
 
-            _physicsEngine.AddBody(earth);
-            _physicsEngine.AddBody(moon);
+            _renderer.AddBody(earth);
+            _renderer.AddBody(moon);
 
             // 设置合适的时间步长（约8小时每帧）
-            _timeScale = 28800;  // 8小时 = 28800秒
-            SimulationTimeStepSlider.Value = _timeScale;
+            _timeStep = 28800;  // 8小时 = 28800秒
+            SimulationTimeStepSlider.Value = _timeStep;
+        }
+        #endregion
 
-            // 调整缩放比例以适应地月系统
-            // 根据画布尺寸自适应调整比例尺
-            double canvasWidth = animationCanva.ActualWidth;
-            double canvasHeight = animationCanva.ActualHeight;
-            double maxDimension = Math.Max(canvasWidth, canvasHeight);
 
-            // 假设地月系统的最大范围为 800,000,000 米（地月距离的两倍）
-            double systemMaxRange = 800000000;
+        #region 调试函数
 
-            // 根据画布最大尺寸和系统最大范围计算比例尺
-            _zoomScale = maxDimension / systemMaxRange;
-
-            // 限制缩放范围
-            // _zoomScale = Math.Max(0.00000001, Math.Min(1.0, _zoomScale));
+        private void InitializeDebugWindow()
+        {
+            _debugWindow = new DebugForm.DebugSimulationForm(UpdateDebugInfo);
+            _debugWindow.Show();
         }
 
+        private void UpdateDebugInfo(string currentText)
+        {
+            var centerBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.IsCenter);
+            var debugInfo = new System.Text.StringBuilder();
+
+            debugInfo.AppendLine($"时间步长: {_timeStep:F2} 秒");
+            debugInfo.AppendLine($"推荐比例尺: {_recommendedScale:F6}");
+            debugInfo.AppendLine($"缩放因子: {_zoomFactor:F6}");
+            debugInfo.AppendLine($"实际比例尺: {_pixelToDistanceRatio:F6}");
+            debugInfo.AppendLine($"相机偏移: X={_cameraOffset.X:F2}, Y={_cameraOffset.Y:F2}");
+            debugInfo.AppendLine($"画布中心: X={_canvasCenter.X:F2}, Y={_canvasCenter.Y:F2}");
+
+            if (centerBody != null)
+            {
+                debugInfo.AppendLine($"\n中心天体 ({centerBody.Name}):");
+                debugInfo.AppendLine($"物理位置: X={centerBody.Position.X:F2}, Y={centerBody.Position.Y:F2}");
+                debugInfo.AppendLine($"显示位置: X={centerBody.DisplayPosition.X:F2}, Y={centerBody.DisplayPosition.Y:F2}");
+            }
+
+            foreach (var body in _renderer._physicsEngine.Bodies.Where(b => !b.IsCenter))
+            {
+                debugInfo.AppendLine($"\n{body.Name}:");
+                debugInfo.AppendLine($"物理位置: X={body.Position.X:F2}, Y={body.Position.Y:F2}");
+                debugInfo.AppendLine($"显示位置: X={body.DisplayPosition.X:F2}, Y={body.DisplayPosition.Y:F2}");
+                debugInfo.AppendLine($"速度: X={body.Velocity.X:F2}, Y={body.Velocity.Y:F2}");
+            }
+
+            foreach (var info in _debugInfo)
+            {
+                if (info == null) continue;
+                debugInfo.AppendLine(info);
+            }
+            _debugWindow.DebugTextBox.Text = debugInfo.ToString();
+        }
+
+        #endregion
+
+
+        #region 基本UI响应
         private void UpdateButtonStates()
         {
             // 在仿真运行时禁用修改按钮
@@ -165,93 +226,211 @@ namespace HangKong_StarTrail.Views
             UpdateButtonStates();
         }
 
-        private void VelocitySettingModeBtn_Click(object sender, RoutedEventArgs e)
+        private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _isVelocitySettingMode = !_isVelocitySettingMode;
-            // TODO: 实现速度设置模式的具体功能
+            if (e.ButtonState == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
         }
+
+        private void SimulationTimeStepSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            _timeStep = e.NewValue;
+        }
+
+        #endregion
+
+
+
+        private double CalculateRecommendedScale()
+        {
+            if (_renderer._physicsEngine.Bodies.Count < 2)
+                return 1.0;
+
+            // 找到最远距离的两个天体
+            double maxDistance = 0;
+            foreach (var body1 in _renderer._physicsEngine.Bodies)
+            {
+                foreach (var body2 in _renderer._physicsEngine.Bodies)
+                {
+                    if (body1 != body2)
+                    {
+                        double distance = (body1.Position - body2.Position).Length;
+                        maxDistance = Math.Max(maxDistance, distance);
+                    }
+                }
+            }
+
+            // 获取画布的实际像素尺寸
+            var source = PresentationSource.FromVisual(animationCanva);
+            var matrix = source?.CompositionTarget?.TransformToDevice ?? Matrix.Identity;
+            double pixelWidth = animationCanva.ActualWidth * matrix.M11;
+            double pixelHeight = animationCanva.ActualHeight * matrix.M22;
+            double maxDimension = Math.Max(pixelWidth, pixelHeight);
+
+            _debugInfo[6] = $"画布实际像素尺寸: 宽={pixelWidth:F2}, 高={pixelHeight:F2}";
+            _debugInfo[7] = $"最大天体距离: {maxDistance:F2}";
+
+            // 如果画布尺寸为0，返回一个默认值
+            if (maxDimension <= 0)
+            {
+                _debugInfo[8] = "警告：画布尺寸为0，使用默认比例尺";
+                return 1.0;
+            }
+
+            // 计算推荐比例尺，确保最远距离的天体在画布上可见
+            double scale = maxDimension / (maxDistance * 3); // 1.2是边距系数
+            _debugInfo[9] = $"计算得到的比例尺: {scale:F6}";
+            return scale;
+        }
+
 
         private void SimulationTimer_Tick(object sender, EventArgs e)
         {
-            if (_isSimulationRunning)
+            if (_isSimulationRunning && !_isFrameRendering)
             {
-                _physicsEngine.Update(_timeStep);
+                _isFrameRendering = true;
+                _isFrameRequested = false;
+
+                if (_isTimeReversed)
+                {
+                    // 反向仿真
+                    _renderer.UpdatePhysics(-_timeStep);
+                }
+                else
+                {
+                    // 正向仿真
+                    _renderer.UpdatePhysics(_timeStep);
+                }
                 UpdateDisplayPositions();
                 animationCanva.InvalidateVisual();
+            }
+            else if (_isSimulationRunning)
+            {
+                _isFrameRequested = true;
             }
         }
 
         private void UpdateDisplayPositions()
         {
-            _canvasCenter = new Vector2D(animationCanva.ActualWidth / 2, animationCanva.ActualHeight / 2);
+            // 获取画布的实际像素尺寸
+            var source = PresentationSource.FromVisual(animationCanva);
+            var matrix = source?.CompositionTarget?.TransformToDevice ?? Matrix.Identity;
+            double pixelWidth = animationCanva.ActualWidth * matrix.M11;
+            double pixelHeight = animationCanva.ActualHeight * matrix.M22;
+            _canvasCenter = new Vector2D(pixelWidth / 2, pixelHeight / 2);
 
-            foreach (var body in _physicsEngine.Bodies)
+            // 如果推荐比例尺为0，重新计算
+            if (_recommendedScale == 0)
             {
-                if (body.IsCenter)
+                _recommendedScale = CalculateRecommendedScale();
+                _pixelToDistanceRatio = _recommendedScale * _zoomFactor;
+                _debugInfo[3] = $"重新计算推荐比例尺: {_recommendedScale:F6}";
+            }
+
+            var centerBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.IsCenter);
+
+            if (centerBody != null)
+            {
+                _debugInfo[2] = $"中心天体名称：{centerBody.Name}";
+                // 中心天体始终位于画布中心
+                centerBody.DisplayPosition = _canvasCenter;
+
+                // 其他天体的位置相对于中心天体计算
+                foreach (var body in _renderer._physicsEngine.Bodies.Where(b => !b.IsCenter))
                 {
-                    body.DisplayPosition = _canvasCenter;
-                    continue;
+                    var relativePosition = body.Position - centerBody.Position;
+                    body.DisplayPosition = _canvasCenter + (relativePosition * _pixelToDistanceRatio);
                 }
-                // 以中心天体为原点，将物理位置转换为画布位置
-                body.DisplayPosition = (body.Position / _pixelToDistanceRatio) + _canvasCenter;
             }
-        }
-
-        private void UpdateUI()
-        {
-            // 更新天体数量显示
-            var bodyCountText = this.FindName("BodyCountText") as TextBlock;
-            if (bodyCountText != null)
+            else
             {
-                bodyCountText.Text = $"天体总量 {_physicsEngine.Bodies.Count} 个";
+                // 如果没有中心天体，所有天体都相对于画布中心计算
+                foreach (var body in _renderer._physicsEngine.Bodies)
+                {
+                    body.DisplayPosition = _canvasCenter + (body.Position * _pixelToDistanceRatio);
+                }
             }
 
-            // 更新其他UI元素
-            // TODO: 实现其他UI更新
+            _universalCounter[1]++;
+            _debugInfo[1] = ($"UpdateDisplayPositions函数被调用次数: {_universalCounter[1]}");
         }
 
-        private void SimulationTimeStepSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            _timeScale = e.NewValue;
-        }
+
+
+
 
         private void AnimationCanva_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            // 根据滚轮方向调整缩放比例
+            // 获取鼠标在画布上的位置
+            var mousePos = e.GetPosition(animationCanva);
+
+            // 计算鼠标位置相对于画布中心的比例
+            double mouseX = (mousePos.X - _canvasCenter.X) / _pixelToDistanceRatio;
+            double mouseY = (mousePos.Y - _canvasCenter.Y) / _pixelToDistanceRatio;
+
+            // 根据滚轮方向调整缩放因子
             double zoomFactor = e.Delta > 0 ? 1.1 : 0.9;
-            _zoomScale *= zoomFactor;
-            
-            // 限制缩放范围
-            _zoomScale = Math.Max(0.00000001, Math.Min(1.0, _zoomScale));
-            
+            _zoomFactor *= zoomFactor;
+
+            // 限制缩放因子范围
+            _zoomFactor = Math.Max(0.1, Math.Min(10.0, _zoomFactor));
+
+            // 更新实际使用的比例尺
+            _pixelToDistanceRatio = _recommendedScale * _zoomFactor;
+
+            // 调整相机偏移以保持鼠标位置不变
+            _cameraOffset = new Vector2D(
+                _cameraOffset.X + mouseX * (1 - zoomFactor),
+                _cameraOffset.Y + mouseY * (1 - zoomFactor)
+            );
+
             // 强制重绘
             animationCanva.InvalidateVisual();
         }
 
-        private Point? _lastMousePosition;
-        private void AnimationCanva_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void AnimationCanva_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (_focusedBody == null)
+            if (e.MiddleButton == MouseButtonState.Pressed)
             {
-                _lastMousePosition = e.GetPosition(animationCanva);
-                animationCanva.CaptureMouse();
+                var centerBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.IsCenter);
+                if (centerBody == null) // 只在没有中心天体时允许拖动
+                {
+                    _isMiddleButtonPressed = true;
+                    _lastMousePosition = e.GetPosition(animationCanva);
+                    animationCanva.CaptureMouse();
+                }
             }
         }
 
         private void AnimationCanva_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_lastMousePosition.HasValue && e.MiddleButton == MouseButtonState.Pressed)
+            if (_isMiddleButtonPressed && _lastMousePosition.HasValue)
             {
                 var currentPosition = e.GetPosition(animationCanva);
                 var delta = currentPosition - _lastMousePosition.Value;
-                
+
                 // 更新相机偏移
                 _cameraOffset = new Vector2D(
-                    _cameraOffset.X + delta.X / _zoomScale,
-                    _cameraOffset.Y + delta.Y / _zoomScale
+                    _cameraOffset.X + delta.X / _pixelToDistanceRatio,
+                    _cameraOffset.Y + delta.Y / _pixelToDistanceRatio
                 );
-                
+
                 _lastMousePosition = currentPosition;
+
+                // 强制重绘
+                animationCanva.InvalidateVisual();
+            }
+        }
+
+        private void AnimationCanva_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.MiddleButton == MouseButtonState.Released)
+            {
+                _isMiddleButtonPressed = false;
+                _lastMousePosition = null;
+                animationCanva.ReleaseMouseCapture();
             }
         }
 
@@ -263,13 +442,13 @@ namespace HangKong_StarTrail.Views
                 {
                     var position = e.GetPosition(animationCanva);
                     var worldPosition = new Vector2D(
-                        (position.X - animationCanva.ActualWidth / 2) / _zoomScale + _cameraOffset.X,
-                        (position.Y - animationCanva.ActualHeight / 2) / _zoomScale + _cameraOffset.Y
+                        (position.X - animationCanva.ActualWidth / 2) / _pixelToDistanceRatio + _cameraOffset.X,
+                        (position.Y - animationCanva.ActualHeight / 2) / _pixelToDistanceRatio + _cameraOffset.Y
                     );
 
                     // 创建新天体
                     var newBody = new Body(
-                        $"Body_{_physicsEngine.Bodies.Count + 1}",
+                        $"Body_{_renderer._physicsEngine.Bodies.Count + 1}",
                         worldPosition,
                         new Vector2D(0, 0), // 初始速度
                         1.0, // 默认质量
@@ -278,15 +457,16 @@ namespace HangKong_StarTrail.Views
                         System.Drawing.Color.Red // 红色
                     );
 
-                    _physicsEngine.AddBody(newBody);
+                    _renderer.AddBody(newBody);
                     _isAddingBody = false;
-                    
+
                     // 强制重绘
                     animationCanva.InvalidateVisual();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"添加天体时发生错误：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"添加天体时发生错误：{ex.Message}", "错误",
+                                    MessageBoxButton.OK, MessageBoxImage.Error);
                     _isAddingBody = false;
                 }
             }
@@ -301,23 +481,22 @@ namespace HangKong_StarTrail.Views
             canvas.Clear(SKColors.Black);
 
             // 使用 Renderer 进行绘制
-            _renderer.RenderBodies(_physicsEngine.Bodies, canvas);
-            
+            _renderer.RenderBodies(canvas);
+            _universalCounter[0]++;
+            _debugInfo[0] = ($"RenderBodies函数被调用次数: {_universalCounter[0]}");
+
             if (_showTrajectory)
             {
-                _renderer.RenderTrajectory(_physicsEngine.Bodies, canvas);
+                _renderer.RenderTrajectory(canvas);
             }
-            
-            _renderer.RenderText(_physicsEngine.Bodies, canvas);
+
+            _renderer.RenderText(canvas);
+
+            // 标记当前帧渲染完成
+            _isFrameRendering = false;
         }
 
-        private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ButtonState == MouseButtonState.Pressed)
-            {
-                DragMove();
-            }
-        }
+
 
         #region 拖动窗口
 
@@ -406,35 +585,41 @@ namespace HangKong_StarTrail.Views
 
         #endregion
 
-        private void ExitSimulationBtn_Click(object sender, RoutedEventArgs e)
+
+        #region 待实现功能
+        private void UpdateUI()
         {
-            Close();
+            // 更新天体数量显示
+            var bodyCountText = this.FindName("BodyCountText") as TextBlock;
+            if (bodyCountText != null)
+            {
+                bodyCountText.Text = $"天体总量 {_renderer._physicsEngine.Bodies.Count} 个";
+            }
+
+            // 更新其他UI元素
+            // TODO: 实现其他UI更新
+        }
+        private void VelocitySettingModeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _isVelocitySettingMode = !_isVelocitySettingMode;
+            // TODO: 实现速度设置模式的具体功能
         }
 
         private void TimeStepSettingBtn_Click(object sender, RoutedEventArgs e)
         {
-            /*
-            // 创建时间步长设置窗口
-            var timeStepWindow = new TimeStepSettingWindow();
-            if (timeStepWindow.ShowDialog() == true)
-            {
-                // 更新滑块范围
-                SimulationTimeStepSlider.Minimum = timeStepWindow.MinValue;
-                SimulationTimeStepSlider.Maximum = timeStepWindow.MaxValue;
-            }
-            */
+
         }
 
         private void ResetSimulationBtn_Click(object sender, RoutedEventArgs e)
         {
             // 重置所有状态
-            _physicsEngine.Bodies.Clear();
+            _renderer._physicsEngine.Bodies.Clear();
             _cameraOffset = Vector2D.ZeroVector;
             _zoomScale = 1.0;
             _focusedBody = null;
             _isTimeReversed = false;
             _showTrajectory = false;
-            
+
             // 重置UI
             SimulationTimeStepSlider.Value = 1.0;
             VelocityIOTextBox.Text = "0";
@@ -452,18 +637,18 @@ namespace HangKong_StarTrail.Views
 
         private void AddBodyBtn_Click(object sender, RoutedEventArgs e)
         {
-            _isAddingBody = true;
-            // 可以在这里添加视觉提示，表明正在添加天体
+            _isAddingBody = !_isAddingBody;
+
         }
 
         private void RemoveBodyBtn_Click(object sender, RoutedEventArgs e)
         {
             if (FocusIOTextBox.SelectedItem != null)
             {
-                var selectedBody = _physicsEngine.Bodies.FirstOrDefault(b => b.Name == FocusIOTextBox.SelectedItem.ToString());
+                var selectedBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.Name == FocusIOTextBox.SelectedItem.ToString());
                 if (selectedBody != null)
                 {
-                    _physicsEngine.Bodies.Remove(selectedBody);
+                    _renderer._physicsEngine.Bodies.Remove(selectedBody);
                     if (_focusedBody == selectedBody)
                     {
                         _focusedBody = null;
@@ -491,5 +676,20 @@ namespace HangKong_StarTrail.Views
         {
             // TODO: 实现预设导出功能
         }
+
+        #endregion
+
+
+        #region 窗口关闭
+        private void ExitSimulationBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+        protected override void OnClosed(EventArgs e)
+        {
+            _debugWindow?.Close();
+            base.OnClosed(e);
+        }
+        #endregion
     }
 }
