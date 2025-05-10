@@ -7,7 +7,7 @@
         xmlns:fontAwesome="clr-namespace:FontAwesome.WPF;assembly=FontAwesome.WPF"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="星际智�?- AI对话" 
+        Title="星际智者 - AI对话" 
         Height="720" Width="1280"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
@@ -15,7 +15,7 @@
         Background="Transparent">
 
     <Window.Resources>
-        <!-- 转换�?-->
+        <!-- 转换器 -->
         <local:StringToBooleanConverter x:Key="BooleanConverter"/>
         
         <!-- 定义本地颜色资源 -->
@@ -218,7 +218,7 @@
             </Setter>
         </Style>
         
-        <!-- 输入框样�?-->
+        <!-- 输入框样式 -->
         <Style x:Key="ChatInputStyle" TargetType="TextBox">
             <Setter Property="Background" Value="#1E1E2E"/>
             <Setter Property="Foreground" Value="White"/>
@@ -294,7 +294,7 @@
 
     <Grid>
         <!-- 背景图片 -->
-        <Image Source="{StaticResource BackgroundImage}" 
+        <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg" 
                Stretch="UniformToFill"/>
                
         <Border CornerRadius="10" BorderBrush="Gray" BorderThickness="2">
@@ -307,14 +307,14 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- 标题�?-->
+                <!-- 标题栏 -->
                 <Grid Grid.Row="0" Background="{StaticResource HeaderBackgroundBrush}" MouseDown="TitleBar_MouseDown" Panel.ZIndex="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="星际智�?- AI对话" Foreground="{StaticResource StarLightWhiteBrush}" FontSize="14" Margin="10,5,0,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="星际智者 - AI对话" Foreground="{StaticResource StarLightWhiteBrush}" FontSize="14" Margin="10,5,0,0" VerticalAlignment="Center"/>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="MinimizeButton" Click="MinimizeButton_Click" Style="{StaticResource IconButtonStyle}">
@@ -340,7 +340,7 @@
                             <StackPanel x:Name="ChatHistoryPanel">
                                 <!-- 欢迎消息 -->
                                 <Border Style="{StaticResource AIMessageStyle}">
-                                    <TextBlock Text="欢迎来到星际智者！我是您的AI助手，可以回答任何关于宇宙、星系和天文学的问题。您想了解什么呢�? 
+                                    <TextBlock Text="欢迎来到星际智者！我是您的AI助手，可以回答任何关于宇宙、星系和天文学的问题。您想了解什么呢？" 
                                             Foreground="White" TextWrapping="Wrap"/>
                                 </Border>
                             </StackPanel>
@@ -372,23 +372,23 @@
                         </Border.Triggers>
                     </Border>
                     
-                    <!-- 快捷提示�?-->
+                    <!-- 快捷提示区 -->
                     <Border Grid.Row="1" Background="#15FFFFFF" CornerRadius="5" Margin="10,5">
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="5">
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="介绍一下银河系" Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
-                                <Button Content="太阳系八大行�? Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
-                                <Button Content="黑洞是什�? Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
-                                <Button Content="宇宙大爆炸理�? Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
-                                <Button Content="暗物质与暗能�? Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
+                                <Button Content="太阳系八大行星" Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
+                                <Button Content="黑洞是什么" Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
+                                <Button Content="宇宙大爆炸理论" Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
+                                <Button Content="暗物质与暗能量" Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
                                 <Button Content="恒星演化过程" Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
-                                <Button Content="宇宙的未�? Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
-                                <Button Content="脉冲星特�? Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
+                                <Button Content="宇宙的未来" Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
+                                <Button Content="脉冲星特性" Style="{StaticResource PromptButtonStyle}" Click="Prompt_Click"/>
                             </StackPanel>
                         </ScrollViewer>
                     </Border>
                     
-                    <!-- 输入�?-->
+                    <!-- 输入区 -->
                     <Grid Grid.Row="2" Margin="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/> <!-- 功能按钮区域 - 新增 -->
@@ -436,7 +436,7 @@
                             </TextBox>
                         </Border>
                         
-                        <Button x:Name="SendButton" Grid.Column="2" Content="发�? 
+                        <Button x:Name="SendButton" Grid.Column="2" Content="发送" 
                                 Style="{StaticResource ChatButtonStyle}" Click="SendButton_Click">
                             <Button.Effect>
                                 <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#6E5FBE" Opacity="0.5"/>

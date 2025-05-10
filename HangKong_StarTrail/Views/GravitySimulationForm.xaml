@@ -18,7 +18,7 @@
 
     <Grid>
         <!-- 背景图片 -->
-        <Image Source="{StaticResource BackgroundImage}" 
+        <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg" 
                Stretch="UniformToFill"/>
                
         <Border BorderBrush="Gray" BorderThickness="2" 

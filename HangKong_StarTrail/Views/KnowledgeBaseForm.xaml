@@ -11,7 +11,7 @@
     <!-- 主布局 -->
     <Grid>
         <!-- 背景图片 -->
-        <Image Source="{StaticResource BackgroundImage}" 
+        <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg" 
                Stretch="UniformToFill"/>
                
         <Grid>
