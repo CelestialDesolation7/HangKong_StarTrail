@@ -176,5 +176,142 @@ namespace HangKong_StarTrail.Services
                 throw new Exception($"调用Deepseek API失败：{ex.Message}", ex);
             }
         }
+
+        /// <summary>
+        /// 获取流式聊天回复
+        /// </summary>
+        /// <param name="chatHistory">聊天历史记录</param>
+        /// <param name="onMessageReceived">接收流式消息的回调函数</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        /// <returns>完成任务</returns>
+        public async Task GetStreamingChatResponseAsync(List<ChatMessage> chatHistory, Action<string> onMessageReceived, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(_apiKey))
+            {
+                throw new InvalidOperationException("未配置Deepseek API密钥，无法使用AI聊天功能");
+            }
+
+            try
+            {
+                // 构建请求消息
+                var messages = new List<Dictionary<string, string>>();
+                
+                // 添加系统指令
+                messages.Add(new Dictionary<string, string>
+                {
+                    { "role", "system" },
+                    { "content", DefaultSystemPrompt }
+                });
+                
+                // 添加历史消息，最多保留最近10条
+                int startIndex = Math.Max(0, chatHistory.Count - 10);
+                for (int i = startIndex; i < chatHistory.Count; i++)
+                {
+                    var message = chatHistory[i];
+                    messages.Add(new Dictionary<string, string>
+                    {
+                        { "role", message.Role },
+                        { "content", message.Content }
+                    });
+                }
+
+                // 构建请求内容，设置stream为true启用流式输出
+                var requestBody = new
+                {
+                    model = "deepseek-chat",
+                    messages,
+                    stream = true,
+                    temperature = 0.7,
+                    max_tokens = 2000
+                };
+
+                // 序列化为JSON
+                string jsonContent = JsonSerializer.Serialize(requestBody);
+                
+                // 创建请求
+                var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                
+                // 确保API密钥没有换行符或其他非法字符
+                string sanitizedApiKey = _apiKey.Trim();
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sanitizedApiKey);
+
+                // 发送请求，获取流式响应
+                using (var response = await _httpClient.PostAsync(ApiUrl, httpContent, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+                {
+                    // 检查响应状态
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        string errorContent = await response.Content.ReadAsStringAsync();
+                        throw new HttpRequestException($"API请求失败：{response.StatusCode}, {errorContent}");
+                    }
+
+                    // 获取响应流
+                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    using (var reader = new StreamReader(stream))
+                    {
+                        // 读取流式响应数据
+                        string line;
+                        StringBuilder messageBuilder = new StringBuilder();
+                        
+                        while ((line = await reader.ReadLineAsync()) != null && !cancellationToken.IsCancellationRequested)
+                        {
+                            // 检查是否为保持连接的空行
+                            if (string.IsNullOrWhiteSpace(line))
+                            {
+                                continue;
+                            }
+
+                            // 检查是否为数据行
+                            if (line.StartsWith("data: "))
+                            {
+                                string data = line.Substring(6);
+                                
+                                // 检查流是否结束
+                                if (data == "[DONE]")
+                                {
+                                    break;
+                                }
+
+                                try
+                                {
+                                    // 解析JSON数据
+                                    var jsonData = JsonDocument.Parse(data);
+                                    if (jsonData.RootElement.TryGetProperty("choices", out var choices) &&
+                                        choices.GetArrayLength() > 0)
+                                    {
+                                        var choice = choices[0];
+                                        if (choice.TryGetProperty("delta", out var delta) &&
+                                            delta.TryGetProperty("content", out var content))
+                                        {
+                                            string contentText = content.GetString() ?? string.Empty;
+                                            if (!string.IsNullOrEmpty(contentText))
+                                            {
+                                                // 调用回调函数，传递收到的内容片段
+                                                onMessageReceived(contentText);
+                                                messageBuilder.Append(contentText);
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (JsonException ex)
+                                {
+                                    Console.WriteLine($"解析流式数据时发生错误: {ex.Message}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // 请求被取消，直接原样抛出异常
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"调用Deepseek流式API失败：{ex.Message}", ex);
+            }
+        }
     }
 } 

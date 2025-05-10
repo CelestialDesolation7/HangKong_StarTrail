@@ -165,20 +165,35 @@ namespace HangKong_StarTrail.Views
                 // 设置取消令牌
                 _cancellationTokenSource = new CancellationTokenSource();
                 
-                // 调用AI服务获取回复
-                string aiResponse = await _chatService.GetChatResponseAsync(_chatHistory, _cancellationTokenSource.Token);
+                // 创建一个空的AI消息面板用于流式显示
+                TextBlock messageText = CreateEmptyAIMessagePanel();
+                StringBuilder responseBuilder = new StringBuilder();
+                
+                // 调用流式输出API
+                await _chatService.GetStreamingChatResponseAsync(
+                    _chatHistory, 
+                    (partialResponse) => {
+                        // 使用Dispatcher确保在UI线程上更新
+                        Dispatcher.Invoke(() => {
+                            // 追加新收到的文本片段
+                            responseBuilder.Append(partialResponse);
+                            messageText.Text = responseBuilder.ToString();
+                            
+                            // 滚动到底部
+                            ChatScrollViewer.ScrollToEnd();
+                        });
+                    },
+                    _cancellationTokenSource.Token
+                );
                 
                 // 保存最后的AI回复用于语音朗读
-                _lastAIResponse = aiResponse;
-                
-                // 以流式效果显示AI回复
-                await AnimateAIResponseAsync(aiResponse);
+                _lastAIResponse = responseBuilder.ToString();
                 
                 // 添加AI回复到历史记录
                 _chatHistory.Add(new ChatMessage
                 {
                     Role = "assistant",
-                    Content = aiResponse
+                    Content = _lastAIResponse
                 });
             }
             catch (TaskCanceledException)
@@ -298,9 +313,11 @@ namespace HangKong_StarTrail.Views
         
         /// <summary>
         /// 流式显示AI回复
+        /// 注意：该方法已被直接调用Deepseek流式API替代，保留仅作为参考
         /// </summary>
         private async Task AnimateAIResponseAsync(string response)
         {
+            // 此方法已不再使用，被真正的流式输出API替代
             if (string.IsNullOrEmpty(response))
                 return;
                 
