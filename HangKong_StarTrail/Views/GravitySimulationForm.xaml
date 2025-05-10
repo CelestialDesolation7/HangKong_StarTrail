@@ -51,21 +51,34 @@
                             </Button>
 
                             <!-- 重置按钮 -->
-                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 10 0" x:Name="ResetSimulationBtn">
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 10 0" x:Name="ResetSimulationBtn" Click="ResetSimulationBtn_Click">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <fa:ImageAwesome Icon="Undo" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <fa:ImageAwesome Icon="Refresh" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
                                     <TextBlock Text="重置" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-                            
-                            <!-- 聚焦按钮 -->
-                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0" x:Name="FocusResetBtn">
+                        </StackPanel>
+
+                        <!-- 开始暂停/速度设置 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 0 0 8">
+
+                            <!-- 开始/暂停按钮 -->
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 10 0" x:Name="StartPauseBtn" Click="StartPauseBtn_Click">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <fa:ImageAwesome Icon="Bullseye" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
-                                    <TextBlock Text="聚焦" VerticalAlignment="Center"/>
+                                    <fa:ImageAwesome Icon="Play" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="开始仿真" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- 速度设置模式按钮 -->
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0" x:Name="VelocitySettingModeBtn" Click="VelocitySettingModeBtn_Click">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Cog" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
+                                    <TextBlock Text="速度设置" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>
+
 
                         
                         <!-- 操作面板标题 -->
@@ -75,7 +88,8 @@
                         </StackPanel>
 
                         <!-- 仿真时间速度 -->
-                        <Button x:Name="TimeStepSettingBtn" Style="{StaticResource IconTextButtonStyle}" Margin="10 0 10 0">
+                        <Button x:Name="TimeStepSettingBtn" Style="{StaticResource IconTextButtonStyle}" 
+                                Margin="10 0 10 0" Click="TimeStepSettingBtn_Click">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <fa:ImageAwesome Icon="Tachometer" Width="25" Height="20" Margin="5" Foreground="White"/>
                                 <TextBlock Style="{StaticResource LabelStyle}" Text="时间流速"/>
@@ -86,13 +100,15 @@
 
                         <!-- 添加 / 删除天体 -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="0 0 10 0">
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="0 0 10 0" 
+                                    x:Name="AddBodyBtn" Click="AddBodyBtn_Click">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <fa:ImageAwesome Icon="Plus" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
                                     <TextBlock Text="添加天体" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0">
+                            <Button Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0" 
+                                    x:Name="RemoveBodyBtn" Click="RemoveBodyBtn_Click">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <fa:ImageAwesome Icon="Minus" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
                                     <TextBlock Text="删除天体" VerticalAlignment="Center"/>
@@ -126,17 +142,19 @@
                             <fa:ImageAwesome Icon="Eye" Foreground="White" Height="20" Margin="5"/>
                             <TextBlock Style="{StaticResource LabelStyle}" Text="当前观察对象"/>
                         </StackPanel>
-                        <hc:TextBox Style="{StaticResource InputTextBoxStyle}" AutomationProperties.HelpText="cesqwiybx" x:Name="FocusIOTextBox"/>
+                        <hc:ComboBox Style="{StaticResource InputComboBoxStyle}" AutomationProperties.HelpText="cesqwiybx" x:Name="FocusIOTextBox"/>
 
                         <!-- 时间流向控制/轨迹显示模式 -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 8 0 8">
-                            <Button x:Name="TimeReverseBtn" Style="{StaticResource IconTextButtonStyle}" Margin="0 0 10 0">
+                            <Button x:Name="TimeReverseBtn" Style="{StaticResource IconTextButtonStyle}" 
+                                    Margin="0 0 10 0" Click="TimeReverseBtn_Click">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <fa:ImageAwesome Icon="Backward" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
                                     <TextBlock Text="时间反向" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="TrajectoryModeBtn" Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0">
+                            <Button x:Name="TrajectoryModeBtn" Style="{StaticResource IconTextButtonStyle}" 
+                                    Margin="10 0 0 0" Click="TrajectoryModeBtn_Click">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <fa:ImageAwesome Icon="Random" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
                                     <TextBlock Text="显示轨迹" VerticalAlignment="Center"/>
@@ -146,13 +164,15 @@
 
                         <!-- 加载预设/导出预设 -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 8 0 8">
-                            <Button x:Name="LoadPresetBtn" Style="{StaticResource IconTextButtonStyle}" Margin="0 0 10 0">
+                            <Button x:Name="LoadPresetBtn" Style="{StaticResource IconTextButtonStyle}" 
+                                    Margin="0 0 10 0" Click="LoadPresetBtn_Click">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <fa:ImageAwesome Icon="Upload" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
                                     <TextBlock Text="加载预设" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="ExportPresetBtn" Style="{StaticResource IconTextButtonStyle}" Margin="10 0 0 0">
+                            <Button x:Name="ExportPresetBtn" Style="{StaticResource IconTextButtonStyle}" 
+                                    Margin="10 0 0 0" Click="ExportPresetBtn_Click">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <fa:ImageAwesome Icon="Download" Width="20" Height="20" Margin="0,0,6,0" Foreground="White"/>
                                     <TextBlock Text="导出预设" VerticalAlignment="Center"/>
@@ -175,11 +195,6 @@
 
             <!-- 右侧面板：包含动画显示和数据表格 -->
             <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="4*"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
 
                 <!-- 画布 -->
                 <Border Margin="0">
@@ -190,43 +205,6 @@
                         </LinearGradientBrush>
                     </Border.Background>
                     <skia:SKElement x:Name="animationCanva" PaintSurface="OnPaintSurface" Margin="0,0,0,0"/>
-                </Border>
-
-                <!-- 动画和数据监控器的分割线 -->
-                <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="#222"/>
-
-                <!-- 表格面板 -->
-                <Border Grid.Row="2" Padding="10">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#3B2F56" Offset="0"/>
-                            <GradientStop Color="#2D2547" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="1*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <lvc:CartesianChart x:Name="VelocityTimeChart"
-                            SyncContext="{Binding Sync}"
-                            Series="{Binding Series}"
-                            XAxes="{Binding XAxes}"
-                            Grid.Column="0">
-                        </lvc:CartesianChart>
-
-                        <lvc:CartesianChart x:Name="ForceTimeChart"
-                            SyncContext="{Binding Sync}"
-                            Series="{Binding Series}"
-                            XAxes="{Binding XAxes}"
-                            Grid.Column="1">
-                        </lvc:CartesianChart>
-                        
-                        
-                    </Grid>
-                    
                 </Border>
 
             </Grid>
