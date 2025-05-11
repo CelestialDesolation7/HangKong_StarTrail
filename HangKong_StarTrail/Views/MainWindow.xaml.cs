@@ -203,6 +203,12 @@ namespace HangKong_StarTrail.Views
             }
         }
 
+        private void ViewCharts_Click(object sender, RoutedEventArgs e)
+        {
+            var chartsView = new ChartsView();
+            chartsView.Show();
+        }
+
         #endregion
     }
 }
