@@ -149,25 +149,21 @@
                         </StackPanel>
 
                         <!-- 仿真时间速度 -->
-                        <Button x:Name="TimeStepSettingBtn"
-                                Style="{StaticResource IconTextButtonStyle}"
-                                Margin="10 0 10 0"
-                                Click="TimeStepSettingBtn_Click">
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center">
-                                <fa:ImageAwesome Icon="Tachometer"
-                                                 Width="25"
-                                                 Height="20"
-                                                 Margin="5"
-                                                 Foreground="White"/>
-                                <TextBlock Style="{StaticResource LabelStyle}"
-                                           Text="时间流速"/>
-                            </StackPanel>
-                        </Button>
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                            <fa:ImageAwesome Icon="Tachometer"
+                                             Foreground="White"
+                                             Height="20"
+                                             Margin="5"/>
+                            <TextBlock Style="{StaticResource LabelStyle}"
+                                       Text="时间流速"/>
+                        </StackPanel>
 
                         <hc:PreviewSlider x:Name="SimulationTimeStepSlider"
                                           Margin="10,0"
-                                          Height="30"/>
+                                          Height="30"
+                                          ValueChanged="SimulationTimeStepSlider_ValueChanged"
+                                          Thumb.DragCompleted="SimulationTimeStepSlider_DragCompleted"/>
 
                         <!-- 添加 / 删除天体 -->
                         <StackPanel Orientation="Horizontal"
@@ -214,8 +210,10 @@
                             <TextBlock Style="{StaticResource LabelStyle}"
                                        Text="天体速度"/>
                         </StackPanel>
-                        <hc:TextBox Style="{StaticResource InputTextBoxStyle}"
-                                    x:Name="VelocityIOTextBox"/>
+                        <hc:TextBox x:Name="VelocityIOTextBox"
+                                 Style="{StaticResource InputTextBoxStyle}"
+                                 Text=""
+                                 KeyDown="VelocityIOTextBox_KeyDown"/>
 
                         <!-- 天体质量设置 -->
                         <StackPanel Orientation="Horizontal"
@@ -227,8 +225,10 @@
                             <TextBlock Style="{StaticResource LabelStyle}"
                                        Text="天体质量"/>
                         </StackPanel>
-                        <hc:TextBox Style="{StaticResource InputTextBoxStyle}"
-                                    x:Name="MassIOTextBox"/>
+                        <hc:TextBox x:Name="MassIOTextBox"
+                                 Style="{StaticResource InputTextBoxStyle}"
+                                 Text=""
+                                 KeyDown="MassIOTextBox_KeyDown"/>
 
                         <!-- 天体位置设置 -->
                         <StackPanel Orientation="Horizontal"
@@ -240,8 +240,10 @@
                             <TextBlock Style="{StaticResource LabelStyle}"
                                        Text="天体位置"/>
                         </StackPanel>
-                        <hc:TextBox Style="{StaticResource InputTextBoxStyle}"
-                                    x:Name="PositionIOTextBox"/>
+                        <hc:TextBox x:Name="PositionIOTextBox"
+                                 Style="{StaticResource InputTextBoxStyle}"
+                                 Text=""
+                                 KeyDown="PositionIOTextBox_KeyDown"/>
 
                         <!-- 当前观察对象 -->
                         <StackPanel Orientation="Horizontal"
@@ -256,7 +258,8 @@
                         <hc:ComboBox Style="{StaticResource InputComboBoxStyle}"
                                      AutomationProperties.HelpText="cesqwiybx"
                                      x:Name="FocusIOTextBox"
-                                     ItemContainerStyle="{StaticResource ComboBoxItemStyle}"/>
+                                     ItemContainerStyle="{StaticResource ComboBoxItemStyle}"
+                                     SelectionChanged="FocusIOTextBox_SelectionChanged"/>
 
                         <!-- 时间流向控制/轨迹显示模式 -->
                         <StackPanel Orientation="Horizontal"
@@ -330,11 +333,31 @@
                             </Button>
                         </StackPanel>
 
-                        <TextBlock Style="{StaticResource LabelStyle}"
-                                   Text="当前帧数 0 FPS"
+                        <!-- 帧率监控 -->
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0 8 0 8">
+                            <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="当前帧率"
+                                   HorizontalAlignment="Center"
+                                   FontSize="20"
+                                   />
+                            <TextBlock Style="{StaticResource LabelStyle}"
+                                       x:Name="FrameReportTextBlock"
+                                        Text="NULL"
+                                        FontSize="20"
+                                        FontWeight="Normal"
+                                        HorizontalAlignment="Center"/>
+                            <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="FPS"
+                                   FontSize="20"
+                                   FontWeight="Normal"
                                    HorizontalAlignment="Center"/>
+                        </StackPanel>
+
                         <TextBlock Style="{StaticResource LabelStyle}"
                                    Text="天体总量 0 个"
+                                   x:Name="BodyCountReportLabel"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Style="{StaticResource LabelStyle}"
                                    Text="仿真时间 0 天"
@@ -370,6 +393,11 @@
                     </Border.Background>
                     <skia:SKElement x:Name="animationCanva"
                                     PaintSurface="OnPaintSurface"
+                                    SizeChanged="animationCanva_SizeChanged"
+                                    MouseWheel="AnimationCanva_MouseWheel"
+                                    MouseDown="AnimationCanva_MouseDown"
+                                    MouseUp="AnimationCanva_MouseUp"
+                                    MouseMove="AnimationCanva_MouseMove"
                                     Margin="0,0,0,0"/>
                 </Border>
 

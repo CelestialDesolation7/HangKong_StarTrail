@@ -4,139 +4,148 @@
                     xmlns:hc="https://handyorg.github.io/handycontrol"
                     xmlns:fa="http://schemas.fontawesome.io/icons/">
 
-    <Style TargetType="TextBlock"
-           x:Key="LabelStyle">
-        <Setter Property="Foreground"
-                Value="White"/>
-        <Setter Property="FontFamily"
-                Value="Microsoft Ya Hei UI"/>
-        <Setter Property="FontSize"
-                Value="16"/>
-        <Setter Property="FontWeight"
-                Value="Bold"/>
-        <Setter Property="VerticalAlignment"
-                Value="Center"/>
-        <Setter Property="Margin"
-                Value="5"/>
-    </Style>
+        <Style TargetType="TextBlock"
+               x:Key="LabelStyle">
+                <Setter Property="Foreground"
+                        Value="White"/>
+                <Setter Property="FontFamily"
+                        Value="Microsoft Ya Hei UI"/>
+                <Setter Property="FontSize"
+                        Value="16"/>
+                <Setter Property="FontWeight"
+                        Value="Bold"/>
+                <Setter Property="VerticalAlignment"
+                        Value="Center"/>
+                <Setter Property="Margin"
+                        Value="5"/>
+        </Style>
 
-    <Style TargetType="hc:ContextMenuButton"
-           x:Key="ActionButtonStyle">
-        <Setter Property="Height"
-                Value="40"/>
-        <Setter Property="Margin"
-                Value="5"/>
-        <Setter Property="MinWidth"
-                Value="100"/>
-    </Style>
+        <Style TargetType="hc:ContextMenuButton"
+               x:Key="ActionButtonStyle">
+                <Setter Property="Height"
+                        Value="40"/>
+                <Setter Property="Margin"
+                        Value="5"/>
+                <Setter Property="MinWidth"
+                        Value="100"/>
+        </Style>
 
-    <Style TargetType="hc:TextBox"
-           x:Key="InputTextBoxStyle"
-           BasedOn="{StaticResource {x:Type hc:TextBox}}">
-        <Setter Property="Background"
-                Value="{x:Null}"/>
-        <Setter Property="Margin"
-                Value="10,0"/>
-        <Setter Property="BorderBrush"
-                Value="#FFBE79D8"/>
-        <Setter Property="Foreground"
-                Value="White"/>
-        <Setter Property="SelectionTextBrush"
-                Value="#FFBE79D8"/>
-        <Setter Property="BorderThickness"
-                Value="2"/>
-        <Setter Property="FontSize"
-                Value="20"/>
-        <Setter Property="HorizontalContentAlignment"
-                Value="Center"/>
-    </Style>
+        <Style TargetType="hc:TextBox"
+               x:Key="InputTextBoxStyle"
+               BasedOn="{StaticResource {x:Type hc:TextBox}}">
+                <Setter Property="Background"
+                        Value="{x:Null}"/>
+                <Setter Property="Margin"
+                        Value="10,0"/>
+                <Setter Property="BorderBrush"
+                        Value="#FFBE79D8"/>
+                <Setter Property="Foreground"
+                        Value="White"/>
+                <Setter Property="SelectionTextBrush"
+                        Value="#FFBE79D8"/>
+                <Setter Property="BorderThickness"
+                        Value="2"/>
+                <Setter Property="FontSize"
+                        Value="20"/>
+                <Setter Property="HorizontalContentAlignment"
+                        Value="Center"/>
+        </Style>
 
-    <Style TargetType="hc:ComboBox" x:Key="InputComboBoxStyle"
-        BasedOn="{StaticResource {x:Type hc:ComboBox}}">
-        <Setter Property="Background" Value="{x:Null}"/>
-        <Setter Property="Margin" Value="10,0"/>
-        <Setter Property="BorderBrush" Value="#FFBE79D8"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="SelectionTextBrush" Value="#FFBE79D8"/>
-        <Setter Property="BorderThickness" Value="2"/>
-        <Setter Property="FontSize" Value="20"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-    </Style>
+        <Style TargetType="hc:ComboBox"
+                        x:Key="InputComboBoxStyle"
+               BasedOn="{StaticResource {x:Type hc:ComboBox}}">
+                <Setter Property="Background"
+                                Value="{x:Null}"/>
+                <Setter Property="Margin"
+                                Value="10,0"/>
+                <Setter Property="BorderBrush"
+                                Value="#FFBE79D8"/>
+                <Setter Property="Foreground"
+                                Value="White"/>
+                <Setter Property="SelectionTextBrush"
+                                Value="#FFBE79D8"/>
+                <Setter Property="BorderThickness"
+                                Value="2"/>
+                <Setter Property="FontSize"
+                                Value="20"/>
+                <Setter Property="HorizontalContentAlignment"
+                                Value="Center"/>
+        </Style>
 
-    <Style x:Key="ComboBoxItemStyle"
-           TargetType="ComboBoxItem">
-        <Setter Property="Background"
-                Value="Transparent"/>
-        <Setter Property="Foreground"
-                Value="#FFE0E0E0"/>
-        <Setter Property="Padding"
-                Value="5,2"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ComboBoxItem">
-                    <Border Background="{TemplateBinding Background}"
-                            Padding="{TemplateBinding Padding}">
-                        <ContentPresenter/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver"
-                                 Value="True">
-                            <Setter Property="Background"
-                                    Value="#FF3D3D3D"/>
-                        </Trigger>
-                        <Trigger Property="IsSelected"
-                                 Value="True">
-                            <Setter Property="Background"
-                                    Value="#FF4D4D4D"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+        <Style x:Key="ComboBoxItemStyle"
+               TargetType="ComboBoxItem">
+                <Setter Property="Background"
+                        Value="#FFBE79D8"/>
+                <Setter Property="Foreground"
+                        Value="#FFE0E0E0"/>
+                <Setter Property="Padding"
+                        Value="5,2"/>
+                <Setter Property="Template">
+                        <Setter.Value>
+                                <ControlTemplate TargetType="ComboBoxItem">
+                                        <Border Background="{TemplateBinding Background}"
+                                                Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver"
+                                                         Value="True">
+                                                        <Setter Property="Background"
+                                                                Value="#FF3D3D3D"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected"
+                                                         Value="True">
+                                                        <Setter Property="Background"
+                                                                Value="#FF4D4D4D"/>
+                                                </Trigger>
+                                        </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                        </Setter.Value>
+                </Setter>
+        </Style>
 
-    <Style TargetType="Button"
-           x:Key="IconTextButtonStyle">
-        <Setter Property="Background"
-                Value="Transparent"/>
-        <Setter Property="Foreground"
-                Value="White"/>
-        <Setter Property="BorderThickness"
-                Value="0"/>
-        <Setter Property="FontSize"
-                Value="14"/>
-        <Setter Property="Cursor"
-                Value="Hand"/>
-        <Setter Property="Padding"
-                Value="10,5"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
-                            CornerRadius="4">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver"
-                                 Value="True">
-                            <Setter Property="Background"
-                                    Value="#33FFFFFF"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed"
-                                 Value="True">
-                            <Setter Property="Background"
-                                    Value="#66FFFFFF"/>
-                        </Trigger>
-                        <Trigger Property="IsEnabled"
-                                 Value="False">
-                            <Setter Property="Foreground"
-                                    Value="#88FFFFFF"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+        <Style TargetType="Button"
+               x:Key="IconTextButtonStyle">
+                <Setter Property="Background"
+                        Value="Transparent"/>
+                <Setter Property="Foreground"
+                        Value="White"/>
+                <Setter Property="BorderThickness"
+                        Value="0"/>
+                <Setter Property="FontSize"
+                        Value="14"/>
+                <Setter Property="Cursor"
+                        Value="Hand"/>
+                <Setter Property="Padding"
+                        Value="10,5"/>
+                <Setter Property="Template">
+                        <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="4">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver"
+                                                         Value="True">
+                                                        <Setter Property="Background"
+                                                                Value="#33FFFFFF"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed"
+                                                         Value="True">
+                                                        <Setter Property="Background"
+                                                                Value="#66FFFFFF"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled"
+                                                         Value="False">
+                                                        <Setter Property="Foreground"
+                                                                Value="#88FFFFFF"/>
+                                                </Trigger>
+                                        </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                        </Setter.Value>
+                </Setter>
+        </Style>
 
 </ResourceDictionary>

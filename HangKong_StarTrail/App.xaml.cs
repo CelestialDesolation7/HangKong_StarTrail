@@ -15,6 +15,7 @@ namespace HangKong_StarTrail;
 /// </summary>
 public partial class App : Application
 {
+    /*
     protected override void OnStartup(StartupEventArgs e)
     {
         try
@@ -53,5 +54,6 @@ public partial class App : Application
             MessageBox.Show($"应用程序启动失败: {ex.Message}\n\n{ex.StackTrace}", "启动错误", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+    */
 }
 
