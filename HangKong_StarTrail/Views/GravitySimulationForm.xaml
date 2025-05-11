@@ -30,16 +30,15 @@
         <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg" 
                Stretch="UniformToFill"/>
                
-        <Border BorderBrush="Gray" BorderThickness="2" 
-                MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+        <Border BorderBrush="Gray" BorderThickness="2">
             <Border.Background>
                 <SolidColorBrush Color="#FF2D2D30" Opacity="0.5"/>
             </Border.Background>
         
-            <Grid MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"
-                                    MaxWidth="300"/>
+                                    MaxWidth="500"/>
                     <ColumnDefinition Width="5"/>
                     <!-- 左右侧之间的分割线 -->
                     <ColumnDefinition Width="3*"/>
@@ -47,7 +46,8 @@
 
                 <!-- 左侧面板（美化版） -->
                 <Border Grid.Column="0"
-                        Padding="15">
+                        Padding="15"
+                        MouseLeftButtonDown="Grid_MouseLeftButtonDown">
 
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0"

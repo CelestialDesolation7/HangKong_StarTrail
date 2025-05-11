@@ -58,13 +58,11 @@ namespace HangKong_StarTrail.Views
         private double _pixelToDistanceRatio; // 实际使用的比例尺 = 推荐比例尺 * 缩放因子
         private Vector2D _canvasCenter; // 画布中心点
         private Vector2D _cameraOffset = Vector2D.ZeroVector;   // 相机偏移量
-        private double _zoomScale = 1.0;    // 缩放比例
         private bool _isFrameRendering = false; // 当前帧是否正在渲染
         private Body? _focusedBody = null;  // 当前聚焦的天体
         private Vector2D? _dragStartPosition; // 记录拖动开始时的物理位置
         private Vector2D? _lastMousePosition; // 记录上一帧的鼠标位置（屏幕坐标）
-        private bool _isMiddleButtonPressed = false;    // 中键是否按下
-        private bool _displayPositionUpdated = false; // 是否更新了显示位置
+        private bool _isMiddleButtonPressed;    // 中键是否按下
         #endregion
 
         #region 调试信息成员
@@ -101,6 +99,19 @@ namespace HangKong_StarTrail.Views
                 animationCanva.InvalidateVisual();
                 // 计算并设置推荐时间步长
             };
+
+            var centerBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.IsCenter);
+            if (centerBody != null)
+            {
+                FocusIOTextBox.SelectedItem = centerBody.Name;
+                _focusedBody = centerBody;
+            }
+            else
+            {
+                // 如果没有中心天体，设置为自由模式
+                FocusIOTextBox.SelectedItem = "自由模式";
+                _focusedBody = null;
+            }
         }
 
         private void InitializeSimulation()
@@ -245,12 +256,11 @@ namespace HangKong_StarTrail.Views
             if (elapsed >= 1.0)
             {
                 var fps = _frameCount / elapsed;
-                FrameReportTextBlock.Text = $"FPS: {fps:F1}";
+                FrameReportTextBlock.Text = $"{fps:F1}";
                 _frameCount = 0;
                 _lastFrameTime = now;
             }
         }
-
 
         private void UpdateButtonStates()
         {
@@ -320,7 +330,6 @@ namespace HangKong_StarTrail.Views
                     {
                         this.DragMove();
                     }
-
                     // 标记事件已处理，防止冒泡
                     e.Handled = true;
                 }
@@ -383,6 +392,10 @@ namespace HangKong_StarTrail.Views
                     _cameraOffset = _focusedBody.Position;
                     _focusedBody = null;
                 }
+                // 清空UI数据显示
+                PositionIOTextBox.Text = "N/A";
+                VelocityIOTextBox.Text = "N/A";
+                MassIOTextBox.Text = "N/A";
             }
             else
             {
@@ -414,8 +427,8 @@ namespace HangKong_StarTrail.Views
                 // 更新位置
                 PositionIOTextBox.Text = $"({FormatDistance(_focusedBody.Position.X)},{FormatDistance(_focusedBody.Position.Y)})";
 
-                // 更新速度
-                VelocityIOTextBox.Text = FormatVelocity(_focusedBody.Velocity.Length);
+                // 更新速度（向量形式）
+                VelocityIOTextBox.Text = $"({FormatVelocity(_focusedBody.Velocity.X)},{FormatVelocity(_focusedBody.Velocity.Y)})";
 
                 // 更新质量
                 MassIOTextBox.Text = FormatMass(_focusedBody.Mass);
@@ -593,11 +606,14 @@ namespace HangKong_StarTrail.Views
                     var parts = PositionIOTextBox.Text.Trim('(', ')').Split(',');
                     if (parts.Length == 2)
                     {
-                        double x = ParseDistance(parts[0]);
-                        double y = ParseDistance(parts[1]);
+                        double x = ParseScientificNumber(parts[0]);
+                        double y = ParseScientificNumber(parts[1]);
                         _focusedBody.Position = new Vector2D(x, y);
                         UpdateDisplayPositions();
                         animationCanva.InvalidateVisual();
+
+                        // 更新显示
+                        PositionIOTextBox.Text = $"({FormatDistance(x)},{FormatDistance(y)})";
                     }
                 }
                 catch (Exception ex)
@@ -614,16 +630,15 @@ namespace HangKong_StarTrail.Views
             {
                 try
                 {
-                    double velocity = ParseVelocity(VelocityIOTextBox.Text);
-                    // 保持速度方向不变，只改变大小
-                    double currentLength = _focusedBody.Velocity.Length;
-                    if (currentLength > 0)
+                    var parts = VelocityIOTextBox.Text.Trim('(', ')').Split(',');
+                    if (parts.Length == 2)
                     {
-                        _focusedBody.Velocity = _focusedBody.Velocity * (velocity / currentLength);
-                    }
-                    else
-                    {
-                        _focusedBody.Velocity = new Vector2D(velocity, 0);
+                        double vx = ParseScientificNumber(parts[0]);
+                        double vy = ParseScientificNumber(parts[1]);
+                        _focusedBody.Velocity = new Vector2D(vx, vy);
+
+                        // 更新显示
+                        VelocityIOTextBox.Text = $"({FormatVelocity(vx)},{FormatVelocity(vy)})";
                     }
                 }
                 catch (Exception ex)
@@ -640,8 +655,11 @@ namespace HangKong_StarTrail.Views
             {
                 try
                 {
-                    double mass = ParseMass(MassIOTextBox.Text);
+                    double mass = ParseScientificNumber(MassIOTextBox.Text);
                     _focusedBody.Mass = mass;
+
+                    // 更新显示
+                    MassIOTextBox.Text = FormatMass(mass);
                 }
                 catch (Exception ex)
                 {
@@ -678,7 +696,6 @@ namespace HangKong_StarTrail.Views
             _universalCounter[1]++;
             _debugInfo[1] = $"UpdateDisplayPositions调用次数{_universalCounter[1]}";
             _debugInfo[5] = "完成 UpdateDisplayPositions";
-            _displayPositionUpdated = true;
         }
 
 
@@ -802,34 +819,21 @@ namespace HangKong_StarTrail.Views
             }
         }
 
-        private void OnPaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
+        private void OnPaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
-            lock (_renderLock)
-            {
-                _isFrameRendering = true;
-                try
-                {
-                    var canvas = e.Surface.Canvas;
-                    canvas.Clear(SKColors.Black);
+            var canvas = e.Surface.Canvas;
 
-                    // 渲染天体
-                    _renderer.RenderBodies(canvas);
-                    _universalCounter[0]++;
-                    _debugInfo[0] = $"RenderBodies调用次数{_universalCounter[0]}";
+            // 渲染星空背景
+            _renderer.RenderBackground(canvas);
 
-                    // 渲染轨迹
-                    if (_showTrajectory)
-                    {
-                        _renderer.RenderTrajectory(canvas);
-                    }
+            // 渲染天体
+            _renderer.RenderBodies(canvas);
 
-                    _frameCount++;
-                }
-                finally
-                {
-                    _isFrameRendering = false;
-                }
-            }
+            // 渲染文本
+            _renderer.RenderText(canvas);
+
+            // 更新帧率统计
+            UpdateFrameRate();
         }
 
         private void CompositionTarget_Rendering(object sender, EventArgs e)
@@ -869,17 +873,12 @@ namespace HangKong_StarTrail.Views
             // TODO: 实现速度设置模式的具体功能
         }
 
-        private void TimeStepSettingBtn_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
 
         private void ResetSimulationBtn_Click(object sender, RoutedEventArgs e)
         {
             // 重置所有状态
             _renderer._physicsEngine.Bodies.Clear();
             _cameraOffset = Vector2D.ZeroVector;
-            _zoomScale = 1.0;
             _focusedBody = null;
             _isTimeReversed = false;
             _showTrajectory = false;
@@ -898,7 +897,6 @@ namespace HangKong_StarTrail.Views
         {
             _focusedBody = null;
             _cameraOffset = Vector2D.ZeroVector;
-            _zoomScale = 1.0;
         }
 
         private void AddBodyBtn_Click(object sender, RoutedEventArgs e)
@@ -964,87 +962,87 @@ namespace HangKong_StarTrail.Views
             return _canvasCenter + (relativePhysicalPos * _pixelToDistanceRatio);
         }
 
+        // 通用数字格式化函数
+        private string NumberFormat(double num, int digit = 2)
+        {
+            if (num == 0) return $"0×10⁰";
+
+            // 计算数量级
+            int exponent = (int)Math.Floor(Math.Log10(Math.Abs(num)));
+
+            // 计算系数
+            double coefficient = num / Math.Pow(10, exponent);
+
+            // 如果系数大于10，调整数量级
+            if (Math.Abs(coefficient) >= 10)
+            {
+                coefficient /= 10;
+                exponent++;
+            }
+
+            // 格式化系数
+            string formattedCoefficient = coefficient.ToString($"F{digit}");
+
+            // 将指数转换为上标
+            string superscript = exponent.ToString()
+                .Replace("0", "⁰")
+                .Replace("1", "¹")
+                .Replace("2", "²")
+                .Replace("3", "³")
+                .Replace("4", "⁴")
+                .Replace("5", "⁵")
+                .Replace("6", "⁶")
+                .Replace("7", "⁷")
+                .Replace("8", "⁸")
+                .Replace("9", "⁹")
+                .Replace("-", "⁻");
+
+            return $"{formattedCoefficient}×10{superscript}";
+        }
+
         // 格式化距离（米）
         private string FormatDistance(double meters)
         {
-            if (Math.Abs(meters) >= 1e9)
-                return $"{meters / 1e9:F2} × 10⁹ m";
-            else if (Math.Abs(meters) >= 1e6)
-                return $"{meters / 1e6:F2} × 10⁶ m";
-            else if (Math.Abs(meters) >= 1e3)
-                return $"{meters / 1e3:F2} × 10³ m";
-            else
-                return $"{meters:F2} m";
+            return $"{NumberFormat(meters)} m";
         }
 
         // 格式化速度（米/秒）
         private string FormatVelocity(double velocity)
         {
-            if (Math.Abs(velocity) >= 1e6)
-                return $"{velocity / 1e6:F2} × 10⁶ m/s";
-            else if (Math.Abs(velocity) >= 1e3)
-                return $"{velocity / 1e3:F2} × 10³ m/s";
-            else
-                return $"{velocity:F2} m/s";
+            return $"{NumberFormat(velocity)} m/s";
         }
 
         // 格式化质量（千克）
         private string FormatMass(double mass)
         {
-            if (Math.Abs(mass) >= 1e30)
-                return $"{mass / 1e30:F2} × 10³⁰ kg";
-            else if (Math.Abs(mass) >= 1e27)
-                return $"{mass / 1e27:F2} × 10²⁷ kg";
-            else if (Math.Abs(mass) >= 1e24)
-                return $"{mass / 1e24:F2} × 10²⁴ kg";
-            else if (Math.Abs(mass) >= 1e21)
-                return $"{mass / 1e21:F2} × 10²¹ kg";
-            else if (Math.Abs(mass) >= 1e18)
-                return $"{mass / 1e18:F2} × 10¹⁸ kg";
-            else
-                return $"{mass:F2} kg";
+            return $"{NumberFormat(mass)} kg";
         }
 
-        // 解析带单位的距离字符串
-        private double ParseDistance(string input)
+        // 解析科学计数法格式的数字
+        private double ParseScientificNumber(string input)
         {
             input = input.Trim().ToLower();
-            double value;
-            if (input.EndsWith("m"))
-            {
-                input = input.Substring(0, input.Length - 1).Trim();
-                if (double.TryParse(input, out value))
-                    return value;
-            }
-            throw new FormatException("无效的距离格式");
-        }
 
-        // 解析带单位的速度字符串
-        private double ParseVelocity(string input)
-        {
-            input = input.Trim().ToLower();
-            double value;
-            if (input.EndsWith("m/s"))
-            {
-                input = input.Substring(0, input.Length - 3).Trim();
-                if (double.TryParse(input, out value))
-                    return value;
-            }
-            throw new FormatException("无效的速度格式");
-        }
+            // 处理空输入
+            if (string.IsNullOrEmpty(input)) return 0;
 
-        // 解析带单位的质量字符串
-        private double ParseMass(string input)
-        {
-            input = input.Trim().ToLower();
-            double value;
-            if (input.EndsWith("kg"))
+            // 处理普通数字
+            if (double.TryParse(input, out double result))
+                return result;
+
+            // 处理科学计数法格式 (例如: 1.87*10^9 或 234.19*10^7)
+            var parts = input.Split(new[] { '*', '^' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 3)
             {
-                input = input.Substring(0, input.Length - 2).Trim();
-                if (double.TryParse(input, out value))
-                    return value;
+                if (double.TryParse(parts[0], out double coefficient) &&
+                    parts[1].Trim() == "10" &&
+                    int.TryParse(parts[2], out int exponent))
+                {
+                    return coefficient * Math.Pow(10, exponent);
+                }
             }
-            throw new FormatException("无效的质量格式");
+
+            throw new FormatException("无效的数字格式");
         }
 
         private double CalculateRecommendedTimeStep()
