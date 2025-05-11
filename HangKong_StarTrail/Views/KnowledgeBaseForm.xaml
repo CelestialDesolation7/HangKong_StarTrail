@@ -6,7 +6,37 @@
         xmlns:local="clr-namespace:HangKong_StarTrail.Views"
         mc:Ignorable="d"
         Title="宇宙知识库" Height="720" Width="1280"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Background="#0F0F1E">
+    
+    <Window.Resources>
+        <Style x:Key="DetailButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#E0E0FF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#252550"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     
     <!-- 主布局 -->
     <Grid>
@@ -21,7 +51,7 @@
             </Grid.RowDefinitions>
             
             <!-- 顶部标题栏 -->
-            <Border Grid.Row="0" Background="#0F0F1E99" MouseLeftButtonDown="TitleBar_MouseDown">
+            <Border Grid.Row="0" Background="#0F0F1E" MouseLeftButtonDown="TitleBar_MouseDown">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -249,232 +279,198 @@
                 </Border>
                 
                 <!-- 右侧内容区 -->
-                <Border Grid.Column="1" Background="#1A1A2E99">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>  <!-- 标题 -->
-                            <RowDefinition Height="*"/>     <!-- 内容列表 -->
-                        </Grid.RowDefinitions>
-                        
-                        <!-- 内容标题 -->
-                        <TextBlock x:Name="ContentTitle"
-                                   Grid.Row="0"
-                                   Text="全部知识"
-                                   Foreground="#E0E0FF"
-                                   FontSize="20"
-                                   FontWeight="Bold"
-                                   Margin="20,20,0,15"/>
-                        
-                        <!-- 内容列表 -->
-                        <ListView x:Name="KnowledgeListView"
-                                  Grid.Row="1"
-                                  Background="Transparent"
-                                  BorderThickness="0"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                  SelectionChanged="KnowledgeListView_SelectionChanged">
-                            <ListView.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" 
-                                               ItemWidth="370" 
-                                               ItemHeight="180"/>
-                                </ItemsPanelTemplate>
-                            </ListView.ItemsPanel>
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="Background" Value="Transparent"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Margin" Value="10"/>
-                                    <Setter Property="Padding" Value="0"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListViewItem">
-                                                <Border x:Name="border"
-                                                        Background="#252550"
-                                                        CornerRadius="8"
-                                                        BorderThickness="0">
-                                                    <ContentPresenter Margin="0"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="border" Property="BorderThickness" Value="1"/>
-                                                        <Setter TargetName="border" Property="BorderBrush" Value="#4169E1"/>
-                                                    </Trigger>
-                                                    <Trigger Property="IsSelected" Value="True">
-                                                        <Setter TargetName="border" Property="BorderThickness" Value="2"/>
-                                                        <Setter TargetName="border" Property="BorderBrush" Value="#4169E1"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="15">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        
-                                        <!-- 标题 -->
-                                        <TextBlock Grid.Row="0"
-                                                   Text="{Binding Title}"
-                                                   Foreground="#E0E0FF"
-                                                   FontSize="16"
-                                                   FontWeight="Bold"
-                                                   TextWrapping="Wrap"/>
-                                        
-                                        <!-- 摘要 -->
-                                        <TextBlock Grid.Row="1"
-                                                   Text="{Binding Summary}"
-                                                   Foreground="#B0B0D0"
-                                                   FontSize="14"
-                                                   TextWrapping="Wrap"
-                                                   Margin="0,8,0,0"/>
-                                        
-                                        <!-- 分类标签 -->
-                                        <Border Grid.Row="2"
-                                                Background="#4169E1"
-                                                CornerRadius="4"
-                                                Padding="8,4"
-                                                HorizontalAlignment="Left"
-                                                Margin="0,10,0,0">
-                                            <TextBlock Text="{Binding Category}"
-                                                       Foreground="White"
-                                                       FontSize="12"/>
-                                        </Border>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                        
-                        <!-- 详情面板（初始隐藏） -->
-                        <Border x:Name="DetailPanel"
-                                Grid.Row="0"
-                                Grid.RowSpan="2"
-                                Background="#1A1A2E"
-                                Visibility="Collapsed">
-                            <Grid Margin="20">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                <ScrollViewer x:Name="MainScrollViewer"
+                             Grid.Column="1" 
+                             VerticalScrollBarVisibility="Auto"
+                             Margin="20">
+                    <StackPanel>
+                        <!-- 太阳系知识 -->
+                        <Border Background="#1A1A3A" 
+                                CornerRadius="10" 
+                                Margin="0,0,0,20"
+                                Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="太阳系" 
+                                         Foreground="#4169E1" 
+                                         FontSize="24" 
+                                         FontWeight="Bold"
+                                         Margin="0,0,0,15"/>
                                 
-                                <!-- 返回按钮 -->
-                                <Button x:Name="BackButton"
-                                        Grid.Row="0"
-                                        Content="返回列表"
-                                        HorizontalAlignment="Left"
-                                        Foreground="#A0A0D0"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Margin="0,0,0,20"
-                                        Click="BackButton_Click"
-                                        Cursor="Hand"/>
+                                <TextBlock TextWrapping="Wrap" 
+                                         Foreground="#E0E0FF" 
+                                         FontSize="16"
+                                         Margin="0,0,0,10">
+                                    <Run Text="太阳系是一个以太阳为中心的恒星系统，包含8颗行星、5颗矮行星以及众多小行星、彗星等天体。"/>
+                                </TextBlock>
                                 
-                                <!-- 标题 -->
-                                <TextBlock x:Name="DetailTitle"
-                                           Grid.Row="1"
-                                           Foreground="#E0E0FF"
-                                           FontSize="24"
-                                           FontWeight="Bold"
-                                           TextWrapping="Wrap"
-                                           Margin="0,0,0,10"/>
+                                <TextBlock Text="主要行星" 
+                                         Foreground="#A0A0D0" 
+                                         FontSize="18" 
+                                         FontWeight="Bold"
+                                         Margin="0,10,0,10"/>
                                 
-                                <!-- 分类和收藏 -->
-                                <Grid Grid.Row="2" Margin="0,0,0,20">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    
-                                    <!-- 分类 -->
-                                    <Border Grid.Column="0"
-                                            Background="#4169E1"
-                                            CornerRadius="4"
-                                            Padding="8,4">
-                                        <TextBlock x:Name="DetailCategory"
-                                                   Foreground="White"
-                                                   FontSize="14"/>
-                                    </Border>
-                                    
-                                    <!-- 收藏按钮 -->
-                                    <Button x:Name="FavoriteButton"
-                                            Grid.Column="2"
-                                            Content="收藏"
-                                            Background="#252550"
-                                            Foreground="#E0E0FF"
-                                            Padding="12,6"
-                                            Click="FavoriteButton_Click"
-                                            Cursor="Hand">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}"
-                                                        CornerRadius="4"
-                                                        Padding="{TemplateBinding Padding}">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock x:Name="favoriteIcon" 
-                                                                   Text="★" 
-                                                                   Foreground="#FFD700" 
-                                                                   Margin="0,0,5,0"
-                                                                   Visibility="Collapsed"/>
-                                                        <TextBlock Text="{TemplateBinding Content}" 
-                                                                   Foreground="{TemplateBinding Foreground}"/>
-                                                    </StackPanel>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <DataTrigger Binding="{Binding ElementName=DetailPanel, Path=Tag}" Value="True">
-                                                        <Setter TargetName="favoriteIcon" Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-                                </Grid>
-                                
-                                <!-- 内容 -->
-                                <ScrollViewer Grid.Row="3"
-                                              VerticalScrollBarVisibility="Auto"
-                                              HorizontalScrollBarVisibility="Disabled">
-                                    <TextBlock x:Name="DetailContent"
-                                               Foreground="#D0D0F0"
-                                               FontSize="16"
-                                               TextWrapping="Wrap"
-                                               LineHeight="24"/>
-                                </ScrollViewer>
-                                
-                                <!-- 标签列表 -->
-                                <ItemsControl x:Name="TagsPanel"
-                                              Grid.Row="4"
-                                              Margin="0,20,0,0">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
+                                <ItemsControl x:Name="PlanetsList" 
+                                            ItemsSource="{Binding Planets}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="#252550"
-                                                    CornerRadius="4"
-                                                    Padding="8,4"
-                                                    Margin="0,0,8,8">
-                                                <TextBlock Text="{Binding}"
-                                                           Foreground="#B0B0D0"
-                                                           FontSize="14"/>
+                                            <Border Background="#252550" 
+                                                    CornerRadius="8" 
+                                                    Margin="0,0,0,10"
+                                                    Padding="15">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="{Binding Name}" 
+                                                                 Foreground="#4169E1" 
+                                                                 FontSize="18" 
+                                                                 FontWeight="Bold"/>
+                                                        <TextBlock Text="{Binding Description}" 
+                                                                 Foreground="#E0E0FF" 
+                                                                 TextWrapping="Wrap"
+                                                                 Margin="0,5,0,0"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1"
+                                                            Content="查看详情" 
+                                                            Style="{StaticResource DetailButtonStyle}"
+                                                            Click="DetailButton_Click"
+                                                            VerticalAlignment="Center"
+                                                            Margin="15,0,0,0"/>
+                                                </Grid>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                            </Grid>
+                            </StackPanel>
                         </Border>
-                    </Grid>
-                </Border>
+
+                        <!-- 恒星知识 -->
+                        <Border Background="#1A1A3A" 
+                                CornerRadius="10" 
+                                Margin="0,0,0,20"
+                                Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="恒星" 
+                                         Foreground="#4169E1" 
+                                         FontSize="24" 
+                                         FontWeight="Bold"
+                                         Margin="0,0,0,15"/>
+                                
+                                <TextBlock TextWrapping="Wrap" 
+                                         Foreground="#E0E0FF" 
+                                         FontSize="16"
+                                         Margin="0,0,0,10">
+                                    <Run Text="恒星是由引力束缚在一起的气体球，通过核聚变产生能量。它们在宇宙中扮演着重要角色，是星系的基本组成单位。"/>
+                                </TextBlock>
+
+                                <TextBlock Text="恒星类型" 
+                                         Foreground="#A0A0D0" 
+                                         FontSize="18" 
+                                         FontWeight="Bold"
+                                         Margin="0,10,0,10"/>
+
+                                <ItemsControl x:Name="StarsList" 
+                                            ItemsSource="{Binding Stars}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#252550" 
+                                                    CornerRadius="8" 
+                                                    Margin="0,0,0,10"
+                                                    Padding="15">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="{Binding Name}" 
+                                                                 Foreground="#4169E1" 
+                                                                 FontSize="18" 
+                                                                 FontWeight="Bold"/>
+                                                        <TextBlock Text="{Binding Description}" 
+                                                                 Foreground="#E0E0FF" 
+                                                                 TextWrapping="Wrap"
+                                                                 Margin="0,5,0,0"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1"
+                                                            Content="查看详情" 
+                                                            Style="{StaticResource DetailButtonStyle}"
+                                                            Click="DetailButton_Click"
+                                                            VerticalAlignment="Center"
+                                                            Margin="15,0,0,0"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 星系知识 -->
+                        <Border Background="#1A1A3A" 
+                                CornerRadius="10" 
+                                Margin="0,0,0,20"
+                                Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="星系" 
+                                         Foreground="#4169E1" 
+                                         FontSize="24" 
+                                         FontWeight="Bold"
+                                         Margin="0,0,0,15"/>
+                                
+                                <TextBlock TextWrapping="Wrap" 
+                                         Foreground="#E0E0FF" 
+                                         FontSize="16"
+                                         Margin="0,0,0,10">
+                                    <Run Text="星系是由恒星、气体、尘埃和暗物质组成的巨大天体系统，在引力作用下聚集在一起。"/>
+                                </TextBlock>
+
+                                <TextBlock Text="星系类型" 
+                                         Foreground="#A0A0D0" 
+                                         FontSize="18" 
+                                         FontWeight="Bold"
+                                         Margin="0,10,0,10"/>
+
+                                <ItemsControl x:Name="GalaxiesList" 
+                                            ItemsSource="{Binding Galaxies}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#252550" 
+                                                    CornerRadius="8" 
+                                                    Margin="0,0,0,10"
+                                                    Padding="15">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="{Binding Name}" 
+                                                                 Foreground="#4169E1" 
+                                                                 FontSize="18" 
+                                                                 FontWeight="Bold"/>
+                                                        <TextBlock Text="{Binding Description}" 
+                                                                 Foreground="#E0E0FF" 
+                                                                 TextWrapping="Wrap"
+                                                                 Margin="0,5,0,0"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1"
+                                                            Content="查看详情" 
+                                                            Style="{StaticResource DetailButtonStyle}"
+                                                            Click="DetailButton_Click"
+                                                            VerticalAlignment="Center"
+                                                            Margin="15,0,0,0"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
         </Grid>
     </Grid>
