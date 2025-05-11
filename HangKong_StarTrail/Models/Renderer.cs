@@ -20,8 +20,6 @@ namespace HangKong_StarTrail.Models
         private readonly Random _random = new Random();
         private readonly List<Star> _stars = new List<Star>();
         private const int STAR_COUNT = 200;
-        private float _canvasWidth;
-        private float _canvasHeight;
 
         private class Star
         {
@@ -67,20 +65,20 @@ namespace HangKong_StarTrail.Models
                 Style = SKPaintStyle.Fill,
                 BlendMode = SKBlendMode.Screen
             };
+
+            // 生成星星
+            GenerateStars();
         }
 
-        private void GenerateStars(float width, float height)
+        private void GenerateStars()
         {
-            _canvasWidth = width;
-            _canvasHeight = height;
             _stars.Clear();
-
             for (int i = 0; i < STAR_COUNT; i++)
             {
                 _stars.Add(new Star
                 {
-                    X = (float)_random.NextDouble() * width,
-                    Y = (float)_random.NextDouble() * height,
+                    X = (float)_random.NextDouble() * 1000,
+                    Y = (float)_random.NextDouble() * 1000,
                     Size = (float)(_random.NextDouble() * 1.5 + 0.5),
                     Brightness = (float)(_random.NextDouble() * 0.5 + 0.5),
                     TwinkleSpeed = (float)(_random.NextDouble() * 0.02 + 0.01),
@@ -91,16 +89,6 @@ namespace HangKong_StarTrail.Models
 
         public void RenderBackground(SKCanvas canvas)
         {
-            // 获取画布尺寸
-            float width = canvas.DeviceClipBounds.Width;
-            float height = canvas.DeviceClipBounds.Height;
-
-            // 如果画布尺寸改变或星星未生成，重新生成星星
-            if (_stars.Count == 0 || width != _canvasWidth || height != _canvasHeight)
-            {
-                GenerateStars(width, height);
-            }
-
             // 绘制黑色背景
             canvas.Clear(SKColors.Black);
 
