@@ -265,8 +265,8 @@ namespace HangKong_StarTrail.Views
         private void UpdateButtonStates()
         {
             // 在仿真运行时禁用修改按钮
-            AddBodyBtn.IsEnabled = !_isSimulationRunning;
-            RemoveBodyBtn.IsEnabled = !_isSimulationRunning;
+            // AddBodyBtn.IsEnabled = !_isSimulationRunning;
+            // RemoveBodyBtn.IsEnabled = !_isSimulationRunning;
             ResetSimulationBtn.IsEnabled = !_isSimulationRunning;
             VelocitySettingModeBtn.IsEnabled = !_isSimulationRunning;
 
@@ -825,13 +825,9 @@ namespace HangKong_StarTrail.Views
 
             // 渲染星空背景
             _renderer.RenderBackground(canvas);
-
             // 渲染天体
             _renderer.RenderBodies(canvas);
-
-            // 渲染文本
-            _renderer.RenderText(canvas);
-
+            _frameCount++;
             // 更新帧率统计
             UpdateFrameRate();
         }

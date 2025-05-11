@@ -153,7 +153,7 @@
                                           ValueChanged="SimulationTimeStepSlider_ValueChanged"
                                           Thumb.DragCompleted="SimulationTimeStepSlider_DragCompleted"/>
 
-                            <!-- 添加 / 删除天体 -->
+                            <!-- 添加 / 删除天体 --><!--
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Center">
                                 <Button Style="{StaticResource IconTextButtonStyle}"
@@ -186,7 +186,7 @@
                                                 VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
-                            </StackPanel>
+                            </StackPanel>-->
 
                             <!-- 天体速度设置 -->
                             <StackPanel Orientation="Horizontal"
