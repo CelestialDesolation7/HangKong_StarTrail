@@ -107,204 +107,204 @@
                Stretch="UniformToFill"/>
                
         <Border CornerRadius="10" BorderBrush="Gray" BorderThickness="2">
-            <Border.Background>
+        <Border.Background>
                 <SolidColorBrush Color="#FF2D2D30" Opacity="0.5"/>
-            </Border.Background>
-            <Grid>
+        </Border.Background>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 标题栏 -->
+                <Grid Grid.Row="0" Background="#1F1E3399" MouseLeftButtonDown="TitleBar_MouseDown">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="星穹轨道" Foreground="#F0F0F0" FontSize="14" Margin="10,5,0,0" VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="MinimizeButton" Click="MinimizeButton_Click" Style="{StaticResource IconButtonStyle}">
+                        <fontAwesome:FontAwesome Icon="Minus" Foreground="#F0F0F0" FontSize="14"/>
+                    </Button>
+                    <Button x:Name="CloseButton" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}">
+                        <fontAwesome:FontAwesome Icon="Close" Foreground="#F0F0F0" FontSize="14"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- 主内容区 -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300"/> <!-- 左侧操作面板 -->
+                    <ColumnDefinition Width="5"/> <!-- 分隔线 -->
+                    <ColumnDefinition Width="*"/> <!-- 右侧主内容区 -->
+                </Grid.ColumnDefinitions>
+
+                <!-- 左侧操作面板 -->
+                <Border Grid.Column="0" Padding="15">
+                    <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" Opacity="0.7">
+                            <GradientStop Color="#343155" Offset="0"/>
+                            <GradientStop Color="#3B2158" Offset="1"/>
+                    </LinearGradientBrush>
+                    </Border.Background>
+                    <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="30"/>
+                            <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- 标题栏 -->
-                <Grid Grid.Row="0" Background="#1F1E3399" MouseLeftButtonDown="TitleBar_MouseDown">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                        <!-- 面板标题 -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
+                            <fa:ImageAwesome Icon="Rocket" Foreground="White" Height="30" Margin="0,0,10,0"/>
+                            <TextBlock Text="星际探索" Foreground="White" FontSize="24" FontWeight="Bold"/>
+                        </StackPanel>
 
-                    <TextBlock Text="星穹轨道" Foreground="#F0F0F0" FontSize="14" Margin="10,5,0,0" VerticalAlignment="Center"/>
-
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="MinimizeButton" Click="MinimizeButton_Click" Style="{StaticResource IconButtonStyle}">
-                            <fontAwesome:FontAwesome Icon="Minus" Foreground="#F0F0F0" FontSize="14"/>
-                        </Button>
-                        <Button x:Name="CloseButton" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}">
-                            <fontAwesome:FontAwesome Icon="Close" Foreground="#F0F0F0" FontSize="14"/>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-
-                <!-- 主内容区 -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="300"/> <!-- 左侧操作面板 -->
-                        <ColumnDefinition Width="5"/> <!-- 分隔线 -->
-                        <ColumnDefinition Width="*"/> <!-- 右侧主内容区 -->
-                    </Grid.ColumnDefinitions>
-
-                    <!-- 左侧操作面板 -->
-                    <Border Grid.Column="0" Padding="15">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" Opacity="0.7">
-                                <GradientStop Color="#343155" Offset="0"/>
-                                <GradientStop Color="#3B2158" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        <Grid>
-                    <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                            <!-- 面板标题 -->
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
-                                <fa:ImageAwesome Icon="Rocket" Foreground="White" Height="30" Margin="0,0,10,0"/>
-                                <TextBlock Text="星际探索" Foreground="White" FontSize="24" FontWeight="Bold"/>
-                            </StackPanel>
-
-                            <!-- 功能按钮区 -->
-                            <StackPanel Grid.Row="1" Margin="10,20,10,10">
+                        <!-- 功能按钮区 -->
+                        <StackPanel Grid.Row="1" Margin="10,20,10,10">
                                 <Button Content="启动探索之旅" Style="{StaticResource MainButtonStyle}" Click="StartExploration_Click" Margin="0,0,0,20">
-                                    <Button.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                            <GradientStop Color="#3E3A65" Offset="0"/>
-                                            <GradientStop Color="#6E5FBE" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Button.Background>
-                                    <Button.ContentTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <fontAwesome:FontAwesome Icon="Rocket" Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding}"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Button.ContentTemplate>
-                                </Button>
-                                
+                                <Button.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#3E3A65" Offset="0"/>
+                                        <GradientStop Color="#6E5FBE" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Button.Background>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <fontAwesome:FontAwesome Icon="Rocket" Margin="0,0,10,0"/>
+                                            <TextBlock Text="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                            
                                 <Button Content="学习宇宙知识" Style="{StaticResource MainButtonStyle}" Click="StartLearning_Click" Margin="0,0,0,20">
-                                    <Button.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                            <GradientStop Color="#3B2F56" Offset="0"/>
-                                            <GradientStop Color="#5A4887" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Button.Background>
-                                    <Button.ContentTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <fontAwesome:FontAwesome Icon="Book" Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding}"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Button.ContentTemplate>
-                                </Button>
-                                
-                                <!-- 星际智者按钮 -->
+                                <Button.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#3B2F56" Offset="0"/>
+                                        <GradientStop Color="#5A4887" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Button.Background>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <fontAwesome:FontAwesome Icon="Book" Margin="0,0,10,0"/>
+                                            <TextBlock Text="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                            
+                            <!-- 星际智者按钮 -->
                                 <Button Content="星际智者" Style="{StaticResource MainButtonStyle}" Click="OpenAIChat_Click" Margin="0,0,0,20">
-                                    <Button.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                            <GradientStop Color="#3B2F56" Offset="0"/>
-                                            <GradientStop Color="#5A4887" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Button.Background>
-                                    <Button.ContentTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <fontAwesome:FontAwesome Icon="Comments" Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding}"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Button.ContentTemplate>
-                                </Button>
-                                
+                                <Button.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#3B2F56" Offset="0"/>
+                                        <GradientStop Color="#5A4887" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Button.Background>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <fontAwesome:FontAwesome Icon="Comments" Margin="0,0,10,0"/>
+                                            <TextBlock Text="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                            
                                 <Button Content="退出系统" Style="{StaticResource MainButtonStyle}" Click="Exit_Click" Margin="0,0,0,0">
-                                    <Button.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                            <GradientStop Color="#473765" Offset="0"/>
-                                            <GradientStop Color="#7E5BBE" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Button.Background>
-                                    <Button.ContentTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <fontAwesome:FontAwesome Icon="SignOut" Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding}"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Button.ContentTemplate>
-                                </Button>
-                            </StackPanel>
+                                <Button.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#473765" Offset="0"/>
+                                        <GradientStop Color="#7E5BBE" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Button.Background>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <fontAwesome:FontAwesome Icon="SignOut" Margin="0,0,10,0"/>
+                                            <TextBlock Text="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </StackPanel>
 
-                            <!-- 底部信息 -->
-                            <StackPanel Grid.Row="2" Margin="10,0,10,20">
-                                <!-- 学习进度跟踪 -->
-                                <Border Margin="0,10,0,15" Padding="10">
+                        <!-- 底部信息 -->
+                        <StackPanel Grid.Row="2" Margin="10,0,10,20">
+                            <!-- 学习进度跟踪 -->
+                            <Border Margin="0,10,0,15" Padding="10">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0" Opacity="0.3">
+                                        <GradientStop Color="#3A3A6A" Offset="0"/>
+                                        <GradientStop Color="#4A3A8A" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <StackPanel>
+                                    <TextBlock Text="学习进度" Foreground="White" FontSize="16" Margin="0,0,0,8"/>
+                                    <Grid Height="8" Margin="0,0,0,5">
+                                        <Border Background="#252042" CornerRadius="4"/>
+                                        <Border Background="#6E5FBE" CornerRadius="4" Width="120" HorizontalAlignment="Left"/>
+                                    </Grid>
+                                    <TextBlock Text="已完成 35%" Foreground="#A0A0A0" HorizontalAlignment="Right" FontSize="12"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 最近活动记录 -->
+                            <Expander Header="最近活动" Margin="0,0,0,15" Foreground="White" Background="Transparent" BorderThickness="0">
+                                <Expander.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <fontAwesome:FontAwesome Icon="History" Foreground="White" Height="16" Margin="0,0,8,0"/>
+                                            <TextBlock Text="{Binding}" Foreground="White" FontSize="16"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Expander.HeaderTemplate>
+                                <Border Padding="5" Margin="0,5,0,0">
                                     <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0" Opacity="0.3">
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0" Opacity="0.2">
                                             <GradientStop Color="#3A3A6A" Offset="0"/>
                                             <GradientStop Color="#4A3A8A" Offset="1"/>
                                         </LinearGradientBrush>
                                     </Border.Background>
-                                    <StackPanel>
-                                        <TextBlock Text="学习进度" Foreground="White" FontSize="16" Margin="0,0,0,8"/>
-                                        <Grid Height="8" Margin="0,0,0,5">
-                                            <Border Background="#252042" CornerRadius="4"/>
-                                            <Border Background="#6E5FBE" CornerRadius="4" Width="120" HorizontalAlignment="Left"/>
-                                        </Grid>
-                                        <TextBlock Text="已完成 35%" Foreground="#A0A0A0" HorizontalAlignment="Right" FontSize="12"/>
+                                    <StackPanel Margin="10,5">
+                                        <TextBlock Foreground="#E0E0E0" Margin="0,5">
+                                            <Run Text="• "/>
+                                            <Run Text="太阳系探索（2小时前）" Foreground="#B0E0FF"/>
+                                        </TextBlock>
+                                        <TextBlock Foreground="#E0E0E0" Margin="0,5">
+                                            <Run Text="• "/>
+                                            <Run Text="黑洞知识学习（昨天）" Foreground="#B0E0FF"/>
+                                        </TextBlock>
+                                        <TextBlock Foreground="#E0E0E0" Margin="0,5">
+                                            <Run Text="• "/>
+                                            <Run Text="星系类型研究（3天前）" Foreground="#B0E0FF"/>
+                                        </TextBlock>
                                     </StackPanel>
                                 </Border>
-                                
-                                <!-- 最近活动记录 -->
-                                <Expander Header="最近活动" Margin="0,0,0,15" Foreground="White" Background="Transparent" BorderThickness="0">
-                                    <Expander.HeaderTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <fontAwesome:FontAwesome Icon="History" Foreground="White" Height="16" Margin="0,0,8,0"/>
-                                                <TextBlock Text="{Binding}" Foreground="White" FontSize="16"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Expander.HeaderTemplate>
-                                    <Border Padding="5" Margin="0,5,0,0">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0" Opacity="0.2">
-                                                <GradientStop Color="#3A3A6A" Offset="0"/>
-                                                <GradientStop Color="#4A3A8A" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Border.Background>
-                                        <StackPanel Margin="10,5">
-                                            <TextBlock Foreground="#E0E0E0" Margin="0,5">
-                                                <Run Text="• "/>
-                                                <Run Text="太阳系探索（2小时前）" Foreground="#B0E0FF"/>
-                                            </TextBlock>
-                                            <TextBlock Foreground="#E0E0E0" Margin="0,5">
-                                                <Run Text="• "/>
-                                                <Run Text="黑洞知识学习（昨天）" Foreground="#B0E0FF"/>
-                                            </TextBlock>
-                                            <TextBlock Foreground="#E0E0E0" Margin="0,5">
-                                                <Run Text="• "/>
-                                                <Run Text="星系类型研究（3天前）" Foreground="#B0E0FF"/>
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </Border>
-                                </Expander>
-                                
-                                <Border BorderThickness="0,1,0,0" BorderBrush="#3F3D5C" Margin="0,0,0,10"/>
-                                <TextBlock Text="© 2025 星穹轨道团队" Foreground="#A0A0A0" FontSize="12" TextAlignment="Center"/>
-                                <TextBlock Text="版本 1.0.0" Foreground="#A0A0A0" FontSize="12" TextAlignment="Center" Margin="0,5,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+                            </Expander>
+                            
+                            <Border BorderThickness="0,1,0,0" BorderBrush="#3F3D5C" Margin="0,0,0,10"/>
+                            <TextBlock Text="© 2025 星穹轨道团队" Foreground="#A0A0A0" FontSize="12" TextAlignment="Center"/>
+                            <TextBlock Text="版本 1.0.0" Foreground="#A0A0A0" FontSize="12" TextAlignment="Center" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
-                    <!-- 中间分隔线 -->
+                <!-- 中间分隔线 -->
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#22222280"/>
 
                     <!-- 右侧主内容区 - 删除独立背景图片，使用整个窗口的背景 -->
-                    <Border Grid.Column="2">
-                        <Border.Background>
+                <Border Grid.Column="2">
+                    <Border.Background>
                             <SolidColorBrush Color="#1A1A2E" Opacity="0.3"/>
-                        </Border.Background>
+                    </Border.Background>
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" /> <!-- 顶部快速导航区 -->
@@ -405,10 +405,10 @@
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
-                        </Grid>
-                    </Border>
-                </Grid>
+                    </Grid>
+                </Border>
             </Grid>
-        </Border>
+        </Grid>
+    </Border>
     </Grid>
 </Window>
