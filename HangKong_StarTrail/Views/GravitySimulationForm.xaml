@@ -398,7 +398,7 @@
                     </Border.Background>
                     <skia:SKElement x:Name="animationCanva"
                                     PaintSurface="OnPaintSurface"
-                                    SizeChanged="animationCanva_SizeChanged"
+                                    SizeChanged="AnimationCanva_SizeChanged"
                                     MouseWheel="AnimationCanva_MouseWheel"
                                     MouseDown="AnimationCanva_MouseDown"
                                     MouseUp="AnimationCanva_MouseUp"

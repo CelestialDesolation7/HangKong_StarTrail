@@ -30,13 +30,16 @@ namespace HangKong_StarTrail.Views
         private Renderer _renderer; // 渲染器，包含物理引擎作为成员
         private DispatcherTimer _simulationTimer;   // 物理仿真计时器
         private DispatcherTimer _uiUpdateTimer;     // UI更新计时器
-        private DispatcherTimer _renderTimer;       // 渲染计时器
         private Task? _physicsUpdateTask;          // 物理更新任务
         private CancellationTokenSource? _physicsUpdateCts; // 物理更新取消令牌
         private readonly object _physicsLock = new object(); // 物理更新锁
         private readonly object _renderLock = new object();  // 渲染锁
         private int _frameCount;                    // 帧计数器
         private DateTime _lastFrameTime;            // 上一帧时间
+        private bool _isPhysicsUpdatePending;      // 是否有待处理的物理更新
+        private DateTime _lastPhysicsUpdate;        // 上次物理更新时间
+        private const int MIN_PHYSICS_UPDATE_INTERVAL = 1; // 最小物理更新间隔(ms)
+        private bool _isRenderingEnabled = true;    // 是否启用渲染
         #endregion
 
         #region 参数设置成员
@@ -113,8 +116,10 @@ namespace HangKong_StarTrail.Views
             _simulationTimer.Tick += SimulationTimer_Tick;
 
             // 初始化UI更新计时器
-            _uiUpdateTimer = new DispatcherTimer();
-            _uiUpdateTimer.Interval = TimeSpan.FromMilliseconds(100); // 100ms更新一次UI
+            _uiUpdateTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(100) // 100ms更新一次UI
+            };
             _uiUpdateTimer.Tick += (sender, e) =>
             {
                 if (_focusedBody != null && _isSimulationRunning)
@@ -124,30 +129,19 @@ namespace HangKong_StarTrail.Views
                 UpdateFrameRate();
             };
 
-            // 初始化渲染计时器
-            _renderTimer = new DispatcherTimer();
-            _renderTimer.Interval = TimeSpan.FromMilliseconds(FRAME_TIME_MS);
-            _renderTimer.Tick += (sender, e) =>
-            {
-                lock (_renderLock)
-                {
-                    if (!_isFrameRendering && _displayPositionUpdated)
-                    {
-                        animationCanva.InvalidateVisual();
-                    }
-                }
-            };
+            // 使用CompositionTarget.Rendering替代DispatcherTimer进行渲染
+            CompositionTarget.Rendering += CompositionTarget_Rendering;
 
             // 初始化帧率统计
             _frameCount = 0;
             _lastFrameTime = DateTime.Now;
-
+            _lastPhysicsUpdate = DateTime.Now;
+            _isPhysicsUpdatePending = false;
 
             // 初始化时间步长滑块
             SimulationTimeStepSlider.Minimum = SLIDER_MIN_VALUE;
             SimulationTimeStepSlider.Maximum = SLIDER_MAX_VALUE;
             SimulationTimeStepSlider.Value = SLIDER_CENTER_VALUE;
-
 
             // 初始化按钮状态
             UpdateButtonStates();
@@ -186,8 +180,6 @@ namespace HangKong_StarTrail.Views
             _focusedBody = earth;
             // 更新焦点下拉框
             UpdateFocusComboBox();
-
-
         }
         #endregion
 
@@ -245,6 +237,21 @@ namespace HangKong_StarTrail.Views
 
 
         #region 基本UI响应
+        private void UpdateFrameRate()
+        {
+            var now = DateTime.Now;
+            var elapsed = (now - _lastFrameTime).TotalSeconds;
+
+            if (elapsed >= 1.0)
+            {
+                var fps = _frameCount / elapsed;
+                FrameReportTextBlock.Text = $"FPS: {fps:F1}";
+                _frameCount = 0;
+                _lastFrameTime = now;
+            }
+        }
+
+
         private void UpdateButtonStates()
         {
             // 在仿真运行时禁用修改按钮
@@ -286,16 +293,16 @@ namespace HangKong_StarTrail.Views
                 // 启动仿真
                 _physicsUpdateCts = new CancellationTokenSource();
                 _simulationTimer.Start();
-                _renderTimer.Start();
                 _uiUpdateTimer.Start();
+                _isRenderingEnabled = true;
             }
             else
             {
                 // 停止仿真
                 _physicsUpdateCts?.Cancel();
                 _simulationTimer.Stop();
-                _renderTimer.Stop();
                 _uiUpdateTimer.Stop();
+                _isRenderingEnabled = false;
             }
 
             UpdateButtonStates();
@@ -313,7 +320,7 @@ namespace HangKong_StarTrail.Views
                     {
                         this.DragMove();
                     }
-                    
+
                     // 标记事件已处理，防止冒泡
                     e.Handled = true;
                 }
@@ -339,7 +346,6 @@ namespace HangKong_StarTrail.Views
 
         private void SimulationTimeStepSlider_DragCompleted(object sender, DragCompletedEventArgs e)
         {
-            _debugInfo[7] = "重置被执行。";
             _baseTimeStep = _timeStep;
             SimulationTimeStepSlider.Value = SLIDER_CENTER_VALUE;
         }
@@ -348,19 +354,15 @@ namespace HangKong_StarTrail.Views
         {
             // 保存当前选中的项
             var currentSelection = FocusIOTextBox.SelectedItem?.ToString();
-
             // 清空下拉框
             FocusIOTextBox.Items.Clear();
-
             // 添加自由模式选项
             FocusIOTextBox.Items.Add("自由模式");
-
             // 添加所有天体
             foreach (var body in _renderer._physicsEngine.Bodies)
             {
                 FocusIOTextBox.Items.Add(body.Name);
             }
-
             // 恢复选中项
             if (!string.IsNullOrEmpty(currentSelection))
             {
@@ -396,7 +398,7 @@ namespace HangKong_StarTrail.Views
             }
         }
 
-        private void animationCanva_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void AnimationCanva_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             var source = PresentationSource.FromVisual(animationCanva);
             var matrix = source?.CompositionTarget?.TransformToDevice ?? Matrix.Identity;
@@ -426,8 +428,8 @@ namespace HangKong_StarTrail.Views
             // 停止所有计时器和任务
             _physicsUpdateCts?.Cancel();
             _simulationTimer?.Stop();
-            _renderTimer?.Stop();
             _uiUpdateTimer?.Stop();
+            CompositionTarget.Rendering -= CompositionTarget_Rendering;
 
             // 等待物理更新任务完成
             if (_physicsUpdateTask != null && !_physicsUpdateTask.IsCompleted)
@@ -539,18 +541,28 @@ namespace HangKong_StarTrail.Views
 
 
 
-        private async void SimulationTimer_Tick(object sender, EventArgs e)
+        private void SimulationTimer_Tick(object sender, EventArgs e)
         {
             if (!_isSimulationRunning) return;
 
+            var now = DateTime.Now;
+            var timeSinceLastUpdate = (now - _lastPhysicsUpdate).TotalMilliseconds;
+
+            // 如果距离上次物理更新时间太短，跳过这次更新
+            if (timeSinceLastUpdate < MIN_PHYSICS_UPDATE_INTERVAL)
+            {
+                return;
+            }
+
+            // 如果上一个物理更新任务还在运行，标记为待处理并返回
+            if (_physicsUpdateTask != null && !_physicsUpdateTask.IsCompleted)
+            {
+                _isPhysicsUpdatePending = true;
+                return;
+            }
+
             try
             {
-                // 如果上一个物理更新任务还在运行，等待它完成
-                if (_physicsUpdateTask != null && !_physicsUpdateTask.IsCompleted)
-                {
-                    await _physicsUpdateTask;
-                }
-
                 // 创建新的物理更新任务
                 _physicsUpdateTask = Task.Run(() =>
                 {
@@ -560,9 +572,9 @@ namespace HangKong_StarTrail.Views
                             return;
 
                         _renderer._physicsEngine.Update(_timeStep);
-                        _displayPositionUpdated = false;
                         UpdateDisplayPositions();
-                        _displayPositionUpdated = true;
+                        _lastPhysicsUpdate = DateTime.Now;
+                        _isPhysicsUpdatePending = false;
                     }
                 });
             }
@@ -642,10 +654,6 @@ namespace HangKong_StarTrail.Views
         private void UpdateDisplayPositions()
         {
             _debugInfo[5] = "进入 UpdateDisplayPositions";
-            // 获取画布的实际像素尺寸
-
-            var centerBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.IsCenter);
-
             if (_focusedBody != null)
             {
                 // 如果有焦点天体，将其置于画布中心
@@ -660,14 +668,15 @@ namespace HangKong_StarTrail.Views
             }
             else
             {
-                // 如果没有中心天体和焦点天体，所有天体都相对于画布中心计算，并考虑相机偏移
+                // 如果没有焦点天体，所有天体都相对于画布中心计算，并考虑相机偏移
                 foreach (var body in _renderer._physicsEngine.Bodies)
                 {
                     var relativePosition = body.Position - _cameraOffset;
                     body.DisplayPosition = PhysicalToScreenPosition(relativePosition);
                 }
             }
-
+            _universalCounter[1]++;
+            _debugInfo[1] = $"UpdateDisplayPositions调用次数{_universalCounter[1]}";
             _debugInfo[5] = "完成 UpdateDisplayPositions";
             _displayPositionUpdated = true;
         }
@@ -805,6 +814,8 @@ namespace HangKong_StarTrail.Views
 
                     // 渲染天体
                     _renderer.RenderBodies(canvas);
+                    _universalCounter[0]++;
+                    _debugInfo[0] = $"RenderBodies调用次数{_universalCounter[0]}";
 
                     // 渲染轨迹
                     if (_showTrajectory)
@@ -817,6 +828,19 @@ namespace HangKong_StarTrail.Views
                 finally
                 {
                     _isFrameRendering = false;
+                }
+            }
+        }
+
+        private void CompositionTarget_Rendering(object sender, EventArgs e)
+        {
+            if (!_isRenderingEnabled) return;
+
+            lock (_renderLock)
+            {
+                if (!_isFrameRendering)
+                {
+                    animationCanva.InvalidateVisual();
                 }
             }
         }
@@ -1084,21 +1108,6 @@ namespace HangKong_StarTrail.Views
             double scale = maxDimension / (maxDistance * 3); // 1.2是边距系数
             return scale;
         }
-
-        private void UpdateFrameRate()
-        {
-            var now = DateTime.Now;
-            var elapsed = (now - _lastFrameTime).TotalSeconds;
-
-            if (elapsed >= 1.0)
-            {
-                var fps = _frameCount / elapsed;
-                FrameReportTextBlock.Text = $"FPS: {fps:F1}";
-                _frameCount = 0;
-                _lastFrameTime = now;
-            }
-        }
-
         #endregion
 
     }
