@@ -21,31 +21,10 @@ namespace HangKong_StarTrail.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        // 添加星星闪烁的随机定时器
-        private List<DispatcherTimer> starTimers = new List<DispatcherTimer>();
-        
         public MainWindow()
         {
             InitializeComponent();
-            InitializeStarAnimation();
             LoadUserProgress();
-        }
-
-        /// <summary>
-        /// 初始化星星闪烁动画效果
-        /// </summary>
-        private void InitializeStarAnimation()
-        {
-            try
-            {
-                // 在实际实现中，这里会随机生成一些星星并添加闪烁效果
-                // 此处为简化实现，实际应用中可以使用Canvas.Children动态生成
-            }
-            catch (Exception ex)
-            {
-                // 记录错误但不影响主程序运行
-                Console.WriteLine($"初始化星星动画出错: {ex.Message}");
-            }
         }
 
         /// <summary>
@@ -71,20 +50,56 @@ namespace HangKong_StarTrail.Views
 
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            try
             {
-                this.DragMove();
+                // 确保鼠标左键按下时才能拖动窗口
+                if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
+                {
+                    // 确保窗口处于正常状态
+                    if (this.WindowState == WindowState.Normal || this.WindowState == WindowState.Maximized)
+                    {
+                        this.DragMove();
+                    }
+                    
+                    // 标记事件已处理，防止冒泡
+                    e.Handled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不影响程序运行
+                Console.WriteLine($"窗口拖动时出错: {ex.Message}");
             }
         }
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            try
+            {
+                this.WindowState = WindowState.Minimized;
+                
+                // 标记事件已处理
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"最小化窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            try
+            {
+                Application.Current.Shutdown();
+                
+                // 标记事件已处理
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"关闭应用程序时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         #endregion

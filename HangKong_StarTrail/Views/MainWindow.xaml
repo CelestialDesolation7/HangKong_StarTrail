@@ -38,11 +38,6 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#6E5FBE"/>
                                 <Setter Property="Foreground" Value="#FFFFFF"/>
-                                <Setter Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#9F5FFF" Opacity="0.8"/>
-                                    </Setter.Value>
-                                </Setter>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -67,11 +62,6 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#33FFFFFF"/>
-                                <Setter Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect ShadowDepth="0" BlurRadius="10" Color="#9F5FFF" Opacity="0.6"/>
-                                    </Setter.Value>
-                                </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Background" Value="#66FFFFFF"/>
@@ -103,11 +93,6 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#33FFFFFF"/>
-                                <Setter Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect ShadowDepth="0" BlurRadius="10" Color="#9F5FFF" Opacity="0.6"/>
-                                    </Setter.Value>
-                                </Setter>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -116,9 +101,14 @@
         </Style>
     </Window.Resources>
 
-    <Border CornerRadius="10" BorderBrush="Gray" BorderThickness="2" MouseLeftButtonDown="TitleBar_MouseDown">
+    <Grid>
+        <!-- 背景图片 - 移到最外层 -->
+        <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg" 
+               Stretch="UniformToFill"/>
+               
+        <Border CornerRadius="10" BorderBrush="Gray" BorderThickness="2">
         <Border.Background>
-            <SolidColorBrush Color="#FF2D2D30"/>
+                <SolidColorBrush Color="#FF2D2D30" Opacity="0.5"/>
         </Border.Background>
         <Grid>
             <Grid.RowDefinitions>
@@ -127,7 +117,7 @@
             </Grid.RowDefinitions>
 
             <!-- 标题栏 -->
-            <Grid Grid.Row="0" Background="#1F1E33" MouseDown="TitleBar_MouseDown">
+                <Grid Grid.Row="0" Background="#1F1E3399" MouseLeftButtonDown="TitleBar_MouseDown">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -156,7 +146,7 @@
                 <!-- 左侧操作面板 -->
                 <Border Grid.Column="0" Padding="15">
                     <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" Opacity="0.7">
                             <GradientStop Color="#343155" Offset="0"/>
                             <GradientStop Color="#3B2158" Offset="1"/>
                     </LinearGradientBrush>
@@ -176,16 +166,13 @@
 
                         <!-- 功能按钮区 -->
                         <StackPanel Grid.Row="1" Margin="10,20,10,10">
-                            <Button Content="启动探索之旅" Style="{StaticResource MainButtonStyle}" Click="StartExploration_Click" Margin="0,0,0,0">
+                                <Button Content="启动探索之旅" Style="{StaticResource MainButtonStyle}" Click="StartExploration_Click" Margin="0,0,0,20">
                                 <Button.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                         <GradientStop Color="#3E3A65" Offset="0"/>
                                         <GradientStop Color="#6E5FBE" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Button.Background>
-                                <Button.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#6E5FBE" Opacity="0.5"/>
-                                </Button.Effect>
                                 <Button.ContentTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
@@ -194,28 +181,15 @@
                                         </StackPanel>
                                     </DataTemplate>
                                 </Button.ContentTemplate>
-                                <Button.Triggers>
-                                    <EventTrigger RoutedEvent="Button.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1"/>
-                                                <ThicknessAnimation Storyboard.TargetProperty="Margin" From="0,-10,0,0" To="0,0,0,0" Duration="0:0:0.5"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Button.Triggers>
                             </Button>
                             
-                            <Button Content="学习宇宙知识" Style="{StaticResource MainButtonStyle}" Click="StartLearning_Click" Margin="0,20,0,0">
+                                <Button Content="学习宇宙知识" Style="{StaticResource MainButtonStyle}" Click="StartLearning_Click" Margin="0,0,0,20">
                                 <Button.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                         <GradientStop Color="#3B2F56" Offset="0"/>
                                         <GradientStop Color="#5A4887" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Button.Background>
-                                <Button.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#5A4887" Opacity="0.5"/>
-                                </Button.Effect>
                                 <Button.ContentTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
@@ -224,29 +198,16 @@
                                         </StackPanel>
                                     </DataTemplate>
                                 </Button.ContentTemplate>
-                                <Button.Triggers>
-                                    <EventTrigger RoutedEvent="Button.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1" BeginTime="0:0:0.2"/>
-                                                <ThicknessAnimation Storyboard.TargetProperty="Margin" From="0,10,0,0" To="0,20,0,0" Duration="0:0:0.5" BeginTime="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Button.Triggers>
                             </Button>
                             
                             <!-- 星际智者按钮 -->
-                            <Button Content="星际智者" Style="{StaticResource MainButtonStyle}" Click="OpenAIChat_Click" Margin="0,20,0,0">
+                                <Button Content="星际智者" Style="{StaticResource MainButtonStyle}" Click="OpenAIChat_Click" Margin="0,0,0,20">
                                 <Button.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                         <GradientStop Color="#3B2F56" Offset="0"/>
                                         <GradientStop Color="#5A4887" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Button.Background>
-                                <Button.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#5A4887" Opacity="0.5"/>
-                                </Button.Effect>
                                 <Button.ContentTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
@@ -255,28 +216,15 @@
                                         </StackPanel>
                                     </DataTemplate>
                                 </Button.ContentTemplate>
-                                <Button.Triggers>
-                                    <EventTrigger RoutedEvent="Button.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1" BeginTime="0:0:0.2"/>
-                                                <ThicknessAnimation Storyboard.TargetProperty="Margin" From="0,10,0,0" To="0,20,0,0" Duration="0:0:0.5" BeginTime="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Button.Triggers>
                             </Button>
                             
-                            <Button Content="退出系统" Style="{StaticResource MainButtonStyle}" Click="Exit_Click" Margin="0,20,0,0">
+                                <Button Content="退出系统" Style="{StaticResource MainButtonStyle}" Click="Exit_Click" Margin="0,0,0,0">
                                 <Button.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                         <GradientStop Color="#473765" Offset="0"/>
                                         <GradientStop Color="#7E5BBE" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Button.Background>
-                                <Button.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#7E5BBE" Opacity="0.5"/>
-                                </Button.Effect>
                                 <Button.ContentTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
@@ -285,16 +233,6 @@
                                         </StackPanel>
                                     </DataTemplate>
                                 </Button.ContentTemplate>
-                                <Button.Triggers>
-                                    <EventTrigger RoutedEvent="Button.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1" BeginTime="0:0:0.4"/>
-                                                <ThicknessAnimation Storyboard.TargetProperty="Margin" From="0,10,0,0" To="0,20,0,0" Duration="0:0:0.5" BeginTime="0:0:0.4"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Button.Triggers>
                             </Button>
                         </StackPanel>
 
@@ -308,9 +246,6 @@
                                         <GradientStop Color="#4A3A8A" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Border.Background>
-                                <Border.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="10" Color="#000000" Opacity="0.5"/>
-                                </Border.Effect>
                                 <StackPanel>
                                     <TextBlock Text="学习进度" Foreground="White" FontSize="16" Margin="0,0,0,8"/>
                                     <Grid Height="8" Margin="0,0,0,5">
@@ -363,207 +298,13 @@
                 </Border>
 
                 <!-- 中间分隔线 -->
-                <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#222"/>
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#22222280"/>
 
-                <!-- 右侧主内容区 -->
+                    <!-- 右侧主内容区 - 删除独立背景图片，使用整个窗口的背景 -->
                 <Border Grid.Column="2">
                     <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#1F1D42" Offset="0"/>
-                            <GradientStop Color="#251A48" Offset="1"/>
-                        </LinearGradientBrush>
+                            <SolidColorBrush Color="#1A1A2E" Opacity="0.3"/>
                     </Border.Background>
-                    <Grid>
-                        <!-- 宇宙背景星空效果（保留现有效果） -->
-                <Canvas>
-                            <!-- 改进的星云效果 - 多层次星云 -->
-                            <Ellipse Canvas.Left="-150" Canvas.Top="50" Width="800" Height="600" Opacity="0.18">
-                                <Ellipse.Fill>
-                                    <RadialGradientBrush>
-                                        <GradientStop Color="#9F5FFF" Offset="0"/>
-                                        <GradientStop Color="#6A42B8" Offset="0.3"/>
-                                        <GradientStop Color="Transparent" Offset="1"/>
-                                    </RadialGradientBrush>
-                                </Ellipse.Fill>
-                                <Ellipse.Effect>
-                                    <BlurEffect Radius="30"/>
-                                </Ellipse.Effect>
-                                <Ellipse.RenderTransform>
-                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                </Ellipse.RenderTransform>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" 
-                                                                From="1" To="1.05" Duration="0:0:15" 
-                                                                AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" 
-                                                                From="1" To="1.05" Duration="0:0:15" 
-                                                                AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                            </Ellipse>
-                    
-                            <Ellipse Canvas.Left="300" Canvas.Top="100" Width="750" Height="450" Opacity="0.15">
-                        <Ellipse.Fill>
-                            <RadialGradientBrush>
-                                        <GradientStop Color="#5F9FFF" Offset="0"/>
-                                        <GradientStop Color="#3A55AA" Offset="0.4"/>
-                                <GradientStop Color="Transparent" Offset="1"/>
-                            </RadialGradientBrush>
-                        </Ellipse.Fill>
-                                <Ellipse.Effect>
-                                    <BlurEffect Radius="25"/>
-                                </Ellipse.Effect>
-                                <Ellipse.RenderTransform>
-                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                </Ellipse.RenderTransform>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" 
-                                                                From="1" To="1.03" Duration="0:0:20" BeginTime="0:0:2"
-                                                                AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" 
-                                                                From="1" To="1.03" Duration="0:0:20" BeginTime="0:0:2"
-                                                                AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                    </Ellipse>
-                    
-                            <!-- 额外的小型星云 -->
-                            <Ellipse Canvas.Left="50" Canvas.Top="350" Width="250" Height="150" Opacity="0.12">
-                        <Ellipse.Fill>
-                            <RadialGradientBrush>
-                                        <GradientStop Color="#FF9FDF" Offset="0"/>
-                                <GradientStop Color="Transparent" Offset="1"/>
-                            </RadialGradientBrush>
-                        </Ellipse.Fill>
-                                <Ellipse.Effect>
-                                    <BlurEffect Radius="15"/>
-                                </Ellipse.Effect>
-                            </Ellipse>
-                            
-                            <!-- 宇宙尘埃效果 -->
-                            <Rectangle Width="970" Height="670" Opacity="0.3">
-                                <Rectangle.Fill>
-                                    <ImageBrush ImageSource="/HangKong_StarTrail;component/StyleResources/Images/planets/sun_texture.jpg" 
-                                                Opacity="0.1" Stretch="UniformToFill"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                            
-                            <!-- 小星星点缀（改进的分布） -->
-                            <!-- 第一组星星 - 较大且明亮 -->
-                            <Ellipse Canvas.Left="100" Canvas.Top="50" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.9"/>
-                            <Ellipse Canvas.Left="240" Canvas.Top="120" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                            <Ellipse Canvas.Left="500" Canvas.Top="80" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                            <Ellipse Canvas.Left="720" Canvas.Top="160" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.9"/>
-                            <Ellipse Canvas.Left="620" Canvas.Top="370" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                            <Ellipse Canvas.Left="380" Canvas.Top="420" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.9"/>
-                            <Ellipse Canvas.Left="180" Canvas.Top="400" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.9"/>
-                            <Ellipse Canvas.Left="800" Canvas.Top="250" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                            
-                            <!-- 第二组星星 - 中等大小 -->
-                            <Ellipse Canvas.Left="170" Canvas.Top="100" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="320" Canvas.Top="80" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="420" Canvas.Top="130" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="630" Canvas.Top="100" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="520" Canvas.Top="300" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="280" Canvas.Top="350" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="460" Canvas.Top="450" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            <Ellipse Canvas.Left="750" Canvas.Top="380" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.8"/>
-                            
-                            <!-- 第三组星星 - 最小且最暗 -->
-                            <Ellipse Canvas.Left="120" Canvas.Top="150" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="230" Canvas.Top="200" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="350" Canvas.Top="150" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="450" Canvas.Top="250" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="580" Canvas.Top="180" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="650" Canvas.Top="220" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="350" Canvas.Top="280" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="430" Canvas.Top="320" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="540" Canvas.Top="390" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="600" Canvas.Top="430" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="680" Canvas.Top="300" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="750" Canvas.Top="330" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="800" Canvas.Top="410" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="140" Canvas.Top="320" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="220" Canvas.Top="280" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            <Ellipse Canvas.Left="270" Canvas.Top="420" Width="1" Height="1" Fill="#FFFFFF" Opacity="0.7"/>
-                            
-                            <!-- 高亮闪烁星 - 更多变化和随机效果 -->
-                            <Ellipse Canvas.Left="180" Canvas.Top="120" Width="3.5" Height="3.5" Fill="#FFFFFF">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="6" Color="White" Opacity="0.8"/>
-                                </Ellipse.Effect>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.3" Duration="0:0:2" AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" From="0.8" To="0.3" Duration="0:0:2" AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                            </Ellipse>
-                            
-                            <Ellipse Canvas.Left="420" Canvas.Top="230" Width="4" Height="4" Fill="#FFFFFF">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="8" Color="#B0E0FF" Opacity="0.9"/>
-                                </Ellipse.Effect>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.2" Duration="0:0:3" AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" From="8" To="4" Duration="0:0:3" AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                            </Ellipse>
-                            
-                            <Ellipse Canvas.Left="620" Canvas.Top="180" Width="3.5" Height="3.5" Fill="#FFFFFF">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="7" Color="#FFE0B0" Opacity="0.8"/>
-                                </Ellipse.Effect>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.4" Duration="0:0:2.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" From="7" To="3" Duration="0:0:2.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                            </Ellipse>
-                            
-                            <Ellipse Canvas.Left="300" Canvas.Top="350" Width="3" Height="3" Fill="#FFFFFF">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect ShadowDepth="0" BlurRadius="6" Color="#E0B0FF" Opacity="0.8"/>
-                                </Ellipse.Effect>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Ellipse.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.3" Duration="0:0:3.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" From="0.8" To="0.2" Duration="0:0:3.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                    </Ellipse>
-                </Canvas>
-
-                        <!-- 主内容布局更新 -->
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" /> <!-- 顶部快速导航区 -->
@@ -572,51 +313,42 @@
                             
                             <!-- 快速导航卡片区域 -->
                             <WrapPanel Grid.Row="0" Margin="20,20,20,0" HorizontalAlignment="Center">
-                                <!-- 太阳系探索卡片 -->
+                                <!-- 太阳系探索卡片 - 调整透明度 -->
                                 <Border Width="200" Height="120" Margin="10" CornerRadius="10" Cursor="Hand" MouseDown="StartExploration_Click">
                                     <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.8">
                                             <GradientStop Color="#3E3A65" Offset="0"/>
                                             <GradientStop Color="#6E5FBE" Offset="0.7"/>
                                         </LinearGradientBrush>
                                     </Border.Background>
-                                    <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="3" BlurRadius="10" Color="#000000" Opacity="0.5"/>
-                                    </Border.Effect>
                                     <Grid>
                                         <TextBlock Text="太阳系探索" FontSize="20" Foreground="White" VerticalAlignment="Top" Margin="15,15,0,0"/>
                                         <fontAwesome:FontAwesome Icon="Globe" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,15,15" Foreground="#FFD700"/>
                                     </Grid>
                                 </Border>
                                 
-                                <!-- 宇宙知识卡片 -->
+                                <!-- 宇宙知识卡片 - 调整透明度 -->
                                 <Border Width="200" Height="120" Margin="10" CornerRadius="10" Cursor="Hand" MouseDown="StartLearning_Click">
                                     <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.8">
                                             <GradientStop Color="#3B2F56" Offset="0"/>
                                             <GradientStop Color="#5A4887" Offset="1"/>
                                         </LinearGradientBrush>
                                     </Border.Background>
-                                    <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="3" BlurRadius="10" Color="#000000" Opacity="0.5"/>
-                                    </Border.Effect>
                                     <Grid>
                                         <TextBlock Text="宇宙知识库" FontSize="20" Foreground="White" VerticalAlignment="Top" Margin="15,15,0,0"/>
                                         <fontAwesome:FontAwesome Icon="Book" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,15,15" Foreground="#E0E0FF"/>
                                     </Grid>
                                 </Border>
                                 
-                                <!-- AI对话卡片 -->
+                                <!-- AI对话卡片 - 调整透明度 -->
                                 <Border Width="200" Height="120" Margin="10" CornerRadius="10" Cursor="Hand" MouseDown="OpenAIChat_Click">
                                     <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.8">
                                             <GradientStop Color="#3B2F56" Offset="0"/>
                                             <GradientStop Color="#6E4FBE" Offset="1"/>
                                         </LinearGradientBrush>
                                     </Border.Background>
-                                    <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="3" BlurRadius="10" Color="#000000" Opacity="0.5"/>
-                                    </Border.Effect>
                                     <Grid>
                                         <TextBlock Text="星际智者" FontSize="20" Foreground="White" VerticalAlignment="Top" Margin="15,15,0,0"/>
                                         <fontAwesome:FontAwesome Icon="Comments" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,15,15" Foreground="#B0E0FF"/>
@@ -624,93 +356,41 @@
                                 </Border>
                             </WrapPanel>
                             
-                            <!-- 欢迎与引导区域 (修改现有内容) -->
+                            <!-- 欢迎与引导区域 -->
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock Text="星穹轨道" FontFamily="Microsoft YaHei" FontSize="64" TextAlignment="Center" Margin="0,0,0,15">
-                                    <TextBlock.Foreground>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#FFD700" Offset="0"/>
-                                            <GradientStop Color="#FF8C00" Offset="0.5"/>
-                                            <GradientStop Color="#FFD700" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </TextBlock.Foreground>
+                                <TextBlock Text="星穹轨道" FontFamily="Microsoft YaHei" FontSize="64" TextAlignment="Center" Margin="0,0,0,15" Foreground="#FFD700">
                                     <TextBlock.Effect>
-                                        <DropShadowEffect ShadowDepth="3" Direction="315" Color="#000000" BlurRadius="6" Opacity="0.8"/>
+                                        <DropShadowEffect ShadowDepth="2" Direction="315" Color="#000000" BlurRadius="4" Opacity="0.7"/>
                                     </TextBlock.Effect>
-                                    <TextBlock.Triggers>
-                                        <EventTrigger RoutedEvent="TextBlock.Loaded">
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1.5"/>
-                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" From="0.8" To="1" Duration="0:0:1"/>
-                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" From="0.8" To="1" Duration="0:0:1"/>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </EventTrigger>
-                                    </TextBlock.Triggers>
-                                    <TextBlock.RenderTransform>
-                                        <ScaleTransform ScaleX="1" ScaleY="1" CenterX="160" CenterY="32"/>
-                                    </TextBlock.RenderTransform>
                                 </TextBlock>
                                 
                                 <TextBlock Text="恒星运行与宇宙知识可视化系统" FontFamily="Microsoft YaHei" FontSize="26" Foreground="#F5F5F5" 
                                         TextAlignment="Center" Margin="0,0,0,40">
                                     <TextBlock.Effect>
-                                        <DropShadowEffect ShadowDepth="2" Direction="315" Color="#000000" BlurRadius="4" Opacity="0.7"/>
+                                        <DropShadowEffect ShadowDepth="1" Direction="315" Color="#000000" BlurRadius="2" Opacity="0.5"/>
                                     </TextBlock.Effect>
-                                    <TextBlock.Triggers>
-                                        <EventTrigger RoutedEvent="TextBlock.Loaded">
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1.5" BeginTime="0:0:0.5"/>
-                                                    <ThicknessAnimation Storyboard.TargetProperty="Margin" From="0,20,0,40" To="0,0,0,40" Duration="0:0:1" BeginTime="0:0:0.5"/>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </EventTrigger>
-                                    </TextBlock.Triggers>
                                 </TextBlock>
                                 
-                                <!-- 新增引导提示 -->
-                                <Border CornerRadius="30" Width="500" Opacity="0.95" Margin="0,0,0,30">
+                                <!-- 引导提示 - 调整透明度 -->
+                                <Border CornerRadius="30" Width="500" Opacity="0.9" Margin="0,0,0,30">
                                     <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.2">
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.3">
                                             <GradientStop Color="#3A3A6A" Offset="0"/>
                                             <GradientStop Color="#4A3A8A" Offset="1"/>
                                         </LinearGradientBrush>
                                     </Border.Background>
-                                    <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#5F5FEE" Opacity="0.2"/>
-                                    </Border.Effect>
                                     <TextBlock Text="点击上方卡片或左侧按钮开始您的宇宙探索之旅" FontFamily="Microsoft YaHei" FontSize="18" Foreground="#E0E0E0" 
-                                            TextAlignment="Center" Margin="20,15,20,15">
-                                        <TextBlock.Triggers>
-                                            <EventTrigger RoutedEvent="TextBlock.Loaded">
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1.5" BeginTime="0:0:1"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" 
-                                                                    From="20" To="0" Duration="0:0:1" BeginTime="0:0:1"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </EventTrigger>
-                                        </TextBlock.Triggers>
-                                        <TextBlock.RenderTransform>
-                                            <TranslateTransform X="0" Y="0"/>
-                                        </TextBlock.RenderTransform>
-                                    </TextBlock>
+                                            TextAlignment="Center" Margin="20,15,20,15"/>
                                 </Border>
                                 
-                                <!-- 今日宇宙概览 -->
+                                <!-- 今日宇宙概览 - 调整透明度 -->
                                 <Border CornerRadius="15" Width="600" Margin="0,10,0,0">
                                     <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.4">
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.6">
                                             <GradientStop Color="#2A2A5A" Offset="0"/>
                                             <GradientStop Color="#3A2A7A" Offset="1"/>
                                         </LinearGradientBrush>
                                     </Border.Background>
-                                    <Border.Effect>
-                                        <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#000000" Opacity="0.5"/>
-                                    </Border.Effect>
                                     <StackPanel Margin="15">
                                         <TextBlock Text="今日宇宙概览" FontSize="20" Foreground="#FFD700" Margin="0,0,0,10"/>
                                         <TextBlock TextWrapping="Wrap" FontSize="14" Foreground="#E0E0E0" Margin="0,0,0,5">
@@ -725,10 +405,10 @@
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
-                        </Grid>
                     </Grid>
                 </Border>
             </Grid>
         </Grid>
     </Border>
+    </Grid>
 </Window>

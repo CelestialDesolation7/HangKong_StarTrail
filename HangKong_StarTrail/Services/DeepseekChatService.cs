@@ -11,6 +11,7 @@ using HangKong_StarTrail.Models;
 using System.Windows;
 using System.IO;
 using System.Configuration;
+using System.Linq;
 
 namespace HangKong_StarTrail.Services
 {
@@ -145,6 +146,12 @@ namespace HangKong_StarTrail.Services
                 
                 // 确保API密钥没有换行符或其他非法字符
                 string sanitizedApiKey = _apiKey.Trim();
+                // 确保API密钥只包含ASCII字符
+                if (!IsAscii(sanitizedApiKey))
+                {
+                    sanitizedApiKey = RemoveNonAsciiChars(sanitizedApiKey);
+                }
+                
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sanitizedApiKey);
 
@@ -233,6 +240,12 @@ namespace HangKong_StarTrail.Services
                 
                 // 确保API密钥没有换行符或其他非法字符
                 string sanitizedApiKey = _apiKey.Trim();
+                // 确保API密钥只包含ASCII字符
+                if (!IsAscii(sanitizedApiKey))
+                {
+                    sanitizedApiKey = RemoveNonAsciiChars(sanitizedApiKey);
+                }
+                
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sanitizedApiKey);
 
@@ -318,6 +331,22 @@ namespace HangKong_StarTrail.Services
             {
                 throw new Exception($"调用Deepseek流式API失败：{ex.Message}", ex);
             }
+        }
+
+        /// <summary>
+        /// 检查字符串是否仅包含ASCII字符
+        /// </summary>
+        private bool IsAscii(string text)
+        {
+            return text.All(c => c < 128);
+        }
+
+        /// <summary>
+        /// 移除字符串中的所有非ASCII字符
+        /// </summary>
+        private string RemoveNonAsciiChars(string text)
+        {
+            return new string(text.Where(c => c < 128).ToArray());
         }
     }
 } 

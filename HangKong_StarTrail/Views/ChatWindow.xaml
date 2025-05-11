@@ -158,7 +158,11 @@
         
         <!-- 聊天气泡样式 -->
         <Style x:Key="UserMessageStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource UserMessageBrush}"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="{StaticResource UserMessageColor}" Opacity="0.75"/>
+                </Setter.Value>
+            </Setter>
             <Setter Property="BorderBrush" Value="#4A4D75"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="10,10,2,10"/>
@@ -186,7 +190,7 @@
             </Setter>
             <Setter Property="Background">
                 <Setter.Value>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.75">
                         <GradientStop Color="#2A244A" Offset="0"/>
                         <GradientStop Color="#352A5A" Offset="1"/>
                     </LinearGradientBrush>
@@ -292,91 +296,20 @@
         </Style>
     </Window.Resources>
 
-    <Border CornerRadius="10">
+    <Grid>
+        <!-- 背景图片 -->
+        <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg" 
+               Stretch="UniformToFill"/>
+               
+        <Border CornerRadius="10" BorderBrush="Gray" BorderThickness="2">
         <Border.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#292841" Offset="0"/>
-                <GradientStop Color="#1F1D42" Offset="1"/>
-            </LinearGradientBrush>
+                <SolidColorBrush Color="#FF2D2D30" Opacity="0.5"/>
         </Border.Background>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
-            <!-- 星空背景效果 -->
-            <Canvas Grid.RowSpan="2" Panel.ZIndex="0">
-                <!-- 星云效果 -->
-                <Ellipse Canvas.Left="-50" Canvas.Top="150" Width="400" Height="300" Opacity="0.08">
-                    <Ellipse.Fill>
-                        <RadialGradientBrush>
-                            <GradientStop Color="#9F5FFF" Offset="0"/>
-                            <GradientStop Color="#6A42B8" Offset="0.5"/>
-                            <GradientStop Color="Transparent" Offset="1"/>
-                        </RadialGradientBrush>
-                    </Ellipse.Fill>
-                    <Ellipse.Effect>
-                        <BlurEffect Radius="30"/>
-                    </Ellipse.Effect>
-                </Ellipse>
-                
-                <Ellipse Canvas.Left="600" Canvas.Top="100" Width="450" Height="350" Opacity="0.1">
-                    <Ellipse.Fill>
-                        <RadialGradientBrush>
-                            <GradientStop Color="#5F9FFF" Offset="0"/>
-                            <GradientStop Color="#3A55AA" Offset="0.4"/>
-                            <GradientStop Color="Transparent" Offset="1"/>
-                        </RadialGradientBrush>
-                    </Ellipse.Fill>
-                    <Ellipse.Effect>
-                        <BlurEffect Radius="25"/>
-                    </Ellipse.Effect>
-                </Ellipse>
-                
-                <!-- 星星点缀 -->
-                <Ellipse Canvas.Left="120" Canvas.Top="80" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.9"/>
-                <Ellipse Canvas.Left="240" Canvas.Top="120" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                <Ellipse Canvas.Left="520" Canvas.Top="90" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                <Ellipse Canvas.Left="780" Canvas.Top="160" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.9"/>
-                <Ellipse Canvas.Left="650" Canvas.Top="370" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.95"/>
-                <Ellipse Canvas.Left="350" Canvas.Top="420" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.9"/>
-                <Ellipse Canvas.Left="190" Canvas.Top="390" Width="1.5" Height="1.5" Fill="#FFFFFF" Opacity="0.9"/>
-                <Ellipse Canvas.Left="840" Canvas.Top="250" Width="3" Height="3" Fill="#FFFFFF" Opacity="0.95"/>
-                <Ellipse Canvas.Left="950" Canvas.Top="350" Width="2" Height="2" Fill="#FFFFFF" Opacity="0.9"/>
-                <Ellipse Canvas.Left="1100" Canvas.Top="180" Width="2.5" Height="2.5" Fill="#FFFFFF" Opacity="0.95"/>
-                
-                <!-- 闪烁星 -->
-                <Ellipse Canvas.Left="550" Canvas.Top="180" Width="3.5" Height="3.5" Fill="#FFFFFF">
-                    <Ellipse.Effect>
-                        <DropShadowEffect ShadowDepth="0" BlurRadius="7" Color="#FFE0B0" Opacity="0.8"/>
-                    </Ellipse.Effect>
-                    <Ellipse.Triggers>
-                        <EventTrigger RoutedEvent="Ellipse.Loaded">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.4" Duration="0:0:2.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Ellipse.Triggers>
-                </Ellipse>
-                
-                <Ellipse Canvas.Left="280" Canvas.Top="250" Width="3" Height="3" Fill="#FFFFFF">
-                    <Ellipse.Effect>
-                        <DropShadowEffect ShadowDepth="0" BlurRadius="6" Color="#E0B0FF" Opacity="0.8"/>
-                    </Ellipse.Effect>
-                    <Ellipse.Triggers>
-                        <EventTrigger RoutedEvent="Ellipse.Loaded">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.3" Duration="0:0:3.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Ellipse.Triggers>
-                </Ellipse>
-            </Canvas>
 
             <!-- 标题栏 -->
             <Grid Grid.Row="0" Background="{StaticResource HeaderBackgroundBrush}" MouseDown="TitleBar_MouseDown" Panel.ZIndex="1">
@@ -525,4 +458,5 @@
             </Grid>
         </Grid>
     </Border>
+    </Grid>
 </Window> 

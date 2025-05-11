@@ -27,17 +27,12 @@ namespace HangKong_StarTrail.Views
     {
         private DispatcherTimer _loadingTimer = new DispatcherTimer();
         private DispatcherTimer _animationTimer = new DispatcherTimer();
-        private DispatcherTimer _particleTimer = new DispatcherTimer();
         private Random _random = new Random();
         private AxisAngleRotation3D? _sunRotationTransform;
         
         // 加载进度
         private int _currentProgress = 0;
         private int _targetProgress = 0;
-
-        // 粒子系统
-        private List<Particle> _particles = new List<Particle>();
-        private const int MaxParticles = 100;
 
         // 3D动画控制
         private double _sunRotationSpeed = 0.3;
@@ -207,35 +202,31 @@ namespace HangKong_StarTrail.Views
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // 初始化粒子系统
-            InitializeParticles();
-            
-            // 启动动画计时器
-            _animationTimer = new DispatcherTimer
+            try
             {
-                Interval = TimeSpan.FromMilliseconds(16)
-            };
-            _animationTimer.Tick += AnimationTimer_Tick;
-            _animationTimer.Start();
-            
-            // 启动粒子计时器
-            _particleTimer = new DispatcherTimer
+                Debug.WriteLine("开始加载启动屏幕...");
+                
+                // 1. 设置加载进度定时器
+                _loadingTimer.Interval = TimeSpan.FromMilliseconds(30);
+                _loadingTimer.Tick += LoadingTimer_Tick;
+                _loadingTimer.Start();
+                Debug.WriteLine("进度定时器已启动");
+                
+                // 2. 设置3D动画定时器
+                _animationTimer.Interval = TimeSpan.FromMilliseconds(16); // ~60fps
+                _animationTimer.Tick += AnimationTimer_Tick;
+                _animationTimer.Start();
+                Debug.WriteLine("动画定时器已启动");
+                
+                // 3. 开始模拟加载过程
+                SimulateLoading();
+                Debug.WriteLine("开始模拟加载过程");
+            }
+            catch (Exception ex)
             {
-                Interval = TimeSpan.FromMilliseconds(50)
-            };
-            _particleTimer.Tick += ParticleTimer_Tick;
-            _particleTimer.Start();
-            
-            // 启动加载进度计时器
-            _loadingTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(100)
-            };
-            _loadingTimer.Tick += LoadingTimer_Tick;
-            _loadingTimer.Start();
-            
-            // 模拟异步加载进程
-            SimulateLoading();
+                Debug.WriteLine($"窗口加载事件中发生异常: {ex.Message}");
+                MessageBox.Show($"启动屏幕初始化失败: {ex.Message}\n\n{ex.StackTrace}", "初始化错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private async void SimulateLoading()
@@ -379,63 +370,57 @@ namespace HangKong_StarTrail.Views
         {
             try
             {
-                // 关闭定时器
-                if (_animationTimer != null && _animationTimer.IsEnabled)
-                    _animationTimer.Stop();
+                Debug.WriteLine("正在完成加载...");
                 
-                if (_particleTimer != null && _particleTimer.IsEnabled)
-                    _particleTimer.Stop();
+                // 停止定时器
+                _loadingTimer.Stop();
+                _animationTimer.Stop();
                 
-                if (_loadingTimer != null && _loadingTimer.IsEnabled)
-                    _loadingTimer.Stop();
+                // 清理资源
+                
+                // 销毁定时器
+                _loadingTimer = null;
+                _animationTimer = null;
                 
                 Debug.WriteLine("所有定时器已停止");
                 
-                try
+                // 显示主窗口
+                Debug.WriteLine("正在创建主窗口...");
+                
+                // 用分派器延迟执行主窗口创建和显示，确保UI线程不会过载
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    // 关闭启动屏幕，显示主窗口
-                    Debug.WriteLine("正在创建主窗口...");
-                    
-                    // 用分派器延迟执行主窗口创建和显示，确保UI线程不会过载
-                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    try
                     {
-                        try
+                        var mainWindow = new MainWindow();
+                        Debug.WriteLine("主窗口已创建，准备显示");
+                        
+                        // 先显示主窗口，然后再关闭启动画面
+                        mainWindow.Show();
+                        Debug.WriteLine("主窗口已显示");
+                        
+                        // 延迟关闭启动窗口
+                        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            var mainWindow = new MainWindow();
-                            Debug.WriteLine("主窗口已创建，准备显示");
-                            
-                            // 先显示主窗口，然后再关闭启动画面
-                            mainWindow.Show();
-                            Debug.WriteLine("主窗口已显示");
-                            
-                            // 延迟关闭启动窗口
-                            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                            try
                             {
-                                try
-                                {
-                                    Debug.WriteLine("正在关闭启动窗口");
-                                    this.Close();
-                                    Debug.WriteLine("启动窗口已关闭");
-                                }
-                                catch (Exception ex)
-                                {
-                                    Debug.WriteLine($"关闭启动窗口时出错: {ex.Message}");
-                                    MessageBox.Show($"关闭启动窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                                }
-                            }), DispatcherPriority.Background);
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine($"创建或显示主窗口时出错: {ex.Message}");
-                            MessageBox.Show($"创建或显示主窗口时出错: {ex.Message}\n\n详细信息: {ex.StackTrace}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }), DispatcherPriority.Background);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"准备窗口转换时出错: {ex.Message}");
-                    MessageBox.Show($"准备窗口转换时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                                Debug.WriteLine("正在关闭启动窗口");
+                                this.Close();
+                                Debug.WriteLine("启动窗口已关闭");
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"关闭启动窗口时出错: {ex.Message}");
+                                MessageBox.Show($"关闭启动窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }), DispatcherPriority.Background);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"创建或显示主窗口时出错: {ex.Message}");
+                        MessageBox.Show($"创建或显示主窗口时出错: {ex.Message}\n\n详细信息: {ex.StackTrace}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }), DispatcherPriority.Background);
             }
             catch (Exception ex)
             {
@@ -500,18 +485,6 @@ namespace HangKong_StarTrail.Views
                         }
                     }
                 }
-            }
-        }
-
-        private void ParticleTimer_Tick(object? sender, EventArgs e)
-        {
-            // 更新粒子位置
-            UpdateParticles();
-            
-            // 创建新粒子
-            if (_particles.Count < MaxParticles && _random.NextDouble() < 0.3)
-            {
-                AddParticle();
             }
         }
 
@@ -673,90 +646,6 @@ namespace HangKong_StarTrail.Views
             }
         }
 
-        private void InitializeParticles()
-        {
-            // 初始创建一些粒子
-            for (int i = 0; i < MaxParticles / 2; i++)
-            {
-                AddParticle();
-            }
-        }
-
-        private void AddParticle()
-        {
-            // 创建新粒子
-            double x = _random.NextDouble() * ParticleCanvas.ActualWidth;
-            double y = _random.NextDouble() * ParticleCanvas.ActualHeight;
-            double size = _random.NextDouble() * 2 + 0.5;
-            
-            byte alpha = (byte)(_random.Next(100, 200));
-            Color color = Color.FromArgb(alpha, 255, 255, 255);
-            
-            Ellipse ellipse = new Ellipse
-            {
-                Width = size,
-                Height = size,
-                Fill = new SolidColorBrush(color)
-            };
-            
-            // 设置粒子位置
-            Canvas.SetLeft(ellipse, x);
-            Canvas.SetTop(ellipse, y);
-            
-            // 添加到粒子列表和Canvas中
-            _particles.Add(new Particle 
-            { 
-                Element = ellipse, 
-                VelocityX = (_random.NextDouble() - 0.5) * 0.5, 
-                VelocityY = (_random.NextDouble() - 0.5) * 0.5, 
-                Size = size,
-                AlphaChange = _random.NextDouble() * 0.01 - 0.005
-            });
-            
-            ParticleCanvas.Children.Add(ellipse);
-        }
-
-        private void UpdateParticles()
-        {
-            for (int i = _particles.Count - 1; i >= 0; i--)
-            {
-                Particle p = _particles[i];
-                
-                // 更新位置
-                double x = Canvas.GetLeft(p.Element) + p.VelocityX;
-                double y = Canvas.GetTop(p.Element) + p.VelocityY;
-                
-                // 更新透明度
-                SolidColorBrush brush = p.Element.Fill as SolidColorBrush;
-                if (brush != null)
-                {
-                    Color color = brush.Color;
-                    double alpha = color.A / 255.0 + p.AlphaChange;
-                    
-                    if (alpha < 0.1 || alpha > 0.8)
-                    {
-                        p.AlphaChange = -p.AlphaChange;
-                        alpha = Math.Clamp(alpha, 0.1, 0.8);
-                    }
-                    
-                    color = Color.FromArgb((byte)(alpha * 255), color.R, color.G, color.B);
-                    p.Element.Fill = new SolidColorBrush(color);
-                }
-                
-                // 检查边界，如果粒子超出边界，则移除
-                if (x < -10 || x > ParticleCanvas.ActualWidth + 10 || 
-                    y < -10 || y > ParticleCanvas.ActualHeight + 10)
-                {
-                    ParticleCanvas.Children.Remove(p.Element);
-                    _particles.RemoveAt(i);
-                    continue;
-                }
-                
-                Canvas.SetLeft(p.Element, x);
-                Canvas.SetTop(p.Element, y);
-            }
-        }
-        
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ButtonState == MouseButtonState.Pressed)
@@ -830,16 +719,6 @@ namespace HangKong_StarTrail.Views
             {
                 Debug.WriteLine($"调用更新进度条方法时出错: {ex.Message}");
             }
-        }
-
-        // 粒子系统的粒子类
-        public class Particle
-        {
-            public Ellipse Element { get; set; } = new Ellipse();
-            public double VelocityX { get; set; }
-            public double VelocityY { get; set; }
-            public double Size { get; set; }
-            public double AlphaChange { get; set; }
         }
     } 
 } 
