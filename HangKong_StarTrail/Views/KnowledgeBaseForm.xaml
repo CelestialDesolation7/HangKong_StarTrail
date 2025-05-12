@@ -244,7 +244,7 @@
                         <Button x:Name="StartTestButton"
                                 Content="开始测试"
                                 Foreground="White"
-                                FontSize="24"
+                                FontSize="22"
                                 Background="#4169E1"
                                 BorderThickness="0"
                                 HorizontalAlignment="Stretch"
