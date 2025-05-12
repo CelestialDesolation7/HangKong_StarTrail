@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Drawing;
+using SkiaSharp;
 using System.Collections.Generic;
 
 namespace HangKong_StarTrail.Models
@@ -20,13 +20,11 @@ namespace HangKong_StarTrail.Models
         // 仅在初始化时对用户可见，之后不再修改
         public int RenderRadius { get; set; }        // 绘制半径
         public bool IsCenter { get; set; }              // 是否为中心天体
-        public Color DisplayColor { get; set; }                // 绘制颜色
+        public SKColor DisplayColor { get; set; }                // 绘制颜色
         // 永远对用户隐藏
         public Vector2D DisplayPosition { get; set; }    // 画布上的位置
 
-
-
-        public Body(string name_in, Vector2D position_in, Vector2D velocity_in, double mass_in, int displayRadius_in, bool isCenter_in, Color color_in)
+        public Body(string name_in, Vector2D position_in, Vector2D velocity_in, double mass_in, int displayRadius_in, bool isCenter_in, SKColor color_in)
         {
             Name = name_in;
             Position = position_in;

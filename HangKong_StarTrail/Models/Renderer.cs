@@ -159,12 +159,7 @@ namespace HangKong_StarTrail.Models
             float radius = (float)body.RenderRadius;
 
             // 创建基础颜色
-            var centerColor = new SKColor(
-                body.DisplayColor.R,
-                body.DisplayColor.G,
-                body.DisplayColor.B,
-                body.DisplayColor.A
-            );
+            var centerColor = body.DisplayColor;
             var edgeColor = new SKColor(
                 (byte)(centerColor.Red * 0.5),
                 (byte)(centerColor.Green * 0.5),
@@ -230,12 +225,7 @@ namespace HangKong_StarTrail.Models
                 // 创建箭头画笔
                 using var arrowPaint = new SKPaint
                 {
-                    Color = new SKColor(
-                        body.DisplayColor.R,
-                        body.DisplayColor.G,
-                        body.DisplayColor.B,
-                        body.DisplayColor.A
-                        ),
+                    Color = body.DisplayColor,
                     StrokeWidth = 2,
                     IsAntialias = true
                 };

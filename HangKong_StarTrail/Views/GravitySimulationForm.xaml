@@ -290,10 +290,10 @@
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Center"
                                         Margin="0 0 0 0">
-                                <Button x:Name="LoadPresetBtn"
+                                <Button x:Name="ImportSceneBtn"
                                         Style="{StaticResource IconTextButtonStyle}"
                                         Margin="0 0 10 0"
-                                        Click="LoadPresetBtn_Click">
+                                        Click="ImportSceneButton_Click">
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="Upload"
@@ -305,10 +305,10 @@
                                                 VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
-                                <Button x:Name="ExportPresetBtn"
+                                <Button x:Name="ExportSceneBtn"
                                         Style="{StaticResource IconTextButtonStyle}"
                                         Margin="10 0 0 0"
-                                        Click="ExportPresetBtn_Click">
+                                        Click="ExportSceneButton_Click">
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="Download"
