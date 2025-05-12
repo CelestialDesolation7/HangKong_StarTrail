@@ -214,11 +214,13 @@ namespace HangKong_StarTrail.Views
                     {
                         if (child is Border border)
                         {
-                            var titleBlock = border.Child as StackPanel;
-                            if (titleBlock?.Children.Count > 0 && titleBlock.Children[0] is TextBlock textBlock)
+                            if (border.Child is StackPanel titleBlock)
                             {
-                                _sectionElements[textBlock.Text] = border;
-                                _allSections.Add(border);
+                                if (titleBlock.Children.Count > 0 && titleBlock.Children[0] is TextBlock textBlock)
+                                {
+                                    _sectionElements[textBlock.Text] = border;
+                                    _allSections.Add(border);
+                                }
                             }
                         }
                     }
@@ -618,17 +620,27 @@ namespace HangKong_StarTrail.Views
         {
             try
             {
-                if (CategoryList.SelectedItem is string selectedCategory)
+                // 用 AddedItems 获取本次选中的项
+                if (e.AddedItems == null || e.AddedItems.Count == 0) return;
+
+                string selectedCategory = e.AddedItems[0]?.ToString();
+                if (string.IsNullOrEmpty(selectedCategory)) return;
+
+                FrameworkElement targetSection = null;
+
+                if (_sectionElements.ContainsKey(selectedCategory))
                 {
-                    if (_sectionElements.TryGetValue(selectedCategory, out var element))
-                    {
-                        ScrollToElement(element);
-                    }
+                    targetSection = _sectionElements[selectedCategory];
+                }
+
+                if (targetSection != null)
+                {
+                    ScrollToElement(targetSection);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"选择分类错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"切换分类时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -636,33 +648,22 @@ namespace HangKong_StarTrail.Views
         {
             try
             {
-                // 使用Dispatcher确保在UI线程上执行
-                Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
-                {
-                    try
-                    {
-                        // 计算目标位置
-                        var transform = element.TransformToVisual(MainScrollViewer);
-                        var position = transform.Transform(new Point(0, 0));
+                if (element == null || MainScrollViewer == null) return;
 
-                        // 滚动到目标位置
-                        MainScrollViewer.ScrollToVerticalOffset(position.Y);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"滚动到元素错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }));
+                // 确保元素已经加载
+                element.UpdateLayout();
+
+                // 计算元素相对于滚动视图的位置
+                Point elementPosition = element.TransformToAncestor(MainScrollViewer)
+                    .Transform(new Point(0, 0));
+
+                // 滚动到元素位置
+                MainScrollViewer.ScrollToVerticalOffset(elementPosition.Y);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"滚动错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"滚动到元素时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void FavoritesButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("收藏功能正在开发中...", "提示");
         }
 
         private void DetailButton_Click(object sender, RoutedEventArgs e)
