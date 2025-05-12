@@ -62,12 +62,12 @@ namespace HangKong_StarTrail.Views
                 new PlanetInfo { 
                     Name = "水星", 
                     Description = "太阳系最内侧的行星，表面布满陨石坑，没有大气层保护。",
-                    DetailInfo = "水星是太阳系中距离太阳最近的行星，也是体积和质量最小的类地行星。它没有大气层，仅有极其稀薄的外壳，白昼温度可达430°C，而夜晚则骤降至-180°C。由于其轨道周期短，仅88地球日便绕太阳一周，因此在古代被称为“晨星”或“昏星”。水星表面布满了撞击坑，形态与月球类似，是太阳系中最原始的行星之一。"
+                    DetailInfo = "水星是太阳系中距离太阳最近的行星，也是体积和质量最小的类地行星。它没有大气层，仅有极其稀薄的外壳，白昼温度可达430°C，而夜晚则骤降至-180°C。由于其轨道周期短，仅88地球日便绕太阳一周，因此在古代被称为晨星或昏星。水星表面布满了撞击坑，形态与月球类似，是太阳系中最原始的行星之一。"
                 },
                 new PlanetInfo { 
                     Name = "金星", 
                     Description = "太阳系最热的行星，表面温度可达462℃，有浓厚的二氧化碳大气层。",
-                    DetailInfo = "金星是太阳系中与地球最相似的行星，大小、质量及组成均接近，但其表面环境却截然不同。金星拥有浓厚的大气层，以二氧化碳为主，产生极强的温室效应，使表面温度高达约465°C，是太阳系中最热的行星。金星大气中覆盖着硫酸云层，表面常年被厚重云雾遮蔽，无法直接观测。此外，它自转方向与其他行星相反，是一个“逆行”的行星。"
+                    DetailInfo = "金星是太阳系中与地球最相似的行星，大小、质量及组成均接近，但其表面环境却截然不同。金星拥有浓厚的大气层，以二氧化碳为主，产生极强的温室效应，使表面温度高达约465°C，是太阳系中最热的行星。金星大气中覆盖着硫酸云层，表面常年被厚重云雾遮蔽，无法直接观测。此外，它自转方向与其他行星相反，是一个逆行的行星。"
                 },
                 new PlanetInfo { 
                     Name = "地球", 
@@ -77,7 +77,7 @@ namespace HangKong_StarTrail.Views
                 new PlanetInfo { 
                     Name = "火星", 
                     Description = "被称为红色星球，拥有太阳系最高的火山和最深的峡谷。",
-                    DetailInfo = "火星被称为“红色星球”，因其表面覆盖着富含氧化铁的尘土而呈现出红色。它比地球小，拥有稀薄的大气层，主要成分为二氧化碳。火星表面存在大量干涸的河道和峡谷，暗示着其远古时期可能曾有液态水存在。近年来对火星的探索主要集中在寻找生命迹象和未来人类移民的可行性。奥林帕斯山是火星上的著名地标，也是太阳系中最高的山峰。"
+                    DetailInfo = "火星被称为红色星球，因其表面覆盖着富含氧化铁的尘土而呈现出红色。它比地球小，拥有稀薄的大气层，主要成分为二氧化碳。火星表面存在大量干涸的河道和峡谷，暗示着其远古时期可能曾有液态水存在。近年来对火星的探索主要集中在寻找生命迹象和未来人类移民的可行性。奥林帕斯山是火星上的著名地标，也是太阳系中最高的山峰。"
                 },
                 new PlanetInfo { 
                     Name = "木星", 
@@ -92,17 +92,17 @@ namespace HangKong_StarTrail.Views
                 new PlanetInfo { 
                     Name = "天王星", 
                     Description = "第一个通过望远镜发现的行星，自转轴几乎平行于公转轨道。",
-                    DetailInfo = "天王星是太阳系中第七颗行星，属于“冰巨星”类型，其内部富含水、氨和甲烷等“冰状”物质。天王星最大的特征是自转轴几乎与轨道平面平行，造成了极端的季节变化。其大气以氢和氦为主，混有少量甲烷，使其呈现出淡蓝绿色调。天王星拥有13个已知环和27颗卫星，环系统暗淡且难以观测。"
+                    DetailInfo = "天王星是太阳系中第七颗行星，属于冰巨星类型，其内部富含水、氨和甲烷等冰状物质。天王星最大的特征是自转轴几乎与轨道平面平行，造成了极端的季节变化。其大气以氢和氦为主，混有少量甲烷，使其呈现出淡蓝绿色调。天王星拥有13个已知环和27颗卫星，环系统暗淡且难以观测。"
                 },
                 new PlanetInfo { 
                     Name = "海王星", 
                     Description = "太阳系最外侧的行星，有强烈的风暴系统，风速可达每小时2100公里。",
-                    DetailInfo = "海王星是离太阳最远的行星，也是另一个“冰巨星”。它以湛蓝的外表和极其活跃的大气系统而著称，拥有太阳系中最快的风速，可超过每小时2000公里。大气中甲烷含量导致其呈深蓝色。海王星拥有多个环系统和14颗已知卫星，其中最大的是海卫一（Triton），被认为可能是一个被俘获的柯伊伯带天体。"
+                    DetailInfo = "海王星是离太阳最远的行星，也是另一个冰巨星。它以湛蓝的外表和极其活跃的大气系统而著称，拥有太阳系中最快的风速，可超过每小时2000公里。大气中甲烷含量导致其呈深蓝色。海王星拥有多个环系统和14颗已知卫星，其中最大的是海卫一（Triton），被认为可能是一个被俘获的柯伊伯带天体。"
                 },
                 new PlanetInfo {
                     Name = "冥王星",
                     Description = "曾经的第九大行星，现在被归为矮行星。",
-                    DetailInfo = "冥王星是柯伊伯带中最著名的矮行星，曾被认为是第九大行星。它的轨道偏心率和倾角都较大，且轨道周期为248年。冥王星表面由冰和岩石组成，存在稀薄的大气层，其最大卫星卡戎（Charon）与其大小相近，两者构成独特的“双星系统”。2006年国际天文学联合会将冥王星重新归类为矮行星。"
+                    DetailInfo = "冥王星是柯伊伯带中最著名的矮行星，曾被认为是第九大行星。它的轨道偏心率和倾角都较大，且轨道周期为248年。冥王星表面由冰和岩石组成，存在稀薄的大气层，其最大卫星卡戎（Charon）与其大小相近，两者构成独特的双星系统。2006年国际天文学联合会将冥王星重新归类为矮行星。"
                 },
                 new PlanetInfo {
                     Name = "谷神星",
@@ -207,21 +207,28 @@ namespace HangKong_StarTrail.Views
                 // 初始化各个部分的引用
                 _sectionElements = new Dictionary<string, FrameworkElement>();
                 _allSections = new List<FrameworkElement>();
-                _mainContentPanel = MainScrollViewer.Content as StackPanel;
                 
-                if (_mainContentPanel != null)
+                // 如果MainScrollViewer.Content不是StackPanel，则新建一个
+                if (MainScrollViewer.Content is StackPanel sp)
                 {
-                    foreach (var child in _mainContentPanel.Children)
+                    _mainContentPanel = sp;
+                }
+                else
+                {
+                    _mainContentPanel = new StackPanel();
+                    MainScrollViewer.Content = _mainContentPanel;
+                }
+
+                foreach (var child in _mainContentPanel.Children)
+                {
+                    if (child is Border border)
                     {
-                        if (child is Border border)
+                        if (border.Child is StackPanel titleBlock)
                         {
-                            if (border.Child is StackPanel titleBlock)
+                            if (titleBlock.Children.Count > 0 && titleBlock.Children[0] is TextBlock textBlock)
                             {
-                                if (titleBlock.Children.Count > 0 && titleBlock.Children[0] is TextBlock textBlock)
-                                {
-                                    _sectionElements[textBlock.Text] = border;
-                                    _allSections.Add(border);
-                                }
+                                _sectionElements[textBlock.Text] = border;
+                                _allSections.Add(border);
                             }
                         }
                     }
@@ -747,6 +754,12 @@ namespace HangKong_StarTrail.Views
             {
                 MessageBox.Show($"显示详情错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void StartTestButton_Click(object sender, RoutedEventArgs e)
+        {
+            var testWindow = new TestWindow();
+            testWindow.ShowDialog();
         }
     }
 
