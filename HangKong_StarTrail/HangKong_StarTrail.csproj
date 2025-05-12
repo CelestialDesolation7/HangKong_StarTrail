@@ -26,5 +26,13 @@
     <Resource Include="StyleResources\Images\*.jpg" />
     <Resource Include="StyleResources\Images\*.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Data\scene.db" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\scene.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>
