@@ -271,8 +271,8 @@
                                 <!-- 速度设置模式按钮 -->
                                 <Button Style="{StaticResource IconTextButtonStyle}"
                                         Margin="10 0 0 0"
-                                        x:Name="VelocitySettingModeBtn"
-                                        Click="VelocitySettingModeBtn_Click">
+                                        x:Name="VelocityVisualizeModeBtn"
+                                        Click="VelocityVisualizeModeBtn_Click">
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="ArrowCircleOutlineUp"
@@ -402,9 +402,8 @@
                                        FontWeight="Normal"
                                        HorizontalAlignment="Center"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="m/px"
+                                       Text="每像素"
                                        FontSize="20"
-                                       FontWeight="Normal"
                                        HorizontalAlignment="Center"/>
                             </StackPanel>
                         </StackPanel>

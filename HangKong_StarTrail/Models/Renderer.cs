@@ -6,17 +6,22 @@ using System.Threading.Tasks;
 using System.Drawing;
 using SkiaSharp;
 using System.Threading;
+using System.Diagnostics;
 
 namespace HangKong_StarTrail.Models
 {
     public class Renderer
     {
         public PhysicsEngine _physicsEngine;
+        private double _timeStep;
+        private double _pixelToDistanceRatio;
         private object _renderLock = new object();
         private SKPaint _bodyPaint;
         private SKPaint _glowPaint;
         private SKPaint _highlightPaint;
         private SKPaint _starPaint;
+        private float _starOffsetX;
+        private float _starOffsetY;
         private readonly Random _random = new Random();
         private readonly List<Star> _stars = new List<Star>();
         private const int STAR_COUNT = 200;
@@ -36,6 +41,8 @@ namespace HangKong_StarTrail.Models
         public Renderer(PhysicsEngine physicsEngine)
         {
             _physicsEngine = physicsEngine;
+            _timeStep = 1.0;
+            _pixelToDistanceRatio = 1.0;
 
             // 初始化天体画笔
             _bodyPaint = new SKPaint
@@ -67,6 +74,16 @@ namespace HangKong_StarTrail.Models
                 Style = SKPaintStyle.Fill,
                 BlendMode = SKBlendMode.Screen
             };
+        }
+
+        public void SetTimeStep(double timeStep)
+        {
+            _timeStep = timeStep;
+        }
+
+        public void SetPixelToDistanceRatio(double ratio)
+        {
+            _pixelToDistanceRatio = ratio;
         }
 
         private void GenerateStars(float width, float height)
@@ -113,13 +130,13 @@ namespace HangKong_StarTrail.Models
 
                 // 绘制星星
                 _starPaint.Color = new SKColor(255, 255, 255, alpha);
-                canvas.DrawCircle(star.X, star.Y, star.Size, _starPaint);
+                canvas.DrawCircle((star.X + _starOffsetX) % width, (star.Y + _starOffsetY) % height, star.Size, _starPaint);
 
                 // 为较亮的星星添加光晕
                 if (alpha > 100)
                 {
                     _starPaint.Color = new SKColor(255, 255, 255, (byte)(alpha * 0.3));
-                    canvas.DrawCircle(star.X, star.Y, star.Size * 2, _starPaint);
+                    canvas.DrawCircle((star.X + _starOffsetX + width) % width, (star.Y + _starOffsetY + height) % height, star.Size * 2, _starPaint);
                 }
             }
         }
@@ -196,6 +213,71 @@ namespace HangKong_StarTrail.Models
             );
         }
 
+        public void RenderVelocityArrow(SKCanvas canvas)
+        {
+            foreach (var body in _physicsEngine.Bodies)
+            {
+                // 计算箭头长度（像素）
+                double arrowLength = 120 * _timeStep * body.Velocity.Length * _pixelToDistanceRatio;
+
+                // 如果速度太小，不绘制箭头
+                if (arrowLength < 1) continue;
+
+                // 计算箭头终点
+                Vector2D velocityDirection = body.Velocity.Normalize();
+                Vector2D arrowEnd = body.DisplayPosition + velocityDirection * arrowLength;
+
+                // 创建箭头画笔
+                using var arrowPaint = new SKPaint
+                {
+                    Color = new SKColor(
+                        body.DisplayColor.R,
+                        body.DisplayColor.G,
+                        body.DisplayColor.B,
+                        body.DisplayColor.A
+                        ),
+                    StrokeWidth = 2,
+                    IsAntialias = true
+                };
+
+                // 绘制箭头主体
+                canvas.DrawLine(
+                    (float)body.DisplayPosition.X,
+                    (float)body.DisplayPosition.Y,
+                    (float)arrowEnd.X,
+                    (float)arrowEnd.Y,
+                    arrowPaint
+                );
+
+                // 计算箭头头部
+                double arrowHeadLength = Math.Min(arrowLength * 0.2, 10); // 箭头头部长度
+                double arrowHeadAngle = Math.PI / 6; // 30度角
+
+                // 计算箭头头部的两个点
+                Vector2D backDirection = -velocityDirection;
+                Vector2D perpendicular = new Vector2D(-velocityDirection.Y, velocityDirection.X);
+
+                Vector2D arrowHead1 = arrowEnd + backDirection * arrowHeadLength + perpendicular * arrowHeadLength * Math.Sin(arrowHeadAngle);
+                Vector2D arrowHead2 = arrowEnd + backDirection * arrowHeadLength - perpendicular * arrowHeadLength * Math.Sin(arrowHeadAngle);
+
+                // 绘制箭头头部
+                canvas.DrawLine(
+                    (float)arrowEnd.X,
+                    (float)arrowEnd.Y,
+                    (float)arrowHead1.X,
+                    (float)arrowHead1.Y,
+                    arrowPaint
+                );
+                canvas.DrawLine(
+                    (float)arrowEnd.X,
+                    (float)arrowEnd.Y,
+                    (float)arrowHead2.X,
+                    (float)arrowHead2.Y,
+                    arrowPaint
+                );
+            }
+        }
+
         public void UpdatePhysics(double deltaT)
         {
             _physicsEngine.Update(deltaT);
@@ -206,9 +288,10 @@ namespace HangKong_StarTrail.Models
             _physicsEngine.Bodies.Add(body);
         }
 
-        public void RenderText(SKCanvas canvas)
+        public void UpdateStarOffset(float cameraMoveX, float cameraMoveY)
         {
-            // TODO: 实现文本渲染
+            _starOffsetX = (_starOffsetX + cameraMoveX) % _canvasWidth;
+            _starOffsetY = (_starOffsetY + cameraMoveY) % _canvasHeight;
         }
 
         public void Dispose()
