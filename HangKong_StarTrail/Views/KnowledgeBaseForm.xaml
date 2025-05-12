@@ -240,6 +240,21 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
+                        <!-- 在此处添加开始测试按钮 -->
+                        <Button x:Name="StartTestButton"
+                                Content="开始测试"
+                                Foreground="White"
+                                FontSize="24"
+                                Background="#4169E1"
+                                BorderThickness="0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Padding="0,16"
+                                Margin="20,40,20,0"
+                                Height="60"
+                                MinWidth="180"
+                                Click="StartTestButton_Click"
+                                Cursor="Hand"/>
                     </StackPanel>
                 </Border>
                 
