@@ -232,16 +232,21 @@ namespace HangKong_StarTrail.Views
             };
             Grid.SetRow(scoreText, 0);
             grid.Children.Add(scoreText);
-            var wrongBlock = new TextBlock
+            // 用TextBox替换TextBlock+ScrollViewer，支持拖动
+            var wrongBox = new TextBox
             {
                 Text = wrongList.Count == 0 ? "全部答对，太棒了！" : "错题：\n\n" + string.Join("\n", wrongList),
                 Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E0E0FF")),
                 FontSize = 20,
                 Margin = new Thickness(30, 0, 30, 20),
-                TextWrapping = TextWrapping.Wrap
+                TextWrapping = TextWrapping.Wrap,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                IsReadOnly = true,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto
             };
-            Grid.SetRow(wrongBlock, 1);
-            grid.Children.Add(wrongBlock);
+            Grid.SetRow(wrongBox, 1);
+            grid.Children.Add(wrongBox);
             win.Content = grid;
             win.ShowDialog();
         }
