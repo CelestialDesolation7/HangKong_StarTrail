@@ -45,9 +45,6 @@ namespace HangKong_StarTrail.Views
         private DateTime _lastPhysicsUpdate;        // 上次物理更新时间
         private bool _isRenderingEnabled = true;    // 是否启用渲染
         private bool _isFrameRendering = false; // 当前帧是否正在渲染
-        private ChartsView? _chartsView;           // 图表视图
-        private DispatcherTimer _dataReportTimer;   // 数据汇报计时器
-        private double _lastDeltaV = 0;            // 上次Δv值
         #endregion
 
         #region 仿真参数设置
@@ -108,7 +105,6 @@ namespace HangKong_StarTrail.Views
             InitializeSimulation();
             InitializeDebugWindow();
             InitializeStatisticsRecord();
-            InitializeChartsView();
 
             // 等待控件完成布局后再计算推荐比例尺
             animationCanva.Loaded += (s, e) =>
@@ -121,83 +117,8 @@ namespace HangKong_StarTrail.Views
                 _renderer.SetTimeStep(_timeStep);
                 _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
             };
-        }
 
-        private void InitializeChartsView()
-        {
-            _chartsView = new ChartsView();
-            var chartsWindow = new Window
-            {
-                Title = "天体运动数据",
-                Content = _chartsView,
-                Width = 800,
-                Height = 600,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen
-            };
-            chartsWindow.Show();
 
-            // 初始化数据汇报计时器
-            _dataReportTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(10) // 10ms汇报一次数据
-            };
-            _dataReportTimer.Tick += DataReportTimer_Tick;
-            _dataReportTimer.Start();
-        }
-
-        private void DataReportTimer_Tick(object? sender, EventArgs e)
-        {
-            if (_focusedBody == null || _chartsView == null) return;
-
-            // 计算高度（相对于中心天体的距离）
-            double height = 0;
-            if (_centerBody != null)
-            {
-                height = (_focusedBody.Position - _centerBody.Position).Length;
-            }
-
-            // 计算速度
-            double speed = _focusedBody.Velocity.Length;
-
-            // 计算Δv（速度变化）
-            double currentDeltaV = Math.Abs(speed - _lastDeltaV);
-            _lastDeltaV = speed;
-
-            // 获取所有天体的速度
-            var raceSpeeds = _renderer._physicsEngine.Bodies
-                .Select(b => b.Velocity.Length)
-                .OrderByDescending(v => v)
-                .ToArray();
-
-            // 更新图表
-            _chartsView.UpdateData(height, speed, currentDeltaV, raceSpeeds);
-        }
-
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
-            _dataReportTimer?.Stop();
-            _chartsView?.ClearData();
-            // 停止所有计时器和任务
-            _physicsUpdateCts?.Cancel();
-            _simulationTimer?.Stop();
-            _uiUpdateTimer?.Stop();
-            CompositionTarget.Rendering -= RenderCaller;
-
-            // 等待物理更新任务完成
-            if (_physicsUpdateTask != null && !_physicsUpdateTask.IsCompleted)
-            {
-                try
-                {
-                    _physicsUpdateTask.Wait(1000); // 等待最多1秒
-                }
-                catch (AggregateException)
-                {
-                    // 忽略取消异常
-                }
-            }
-
-            _debugWindow?.Close();
         }
 
         // 初始化所有参数设置
@@ -620,6 +541,32 @@ namespace HangKong_StarTrail.Views
             double pixelWidth = animationCanva.ActualWidth * matrix.M11;
             double pixelHeight = animationCanva.ActualHeight * matrix.M22;
             _canvasCenter = new Vector2D(pixelWidth / 2, pixelHeight / 2);
+        }
+
+        // 窗口关闭时的线程处理函数
+        protected override void OnClosed(EventArgs e)
+        {
+            // 停止所有计时器和任务
+            _physicsUpdateCts?.Cancel();
+            _simulationTimer?.Stop();
+            _uiUpdateTimer?.Stop();
+            CompositionTarget.Rendering -= RenderCaller;
+
+            // 等待物理更新任务完成
+            if (_physicsUpdateTask != null && !_physicsUpdateTask.IsCompleted)
+            {
+                try
+                {
+                    _physicsUpdateTask.Wait(1000); // 等待最多1秒
+                }
+                catch (AggregateException)
+                {
+                    // 忽略取消异常
+                }
+            }
+
+            _debugWindow?.Close();
+            base.OnClosed(e);
         }
 
         // 位置输入输出框的键盘事件处理函数
