@@ -218,7 +218,7 @@
                                 </Button.ContentTemplate>
                             </Button>
                             
-                            <Button Content="查看仿真图表" Style="{StaticResource MainButtonStyle}" Click="ViewCharts_Click" Margin="0,20,0,0">
+                            <Button Content="查看仿真图表" Style="{StaticResource MainButtonStyle}" Click="ViewCharts_Click" Margin="0,0,0,20">
                                 <Button.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                         <GradientStop Color="#3B2F56" Offset="0"/>
@@ -248,7 +248,7 @@
                                 </Button.Triggers>
                             </Button>
                             
-                            <Button Content="退出系统" Style="{StaticResource MainButtonStyle}" Click="Exit_Click" Margin="0,20,0,0">
+                            <Button Content="退出系统" Style="{StaticResource MainButtonStyle}" Click="Exit_Click" Margin="0,0,0,20">
                                 <Button.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                         <GradientStop Color="#473765" Offset="0"/>

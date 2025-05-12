@@ -206,7 +206,15 @@ namespace HangKong_StarTrail.Views
         private void ViewCharts_Click(object sender, RoutedEventArgs e)
         {
             var chartsView = new ChartsView();
-            chartsView.Show();
+            var window = new Window
+            {
+                Title = "仿真图表",
+                Content = chartsView,
+                Width = 1200,
+                Height = 800,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
+            };
+            window.Show();
         }
 
         #endregion
