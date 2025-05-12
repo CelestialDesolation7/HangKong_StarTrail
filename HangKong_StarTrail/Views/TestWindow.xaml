@@ -33,66 +33,6 @@
                     </Setter>
                 </Style>
             </TabControl.Resources>
-            <!-- 题目1 -->
-            <TabItem Header="第1题" >
-                <StackPanel Margin="40">
-                    <TextBlock Text="1. 太阳系中最大的行星是？" Foreground="#E0E0FF" FontSize="24" FontWeight="Bold" Margin="0,0,0,30" TextAlignment="Center" HorizontalAlignment="Center"/>
-                    <UniformGrid Columns="1" Rows="4" Margin="0,0,0,30">
-                        <Button Content="A. 地球" Name="Q1A" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="B. 木星" Name="Q1B" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="C. 土星" Name="Q1C" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="D. 火星" Name="Q1D" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                    </UniformGrid>
-                </StackPanel>
-            </TabItem>
-            <!-- 题目2 -->
-            <TabItem Header="第2题">
-                <StackPanel Margin="40">
-                    <TextBlock Text="2. 被称为红色星球的行星是？" Foreground="#E0E0FF" FontSize="24" FontWeight="Bold" Margin="0,0,0,30" TextAlignment="Center" HorizontalAlignment="Center"/>
-                    <UniformGrid Columns="1" Rows="4" Margin="0,0,0,30">
-                        <Button Content="A. 金星" Name="Q2A" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="B. 火星" Name="Q2B" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="C. 木星" Name="Q2C" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="D. 土星" Name="Q2D" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                    </UniformGrid>
-                </StackPanel>
-            </TabItem>
-            <!-- 题目3 -->
-            <TabItem Header="第3题">
-                <StackPanel Margin="40">
-                    <TextBlock Text="3. 太阳系中距离太阳最近的行星是？" Foreground="#E0E0FF" FontSize="24" FontWeight="Bold" Margin="0,0,0,30" TextAlignment="Center" HorizontalAlignment="Center"/>
-                    <UniformGrid Columns="1" Rows="4" Margin="0,0,0,30">
-                        <Button Content="A. 水星" Name="Q3A" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="B. 金星" Name="Q3B" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="C. 地球" Name="Q3C" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="D. 火星" Name="Q3D" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                    </UniformGrid>
-                </StackPanel>
-            </TabItem>
-            <!-- 题目4 -->
-            <TabItem Header="第4题">
-                <StackPanel Margin="40">
-                    <TextBlock Text="4. 太阳系中最大的卫星是？" Foreground="#E0E0FF" FontSize="24" FontWeight="Bold" Margin="0,0,0,30" TextAlignment="Center" HorizontalAlignment="Center"/>
-                    <UniformGrid Columns="1" Rows="4" Margin="0,0,0,30">
-                        <Button Content="A. 月球" Name="Q4A" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="B. 木卫一" Name="Q4B" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="C. 土卫六" Name="Q4C" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="D. 海卫一" Name="Q4D" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                    </UniformGrid>
-                </StackPanel>
-            </TabItem>
-            <!-- 题目5 -->
-            <TabItem Header="第5题">
-                <StackPanel Margin="40">
-                    <TextBlock Text="5. 太阳系中唯一已知存在生命的行星是？" Foreground="#E0E0FF" FontSize="24" FontWeight="Bold" Margin="0,0,0,30" TextAlignment="Center" HorizontalAlignment="Center"/>
-                    <UniformGrid Columns="1" Rows="4" Margin="0,0,0,30">
-                        <Button Content="A. 火星" Name="Q5A" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="B. 地球" Name="Q5B" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="C. 金星" Name="Q5C" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                        <Button Content="D. 木星" Name="Q5D" Click="Option_Click" Margin="0,10" Padding="0,10" Background="#252550" Foreground="#E0E0FF" FontFamily="Microsoft YaHei" Height="60" Width="400" FontSize="22"/>
-                    </UniformGrid>
-                </StackPanel>
-            </TabItem>
         </TabControl>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,40" Panel.ZIndex="2">
             <Button Content="上一题" Click="PrevTab_Click" Margin="0,0,20,0" Padding="0,10" Background="#4169E1" Foreground="White" FontSize="22" MinWidth="200" Height="60"/>
