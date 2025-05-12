@@ -27,7 +27,14 @@ namespace HangKong_StarTrail.Models
         private const int STAR_COUNT = 200;
         private float _canvasWidth;
         private float _canvasHeight;
-
+        // 最小显示半径
+        public double _minimumDisplayRadius = 15;
+        public double _velocityLengthFactor = 60;
+        public void InitializeRenderer()
+        {
+            _starOffsetX = 0;
+            _starOffsetY = 0;
+        }
         private class Star
         {
             public float X { get; set; }
@@ -156,7 +163,10 @@ namespace HangKong_StarTrail.Models
         private void RenderBody(SKCanvas canvas, Body body)
         {
             var displayPos = body.DisplayPosition;
-            float radius = (float)body.RenderRadius;
+            // Calculate display radius based on physical radius and pixel-to-distance ratio
+            float calculatedRadius = (float)(body.PhysicalRadius * _pixelToDistanceRatio);
+            // Use MIN_DISPLAY_RADIUS if calculated radius is too small
+            float radius = Math.Max(calculatedRadius, (float)_minimumDisplayRadius);
 
             // 创建基础颜色
             var centerColor = body.DisplayColor;
@@ -213,7 +223,7 @@ namespace HangKong_StarTrail.Models
             foreach (var body in _physicsEngine.Bodies)
             {
                 // 计算箭头长度（像素）
-                double arrowLength = 120 * _timeStep * body.Velocity.Length * _pixelToDistanceRatio;
+                double arrowLength = _velocityLengthFactor * _timeStep * body.Velocity.Length * _pixelToDistanceRatio;
 
                 // 如果速度太小，不绘制箭头
                 if (arrowLength < 1) continue;

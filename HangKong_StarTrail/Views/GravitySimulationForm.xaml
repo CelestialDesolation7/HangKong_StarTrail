@@ -10,7 +10,7 @@
     xmlns:hc="https://handyorg.github.io/handycontrol"
     x:Class="HangKong_StarTrail.Views.GravitySimulationForm"
     mc:Ignorable="d"
-    Height="720"
+    Height="800"
     Width="1280"
     WindowStartupLocation="CenterScreen"
     AllowsTransparency="True"
@@ -245,11 +245,43 @@
                             </StackPanel>
                             <hc:ComboBox Style="{StaticResource InputComboBoxStyle}"
                                      AutomationProperties.HelpText="cesqwiybx"
-                                     x:Name="FocusIOTextBox"
+                                     x:Name="FocusIOComboBox"
                                      ItemContainerStyle="{StaticResource ComboBoxItemStyle}"
-                                     SelectionChanged="FocusIOTextBox_SelectionChanged"/>
+                                     SelectionChanged="FocusIOComboBox_SelectionChanged"/>
 
-                            <!-- 时间流向控制/轨迹显示模式 -->
+
+                            <!-- 最小天体半径设置 -->
+                            <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                                <fa:ImageAwesome Icon="Circle"
+                                             Foreground="White"
+                                             Height="20"
+                                             Margin="5"/>
+                                <TextBlock Style="{StaticResource LabelStyle}"
+                                       Text="天体最小显示半径"/>
+                            </StackPanel>
+                            <hc:TextBox x:Name="MinimumDisplayRadiusIOTextBox"
+                                 Style="{StaticResource InputTextBoxStyle}"
+                                 Text="15"
+                                 KeyDown="MinimumDisplayRadiusIOTextBox_KeyDown"/>
+
+
+                            <!-- 速度向量显示长度比例 -->
+                            <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                                <fa:ImageAwesome Icon="ArrowsAlt"
+                                             Foreground="White"
+                                             Height="20"
+                                             Margin="5"/>
+                                <TextBlock Style="{StaticResource LabelStyle}"
+                                       Text="速度向量显示长度比例"/>
+                            </StackPanel>
+                            <hc:TextBox x:Name="VelocityLengthFactorIOTextBox"
+                                 Style="{StaticResource InputTextBoxStyle}"
+                                 Text="60"
+                                 KeyDown="VelocityLengthFactorIOTextBox_KeyDown"/>
+
+                            <!-- 时间流向控制/速度显示模式 -->
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Center"
                                         Margin="0 8 0 8">
