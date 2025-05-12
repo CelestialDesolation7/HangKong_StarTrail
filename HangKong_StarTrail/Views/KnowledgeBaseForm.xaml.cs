@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Windows.Media.Imaging;
 
 namespace HangKong_StarTrail.Views
 {
@@ -61,57 +62,57 @@ namespace HangKong_StarTrail.Views
                 new PlanetInfo { 
                     Name = "水星", 
                     Description = "太阳系最内侧的行星，表面布满陨石坑，没有大气层保护。",
-                    DetailInfo = "水星是太阳系中最小的行星，也是距离太阳最近的行星。它的表面布满了陨石坑，没有大气层的保护，因此温差极大，白天温度可达427℃，夜晚则降至-173℃。水星的自转周期为58.6个地球日，公转周期为88个地球日。"
+                    DetailInfo = "水星是太阳系中距离太阳最近的行星，也是体积和质量最小的类地行星。它没有大气层，仅有极其稀薄的外壳，白昼温度可达430°C，而夜晚则骤降至-180°C。由于其轨道周期短，仅88地球日便绕太阳一周，因此在古代被称为“晨星”或“昏星”。水星表面布满了撞击坑，形态与月球类似，是太阳系中最原始的行星之一。"
                 },
                 new PlanetInfo { 
                     Name = "金星", 
                     Description = "太阳系最热的行星，表面温度可达462℃，有浓厚的二氧化碳大气层。",
-                    DetailInfo = "金星是太阳系中第二颗行星，也是太阳系中最热的行星。它的大气层主要由二氧化碳组成，造成了强烈的温室效应，使表面温度高达462℃。金星的自转方向与公转方向相反，是太阳系中唯一一个逆向自转的行星。"
+                    DetailInfo = "金星是太阳系中与地球最相似的行星，大小、质量及组成均接近，但其表面环境却截然不同。金星拥有浓厚的大气层，以二氧化碳为主，产生极强的温室效应，使表面温度高达约465°C，是太阳系中最热的行星。金星大气中覆盖着硫酸云层，表面常年被厚重云雾遮蔽，无法直接观测。此外，它自转方向与其他行星相反，是一个“逆行”的行星。"
                 },
                 new PlanetInfo { 
                     Name = "地球", 
                     Description = "太阳系中唯一已知存在生命的行星，表面71%被水覆盖。",
-                    DetailInfo = "地球是太阳系中第三颗行星，也是目前已知唯一存在生命的行星。地球表面71%被水覆盖，大气层主要由氮气和氧气组成。地球的自转周期为24小时，公转周期为365.25天。地球有一个天然卫星——月球。"
+                    DetailInfo = "地球是目前唯一已知存在生命的天体，拥有稳定的气候系统和液态水覆盖的大面积海洋。大气层由氮气和氧气构成，有效调节温度并保护生命免受宇宙辐射。地球的自转轴有23.5度的倾角，导致了四季更替；同时它也是唯一拥有板块构造、磁场保护和丰富生态系统的行星，是太阳系中最复杂且活跃的地质体。"
                 },
                 new PlanetInfo { 
                     Name = "火星", 
                     Description = "被称为红色星球，拥有太阳系最高的火山和最深的峡谷。",
-                    DetailInfo = "火星是太阳系中第四颗行星，因其表面富含氧化铁而呈现红色。火星拥有太阳系最高的火山奥林匹斯山（高度约21.9公里）和最深的峡谷水手谷（长度约4000公里）。火星有两个小卫星：火卫一和火卫二。"
+                    DetailInfo = "火星被称为“红色星球”，因其表面覆盖着富含氧化铁的尘土而呈现出红色。它比地球小，拥有稀薄的大气层，主要成分为二氧化碳。火星表面存在大量干涸的河道和峡谷，暗示着其远古时期可能曾有液态水存在。近年来对火星的探索主要集中在寻找生命迹象和未来人类移民的可行性。奥林帕斯山是火星上的著名地标，也是太阳系中最高的山峰。"
                 },
                 new PlanetInfo { 
                     Name = "木星", 
                     Description = "太阳系最大的行星，主要由氢和氦组成，有著名的大红斑。",
-                    DetailInfo = "木星是太阳系中最大的行星，主要由氢和氦组成。它最著名的特征是大红斑，这是一个持续了至少300年的巨大风暴。木星有79颗已知的卫星，其中最大的四颗被称为伽利略卫星。"
+                    DetailInfo = "木星是太阳系中体积和质量最大的行星，是一颗典型的气态巨行星。其大气主要由氢和氦构成，表面并无固态地壳，拥有壮观的云带和长期存在的大红斑——一个超强风暴系统。木星具有强大的磁场和辐射带，并拥有超过90颗已知的卫星，其中最著名的包括木卫一（Io）、木卫二（Europa）、木卫三（Ganymede）和木卫四（Callisto），它们是太阳系中最值得探索的天然卫星之一。"
                 },
                 new PlanetInfo { 
                     Name = "土星", 
                     Description = "以其壮观的环系而闻名，密度是太阳系行星中最低的。",
-                    DetailInfo = "土星是太阳系中第二大的行星，以其壮观的环系而闻名。土星的密度是太阳系行星中最低的，如果有一个足够大的水池，土星会漂浮在水面上。土星有82颗已知的卫星，其中最大的土卫六是太阳系中唯一拥有浓厚大气层的卫星。"
+                    DetailInfo = "土星是以其壮丽光环系统著称的气态巨行星。它的环由无数冰块和微小尘粒组成，环结构复杂并分为多个带。土星本身主要由氢气构成，密度低至低于水，是太阳系中密度最小的行星。它也拥有众多卫星，其中包括可能存在地下海洋的土卫六（Titan）与土卫二（Enceladus），这两个天体被认为有潜在的生命存在可能。"
                 },
                 new PlanetInfo { 
                     Name = "天王星", 
                     Description = "第一个通过望远镜发现的行星，自转轴几乎平行于公转轨道。",
-                    DetailInfo = "天王星是太阳系中第七颗行星，是第一个通过望远镜发现的行星。它的自转轴几乎平行于公转轨道，就像是在侧躺着公转。天王星有27颗已知的卫星，其中最大的五颗是：天卫一、天卫二、天卫三、天卫四和天卫五。"
+                    DetailInfo = "天王星是太阳系中第七颗行星，属于“冰巨星”类型，其内部富含水、氨和甲烷等“冰状”物质。天王星最大的特征是自转轴几乎与轨道平面平行，造成了极端的季节变化。其大气以氢和氦为主，混有少量甲烷，使其呈现出淡蓝绿色调。天王星拥有13个已知环和27颗卫星，环系统暗淡且难以观测。"
                 },
                 new PlanetInfo { 
                     Name = "海王星", 
                     Description = "太阳系最外侧的行星，有强烈的风暴系统，风速可达每小时2100公里。",
-                    DetailInfo = "海王星是太阳系中最外侧的行星，有强烈的风暴系统，风速可达每小时2100公里。海王星有14颗已知的卫星，其中最大的海卫一是一个冰质天体，表面有活跃的地质活动。海王星的大气层主要由氢、氦和甲烷组成。"
+                    DetailInfo = "海王星是离太阳最远的行星，也是另一个“冰巨星”。它以湛蓝的外表和极其活跃的大气系统而著称，拥有太阳系中最快的风速，可超过每小时2000公里。大气中甲烷含量导致其呈深蓝色。海王星拥有多个环系统和14颗已知卫星，其中最大的是海卫一（Triton），被认为可能是一个被俘获的柯伊伯带天体。"
                 },
                 new PlanetInfo {
                     Name = "冥王星",
                     Description = "曾经的第九大行星，现在被归为矮行星。",
-                    DetailInfo = "冥王星曾被认为是太阳系的第九颗行星，但在2006年被国际天文学联合会重新归类为'矮行星'。它位于柯伊伯带，拥有稀薄的大气层，主要由氮、甲烷和一氧化碳组成。冥王星有五颗已知的卫星，其中最大的是卡戎。"
+                    DetailInfo = "冥王星是柯伊伯带中最著名的矮行星，曾被认为是第九大行星。它的轨道偏心率和倾角都较大，且轨道周期为248年。冥王星表面由冰和岩石组成，存在稀薄的大气层，其最大卫星卡戎（Charon）与其大小相近，两者构成独特的“双星系统”。2006年国际天文学联合会将冥王星重新归类为矮行星。"
                 },
                 new PlanetInfo {
                     Name = "谷神星",
                     Description = "位于小行星带的矮行星，是小行星带中最大的天体。",
-                    DetailInfo = "谷神星是太阳系中首个被发现的矮行星，同时也是小行星带中最大天体。它的直径约为940公里，表面可能存在地下水或冰，是研究太阳系早期历史的重要对象。"
+                    DetailInfo = "谷神星是太阳系中第一个被发现的小行星，也是体积最大的主带小行星，后来也被归类为矮行星。它位于火星与木星之间的小行星带中，直径约940公里。谷神星表面存在大量冰和疑似咸水地下海洋的证据，是研究太阳系早期演化的重要目标之一。"
                 },
                 new PlanetInfo {
                     Name = "小行星带",
                     Description = "火星和木星之间的天体带，包含大量小行星。",
-                    DetailInfo = "小行星带位于火星和木星之间，是由数十万颗小行星组成的区域。它们是太阳系早期形成时遗留下来的物质。尽管数量众多，它们之间的间距非常大，航天器可以轻松穿过这个区域。"
+                    DetailInfo = "小行星带位于火星和木星轨道之间，是由大量岩石和金属碎片组成的区域。该区域包含数百万颗小行星，它们是太阳系形成初期残留的原始物质。虽然整体质量仅为月球的约4%，但仍对太阳系的动态演化有着重要意义。谷神星就是该区域中最大的天体。"
                 }
             };
 
@@ -214,11 +215,13 @@ namespace HangKong_StarTrail.Views
                     {
                         if (child is Border border)
                         {
-                            var titleBlock = border.Child as StackPanel;
-                            if (titleBlock?.Children.Count > 0 && titleBlock.Children[0] is TextBlock textBlock)
+                            if (border.Child is StackPanel titleBlock)
                             {
-                                _sectionElements[textBlock.Text] = border;
-                                _allSections.Add(border);
+                                if (titleBlock.Children.Count > 0 && titleBlock.Children[0] is TextBlock textBlock)
+                                {
+                                    _sectionElements[textBlock.Text] = border;
+                                    _allSections.Add(border);
+                                }
                             }
                         }
                     }
@@ -491,8 +494,8 @@ namespace HangKong_StarTrail.Views
                 };
 
                 var grid = new Grid();
-                grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(60) });
-                grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(60) }); // 标题栏
+                grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }); // 内容区
 
                 // 标题栏
                 var titleBar = new Border
@@ -508,8 +511,8 @@ namespace HangKong_StarTrail.Views
                 var titleText = new TextBlock
                 {
                     Text = title,
-                    Foreground = new SolidColorBrush(Color.FromRgb(224, 224, 255)),
-                    FontSize = 24,
+                    Foreground = new SolidColorBrush(Colors.White),
+                    FontSize = 20,
                     FontWeight = FontWeights.Bold,
                     Margin = new Thickness(20, 0, 0, 0),
                     VerticalAlignment = VerticalAlignment.Center
@@ -518,13 +521,12 @@ namespace HangKong_StarTrail.Views
                 var closeButton = new Button
                 {
                     Content = "×",
-                    FontSize = 22,
-                    Foreground = new SolidColorBrush(Color.FromRgb(224, 224, 255)),
-                    Background = Brushes.Transparent,
-                    BorderThickness = new Thickness(0),
+                    FontSize = 20,
                     Width = 40,
                     Height = 40,
-                    Margin = new Thickness(0, 0, 10, 0),
+                    Background = Brushes.Transparent,
+                    Foreground = new SolidColorBrush(Colors.White),
+                    BorderThickness = new Thickness(0),
                     Cursor = Cursors.Hand
                 };
                 closeButton.Click += (s, e) => detailWindow.Close();
@@ -534,43 +536,99 @@ namespace HangKong_StarTrail.Views
                 titleBarGrid.Children.Add(titleText);
                 titleBarGrid.Children.Add(closeButton);
                 titleBar.Child = titleBarGrid;
+                Grid.SetRow(titleBar, 0);
 
-                // 内容区
-                var contentBorder = new Border
+                // 内容区域使用 ScrollViewer
+                var scrollViewer = new ScrollViewer
                 {
-                    Background = new SolidColorBrush(Color.FromRgb(26, 26, 58)),
-                    Margin = new Thickness(20),
-                    CornerRadius = new CornerRadius(10)
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                    Margin = new Thickness(20)
                 };
 
                 var contentStack = new StackPanel
                 {
-                    Margin = new Thickness(20)
+                    Margin = new Thickness(0, 10, 0, 10)
                 };
 
-                var detailText = new TextBlock
+                // 尝试加载图片
+                string imagePath = System.IO.Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory, 
+                    "StyleResources", 
+                    "Images",
+                    "Knowledge_image",
+                    $"{title}.png");
+
+                // 添加调试信息
+                Console.WriteLine($"尝试加载图片: {imagePath}");
+                Console.WriteLine($"当前目录: {AppDomain.CurrentDomain.BaseDirectory}");
+
+                // 如果 png 不存在，尝试 jpg
+                if (!System.IO.File.Exists(imagePath))
+                {
+                    imagePath = System.IO.Path.Combine(
+                        AppDomain.CurrentDomain.BaseDirectory,
+                        "StyleResources",
+                        "Images",
+                        "Knowledge_image",
+                        $"{title}.jpg");
+                    Console.WriteLine($"尝试加载图片: {imagePath}");
+                }
+
+                // 如果找到了图片，添加到内容中
+                if (System.IO.File.Exists(imagePath))
+                {
+                    try
+                    {
+                        var image = new Image
+                        {
+                            Source = new BitmapImage(new Uri(imagePath)),
+                            MaxHeight = 300,
+                            Margin = new Thickness(0, 0, 0, 20),
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            Stretch = Stretch.Uniform
+                        };
+                        
+                        // 添加边框效果
+                        var imageBorder = new Border
+                        {
+                            Child = image,
+                            BorderBrush = new SolidColorBrush(Color.FromRgb(65, 105, 225)),
+                            BorderThickness = new Thickness(2),
+                            CornerRadius = new CornerRadius(8),
+                            Margin = new Thickness(0, 0, 0, 20)
+                        };
+                        
+                        contentStack.Children.Add(imageBorder);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"加载图片时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+
+                // 详细信息文本
+                var detailTextBlock = new TextBlock
                 {
                     Text = detailInfo,
-                    Foreground = new SolidColorBrush(Color.FromRgb(224, 224, 255)),
+                    Foreground = new SolidColorBrush(Colors.White),
                     FontSize = 16,
                     TextWrapping = TextWrapping.Wrap,
-                    LineHeight = 28
+                    LineHeight = 24
                 };
+                contentStack.Children.Add(detailTextBlock);
 
-                contentStack.Children.Add(detailText);
-                contentBorder.Child = contentStack;
+                scrollViewer.Content = contentStack;
+                Grid.SetRow(scrollViewer, 1);
 
-                Grid.SetRow(titleBar, 0);
-                Grid.SetRow(contentBorder, 1);
                 grid.Children.Add(titleBar);
-                grid.Children.Add(contentBorder);
+                grid.Children.Add(scrollViewer);
 
                 detailWindow.Content = grid;
-                detailWindow.Show();
+                detailWindow.ShowDialog();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"显示详情错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"显示详情窗口时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -618,17 +676,27 @@ namespace HangKong_StarTrail.Views
         {
             try
             {
-                if (CategoryList.SelectedItem is string selectedCategory)
+                // 用 AddedItems 获取本次选中的项
+                if (e.AddedItems == null || e.AddedItems.Count == 0) return;
+
+                string selectedCategory = e.AddedItems[0]?.ToString();
+                if (string.IsNullOrEmpty(selectedCategory)) return;
+
+                FrameworkElement targetSection = null;
+
+                if (_sectionElements.ContainsKey(selectedCategory))
                 {
-                    if (_sectionElements.TryGetValue(selectedCategory, out var element))
-                    {
-                        ScrollToElement(element);
-                    }
+                    targetSection = _sectionElements[selectedCategory];
+                }
+
+                if (targetSection != null)
+                {
+                    ScrollToElement(targetSection);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"选择分类错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"切换分类时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -636,33 +704,22 @@ namespace HangKong_StarTrail.Views
         {
             try
             {
-                // 使用Dispatcher确保在UI线程上执行
-                Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
-                {
-                    try
-                    {
-                        // 计算目标位置
-                        var transform = element.TransformToVisual(MainScrollViewer);
-                        var position = transform.Transform(new Point(0, 0));
+                if (element == null || MainScrollViewer == null) return;
 
-                        // 滚动到目标位置
-                        MainScrollViewer.ScrollToVerticalOffset(position.Y);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"滚动到元素错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }));
+                // 确保元素已经加载
+                element.UpdateLayout();
+
+                // 计算元素相对于滚动视图的位置
+                Point elementPosition = element.TransformToAncestor(MainScrollViewer)
+                    .Transform(new Point(0, 0));
+
+                // 滚动到元素位置
+                MainScrollViewer.ScrollToVerticalOffset(elementPosition.Y);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"滚动错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"滚动到元素时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void FavoritesButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("收藏功能正在开发中...", "提示");
         }
 
         private void DetailButton_Click(object sender, RoutedEventArgs e)
