@@ -25,6 +25,10 @@ namespace HangKong_StarTrail.Views
         private readonly Random _random = new Random();
         private int _currentIndex = 0;
         private const int MaxPoints = 50;
+        private double _maxHeight = 10000;
+        private double _maxSpeed = 1000;
+        private double _maxDeltaV = 1;
+        private double _maxRaceSpeed = 10000;
 
         public ISeries[] Series1 { get; set; }
         public ISeries[] Series2 { get; set; }
@@ -62,7 +66,7 @@ namespace HangKong_StarTrail.Views
 
         private void InitializeCharts()
         {
-            // 初始化高度图表
+            // 初始化位移图表
             Series1 = new ISeries[]
             {
                 new LineSeries<double>
@@ -109,12 +113,12 @@ namespace HangKong_StarTrail.Views
             {
                 new LineSeries<double>
                 {
-                    Name = "Speed(km/h)",
+                    Name = "Speed(m/s)",
                     Values = new ObservableCollection<double>(),
                     Stroke = new SolidColorPaint(SKColors.Orange, 2),
                     GeometryStroke = new SolidColorPaint(SKColors.Orange, 2),
                     GeometrySize = 8,
-                    XToolTipLabelFormatter = (chartPoint) => $"Speed: {chartPoint.Coordinate.PrimaryValue:F2} km/h",
+                    XToolTipLabelFormatter = (chartPoint) => $"Speed: {chartPoint.Coordinate.PrimaryValue:F2} m/s",
                     EnableNullSplitting = false,
                     LineSmoothness = 0.5
                 }
@@ -137,7 +141,7 @@ namespace HangKong_StarTrail.Views
             {
                 new Axis
                 {
-                    Name = "Speed (km/h)",
+                    Name = "Speed (m/s)",
                     NamePaint = new SolidColorPaint(SKColors.Black),
                     LabelsPaint = new SolidColorPaint(SKColors.Black),
                     SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
@@ -173,7 +177,7 @@ namespace HangKong_StarTrail.Views
             {
                 new Axis
                 {
-                    Name = "Δv (km/s)",
+                    Name = "Δv (m/s)",
                     NamePaint = new SolidColorPaint(SKColors.Black),
                     LabelsPaint = new SolidColorPaint(SKColors.Black),
                     SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
@@ -199,7 +203,7 @@ namespace HangKong_StarTrail.Views
             {
                 new Axis
                 {
-                    Name = "Speed (km/h)",
+                    Name = "Speed (m/s)",
                     NamePaint = new SolidColorPaint(SKColors.Black),
                     LabelsPaint = new SolidColorPaint(SKColors.Black),
                     SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
@@ -291,5 +295,82 @@ namespace HangKong_StarTrail.Views
         {
             UpdateRaceChart(new double[] { 9700, 9500, 9400, 9300, 9200, 9100 });
         }
+
+        // 数据更新接口
+        public void UpdateData(double height, double speed, double deltaV, double[] raceSpeeds)
+        {
+            var heightSeries = (LineSeries<double>)Series1[0];
+            var speedSeries = (LineSeries<double>)Series2[0];
+            var deltaVSeries = (ColumnSeries<double>)Series3[0];
+            var raceSeries = (RowSeries<double>)Series4[0];
+
+            if (heightSeries?.Values == null || speedSeries?.Values == null ||
+                deltaVSeries?.Values == null || raceSeries?.Values == null) return;
+
+            var heightValues = (ObservableCollection<double>)heightSeries.Values;
+            var speedValues = (ObservableCollection<double>)speedSeries.Values;
+            var deltaVValues = (ObservableCollection<double>)deltaVSeries.Values;
+            var raceValues = (ObservableCollection<double>)raceSeries.Values;
+
+            // 更新高度数据
+            if (heightValues.Count >= MaxPoints)
+                heightValues.RemoveAt(0);
+            heightValues.Add(height);
+            _maxHeight = Math.Max(_maxHeight, height * 1.2); // 留20%余量
+            YAxes1[0].MaxLimit = _maxHeight;
+
+            // 更新速度数据
+            if (speedValues.Count >= MaxPoints)
+                speedValues.RemoveAt(0);
+            speedValues.Add(speed);
+            _maxSpeed = Math.Max(_maxSpeed, speed * 1.2);
+            YAxes2[0].MaxLimit = _maxSpeed;
+
+            // 更新Δv数据
+            if (deltaVValues.Count >= 5)
+                deltaVValues.RemoveAt(0);
+            deltaVValues.Add(deltaV);
+            _maxDeltaV = Math.Max(_maxDeltaV, deltaV * 1.2);
+            YAxes3[0].MaxLimit = _maxDeltaV;
+
+            // 更新竞速数据
+            raceValues.Clear();
+            foreach (var s in raceSpeeds)
+            {
+                raceValues.Add(s);
+            }
+            _maxRaceSpeed = Math.Max(_maxRaceSpeed, raceSpeeds.Max() * 1.2);
+            XAxes4[0].MaxLimit = _maxRaceSpeed;
+
+            _currentIndex++;
+        }
+
+        // 清除所有数据
+        public void ClearData()
+        {
+            var heightSeries = (LineSeries<double>)Series1[0];
+            var speedSeries = (LineSeries<double>)Series2[0];
+            var deltaVSeries = (ColumnSeries<double>)Series3[0];
+            var raceSeries = (RowSeries<double>)Series4[0];
+
+            if (heightSeries?.Values == null || speedSeries?.Values == null ||
+                deltaVSeries?.Values == null || raceSeries?.Values == null) return;
+
+            ((ObservableCollection<double>)heightSeries.Values).Clear();
+            ((ObservableCollection<double>)speedSeries.Values).Clear();
+            ((ObservableCollection<double>)deltaVSeries.Values).Clear();
+            ((ObservableCollection<double>)raceSeries.Values).Clear();
+
+            _currentIndex = 0;
+            _maxHeight = 10000;
+            _maxSpeed = 1000;
+            _maxDeltaV = 1;
+            _maxRaceSpeed = 10000;
+
+            YAxes1[0].MaxLimit = _maxHeight;
+            YAxes2[0].MaxLimit = _maxSpeed;
+            YAxes3[0].MaxLimit = _maxDeltaV;
+            XAxes4[0].MaxLimit = _maxRaceSpeed;
+        }
     }
-} 
+}
