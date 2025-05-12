@@ -45,11 +45,10 @@ namespace HangKong_StarTrail.Views
         #region 参数设置成员
         private double _timeStep; // 每帧物理仿真时间步长
         private double _baseTimeStep;
-        private bool _showTrajectory = false; // 是否显示轨迹
-        private bool _isSimulationRunning = false; // 是否正在仿真
+        private bool _isSimulationRunning = true; // 是否正在仿真
         private bool _isTimeReversed = false;   // 是否反向仿真
         private bool _isAddingBody = false;
-        private bool _isVelocitySettingMode = false;
+        private bool _isVelocityVisualizeMode = false;
         #endregion
 
         #region 画布相关参数成员
@@ -96,8 +95,11 @@ namespace HangKong_StarTrail.Views
                 _zoomFactor = 1.0;
                 _pixelToDistanceRatio = _recommendedScale * _zoomFactor;
                 _baseTimeStep = _timeStep = CalculateRecommendedTimeStep();
+                UpdateDisplayPositions();
                 animationCanva.InvalidateVisual();
                 // 计算并设置推荐时间步长
+                _renderer.SetTimeStep(_timeStep);
+                _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
             };
 
             var centerBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.IsCenter);
@@ -131,23 +133,11 @@ namespace HangKong_StarTrail.Views
             {
                 Interval = TimeSpan.FromMilliseconds(100) // 100ms更新一次UI
             };
-            _uiUpdateTimer.Tick += (sender, e) =>
-            {
-                if (_focusedBody != null && _isSimulationRunning)
-                {
-                    UpdateFocusedBodyUI();
-                }
-                UpdateFrameRate();
-            };
+            _uiUpdateTimer.Tick += UpdateAllUIMonitor;
 
             // 使用CompositionTarget.Rendering替代DispatcherTimer进行渲染
             CompositionTarget.Rendering += CompositionTarget_Rendering;
 
-            // 初始化帧率统计
-            _frameCount = 0;
-            _lastFrameTime = DateTime.Now;
-            _lastPhysicsUpdate = DateTime.Now;
-            _isPhysicsUpdatePending = false;
 
             // 初始化时间步长滑块
             SimulationTimeStepSlider.Minimum = SLIDER_MIN_VALUE;
@@ -159,6 +149,12 @@ namespace HangKong_StarTrail.Views
 
             // 加载默认地月系数据
             LoadDefaultEarthMoonSystem();
+
+            // 初始化帧率统计
+            _frameCount = 0;
+            _lastFrameTime = DateTime.Now;
+            _lastPhysicsUpdate = DateTime.Now;
+            _isPhysicsUpdatePending = false;
         }
 
         private void LoadDefaultEarthMoonSystem()
@@ -177,7 +173,7 @@ namespace HangKong_StarTrail.Views
             // 月球数据
             var moon = new Body(
                 "月球",
-                new Vector2D(384400e3 / 1.4, 0),  // 地月距离（米）
+                new Vector2D(384400e3, 0),  // 地月距离（米）
                 new Vector2D(0, 1022),      // 月球轨道速度（m/s）
                 7.348e22,                   // 质量（kg）
                 10,                         // 显示半径
@@ -248,11 +244,11 @@ namespace HangKong_StarTrail.Views
 
 
         #region 基本UI响应
-        private void UpdateFrameRate()
+        private void UpdateAllUIMonitor(object sender, EventArgs e)
         {
+            // 帧数汇报
             var now = DateTime.Now;
             var elapsed = (now - _lastFrameTime).TotalSeconds;
-
             if (elapsed >= 1.0)
             {
                 var fps = _frameCount / elapsed;
@@ -260,15 +256,54 @@ namespace HangKong_StarTrail.Views
                 _frameCount = 0;
                 _lastFrameTime = now;
             }
+            // 汇报观测对象属性
+            if (_focusedBody != null && _isSimulationRunning)
+            {
+                if (_focusedBody != null)
+                {
+                    // 更新位置
+                    PositionIOTextBox.Text = $"({FormatDistance(_focusedBody.Position.X)},{FormatDistance(_focusedBody.Position.Y)})";
+                    // 更新速度（向量形式）
+                    VelocityIOTextBox.Text = $"({FormatVelocity(_focusedBody.Velocity.X)},{FormatVelocity(_focusedBody.Velocity.Y)})";
+                    // 更新质量
+                    MassIOTextBox.Text = FormatMass(_focusedBody.Mass);
+                }
+            }
+            else
+            {
+                PositionIOTextBox.Text = "N/A";
+                VelocityIOTextBox.Text = "N/A";
+                MassIOTextBox.Text = "N/A";
+            }
+            // 汇报渲染状态
+            BodyCountReportLabel.Text = $" {_renderer._physicsEngine.Bodies.Count} ";
+            if (_renderer._physicsEngine.timeElapsed <= 3600 * 24)
+            {
+                SimulationTimeReportLabel.Text = $" {_renderer._physicsEngine.timeElapsed:F2} ";
+                SimulationTimeUnitLabel.Text = "秒";
+            }
+            else if (_renderer._physicsEngine.timeElapsed <= 3600 * 24 * 30)
+            {
+                SimulationTimeReportLabel.Text = $" {_renderer._physicsEngine.timeElapsed / (3600 * 24):F2} ";
+                SimulationTimeUnitLabel.Text = "天";
+            }
+            else if (_renderer._physicsEngine.timeElapsed < 3600 * 24 * 30 * 12)
+            {
+                SimulationTimeReportLabel.Text = $" {_renderer._physicsEngine.timeElapsed / (3600 * 24 * 30):F2} ";
+                SimulationTimeUnitLabel.Text = "月";
+            }
+            else
+            {
+                SimulationTimeReportLabel.Text = $" {_renderer._physicsEngine.timeElapsed / (3600 * 24 * 30 * 12):F2} ";
+                SimulationTimeUnitLabel.Text = "年";
+            }
+            ScaleReportLabel.Text = NumberFormat(1 / _pixelToDistanceRatio) + " m";
+
         }
 
         private void UpdateButtonStates()
         {
-            // 在仿真运行时禁用修改按钮
-            // AddBodyBtn.IsEnabled = !_isSimulationRunning;
-            // RemoveBodyBtn.IsEnabled = !_isSimulationRunning;
-            ResetSimulationBtn.IsEnabled = !_isSimulationRunning;
-            VelocitySettingModeBtn.IsEnabled = !_isSimulationRunning;
+            // 在仿真运行时禁用部分修改相关按钮
 
             // 更新开始/暂停按钮文本
             var startPauseBtn = StartPauseBtn.Content as StackPanel;
@@ -349,6 +384,7 @@ namespace HangKong_StarTrail.Views
                 double ratio = Math.Pow(2, e.NewValue - SLIDER_CENTER_VALUE); // 使用更小的底数来降低灵敏度
                 // 实时应用新的时间步长,但暂时不更新
                 _timeStep = _baseTimeStep * ratio;
+                _renderer.SetTimeStep(_timeStep);
                 _debugInfo[1] = $"当前滑块值：{e.NewValue}";
             }
         }
@@ -419,23 +455,6 @@ namespace HangKong_StarTrail.Views
             double pixelHeight = animationCanva.ActualHeight * matrix.M22;
             _canvasCenter = new Vector2D(pixelWidth / 2, pixelHeight / 2);
         }
-
-        private void UpdateFocusedBodyUI()
-        {
-            if (_focusedBody != null)
-            {
-                // 更新位置
-                PositionIOTextBox.Text = $"({FormatDistance(_focusedBody.Position.X)},{FormatDistance(_focusedBody.Position.Y)})";
-
-                // 更新速度（向量形式）
-                VelocityIOTextBox.Text = $"({FormatVelocity(_focusedBody.Velocity.X)},{FormatVelocity(_focusedBody.Velocity.Y)})";
-
-                // 更新质量
-                MassIOTextBox.Text = FormatMass(_focusedBody.Mass);
-            }
-        }
-
-
         protected override void OnClosed(EventArgs e)
         {
             // 停止所有计时器和任务
@@ -553,7 +572,7 @@ namespace HangKong_StarTrail.Views
 
 
 
-
+        #region 画面渲染相关操作
         private void SimulationTimer_Tick(object sender, EventArgs e)
         {
             if (!_isSimulationRunning) return;
@@ -601,13 +620,14 @@ namespace HangKong_StarTrail.Views
         {
             if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
             {
+                var originalText = PositionIOTextBox.Text;
                 try
                 {
                     var parts = PositionIOTextBox.Text.Trim('(', ')').Split(',');
                     if (parts.Length == 2)
                     {
-                        double x = ParseScientificNumber(parts[0]);
-                        double y = ParseScientificNumber(parts[1]);
+                        double x = ParseScientificNumber(parts[0].Substring(0, parts[0].Length - 2));
+                        double y = ParseScientificNumber(parts[1].Substring(0, parts[1].Length - 2));
                         _focusedBody.Position = new Vector2D(x, y);
                         UpdateDisplayPositions();
                         animationCanva.InvalidateVisual();
@@ -620,6 +640,8 @@ namespace HangKong_StarTrail.Views
                 {
                     MessageBox.Show($"无效的位置格式：{ex.Message}", "错误",
                         MessageBoxButton.OK, MessageBoxImage.Error);
+                    // 恢复原始文本
+                    PositionIOTextBox.Text = originalText;
                 }
             }
         }
@@ -628,13 +650,17 @@ namespace HangKong_StarTrail.Views
         {
             if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
             {
+                var originalText = VelocityIOTextBox.Text;
+                _debugInfo[4] = $"原始文本：{originalText}";
                 try
                 {
                     var parts = VelocityIOTextBox.Text.Trim('(', ')').Split(',');
                     if (parts.Length == 2)
                     {
-                        double vx = ParseScientificNumber(parts[0]);
-                        double vy = ParseScientificNumber(parts[1]);
+                        _debugInfo[3] = parts[0];
+                        _debugInfo[2] = parts[1];
+                        double vx = ParseScientificNumber(parts[0].Substring(0, parts[0].Length - 4));
+                        double vy = ParseScientificNumber(parts[1].Substring(0, parts[1].Length - 4));
                         _focusedBody.Velocity = new Vector2D(vx, vy);
 
                         // 更新显示
@@ -645,6 +671,8 @@ namespace HangKong_StarTrail.Views
                 {
                     MessageBox.Show($"无效的速度格式：{ex.Message}", "错误",
                         MessageBoxButton.OK, MessageBoxImage.Error);
+                    // 恢复原始文本
+                    VelocityIOTextBox.Text = originalText;
                 }
             }
         }
@@ -653,9 +681,10 @@ namespace HangKong_StarTrail.Views
         {
             if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
             {
+                var originalText = MassIOTextBox.Text;
                 try
                 {
-                    double mass = ParseScientificNumber(MassIOTextBox.Text);
+                    double mass = ParseScientificNumber(MassIOTextBox.Text.Substring(0, MassIOTextBox.Text.Length - 3));
                     _focusedBody.Mass = mass;
 
                     // 更新显示
@@ -665,6 +694,8 @@ namespace HangKong_StarTrail.Views
                 {
                     MessageBox.Show($"无效的质量格式：{ex.Message}", "错误",
                         MessageBoxButton.OK, MessageBoxImage.Error);
+                    // 恢复原始文本
+                    MassIOTextBox.Text = originalText;
                 }
             }
         }
@@ -698,10 +729,6 @@ namespace HangKong_StarTrail.Views
             _debugInfo[5] = "完成 UpdateDisplayPositions";
         }
 
-
-
-
-
         private void AnimationCanva_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             _debugInfo[5] = "进入 AnimationCanva_MouseWheel";
@@ -714,6 +741,7 @@ namespace HangKong_StarTrail.Views
 
             // 更新实际使用的比例尺
             _pixelToDistanceRatio = _recommendedScale * _zoomFactor;
+            _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
 
             // 只在暂停模式下更新显示
             if (!_isSimulationRunning)
@@ -735,7 +763,7 @@ namespace HangKong_StarTrail.Views
                     _lastMousePosition = new Vector2D(mousePos.X, mousePos.Y);
 
                     // 将鼠标位置转换为物理坐标
-                    _dragStartPosition = ScreenToPhysicalPosition(_lastMousePosition.Value);
+                    _dragStartPosition = ScreenToRelativePhysicalPosition(_lastMousePosition.Value);
                     animationCanva.CaptureMouse();
                 }
             }
@@ -750,9 +778,10 @@ namespace HangKong_StarTrail.Views
                 var currentMouseVector = new Vector2D(currentMousePos.X, currentMousePos.Y);
 
                 // 计算鼠标移动的物理位移
-                var currentPhysicalPos = ScreenToPhysicalPosition(currentMouseVector);
+                var currentPhysicalPos = ScreenToRelativePhysicalPosition(currentMouseVector);
                 var physicalDelta = currentPhysicalPos - _dragStartPosition.Value;
-
+                var pixelDelta = currentMouseVector - _lastMousePosition.Value;
+                _renderer.UpdateStarOffset((float)pixelDelta.X, (float)pixelDelta.Y);
                 // 更新相机偏移
                 _cameraOffset -= physicalDelta;
 
@@ -827,9 +856,12 @@ namespace HangKong_StarTrail.Views
             _renderer.RenderBackground(canvas);
             // 渲染天体
             _renderer.RenderBodies(canvas);
+            // 渲染速度箭头
+            if (_isVelocityVisualizeMode)
+            {
+                _renderer.RenderVelocityArrow(canvas);
+            }
             _frameCount++;
-            // 更新帧率统计
-            UpdateFrameRate();
         }
 
         private void CompositionTarget_Rendering(object sender, EventArgs e)
@@ -844,31 +876,18 @@ namespace HangKong_StarTrail.Views
                 }
             }
         }
-
+        #endregion
 
 
 
 
 
         #region 待实现功能
-        private void UpdateUI()
+        private void VelocityVisualizeModeBtn_Click(object sender, RoutedEventArgs e)
         {
-            // 更新天体数量显示
-            var bodyCountText = this.FindName("BodyCountText") as TextBlock;
-            if (bodyCountText != null)
-            {
-                bodyCountText.Text = $"天体总量 {_renderer._physicsEngine.Bodies.Count} 个";
-            }
-
-            // 更新其他UI元素
-            // TODO: 实现其他UI更新
-        }
-        private void VelocitySettingModeBtn_Click(object sender, RoutedEventArgs e)
-        {
-            _isVelocitySettingMode = !_isVelocitySettingMode;
+            _isVelocityVisualizeMode = !_isVelocityVisualizeMode;
             // TODO: 实现速度设置模式的具体功能
         }
-
 
         private void ResetSimulationBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -877,7 +896,6 @@ namespace HangKong_StarTrail.Views
             _cameraOffset = Vector2D.ZeroVector;
             _focusedBody = null;
             _isTimeReversed = false;
-            _showTrajectory = false;
 
             // 重置UI
             SimulationTimeStepSlider.Value = SLIDER_CENTER_VALUE;
@@ -891,40 +909,25 @@ namespace HangKong_StarTrail.Views
 
         private void FocusResetBtn_Click(object sender, RoutedEventArgs e)
         {
-            _focusedBody = null;
-            _cameraOffset = Vector2D.ZeroVector;
-        }
-
-        private void AddBodyBtn_Click(object sender, RoutedEventArgs e)
-        {
-            _isAddingBody = !_isAddingBody;
-
-        }
-
-        private void RemoveBodyBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (FocusIOTextBox.SelectedItem != null)
+            var centerBody = _renderer._physicsEngine.Bodies.Where(b => b.IsCenter);
+            if (centerBody.Any())
             {
-                var selectedBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.Name == FocusIOTextBox.SelectedItem.ToString());
-                if (selectedBody != null)
-                {
-                    _renderer._physicsEngine.Bodies.Remove(selectedBody);
-                    if (_focusedBody == selectedBody)
-                    {
-                        _focusedBody = null;
-                    }
-                }
+                _cameraOffset = Vector2D.ZeroVector;
+                _focusedBody = centerBody.First();
+                FocusIOTextBox.SelectedItem = $"{centerBody.First().Name}";
+            }
+            else
+            {
+                // 如果没有中心天体，设置为自由模式
+                FocusIOTextBox.SelectedItem = "自由模式";
+                _cameraOffset = Vector2D.ZeroVector;
+                _focusedBody = null;
             }
         }
 
         private void TimeReverseBtn_Click(object sender, RoutedEventArgs e)
         {
             _isTimeReversed = !_isTimeReversed;
-        }
-
-        private void TrajectoryModeBtn_Click(object sender, RoutedEventArgs e)
-        {
-            _showTrajectory = !_showTrajectory;
         }
 
         private void LoadPresetBtn_Click(object sender, RoutedEventArgs e)
@@ -936,13 +939,12 @@ namespace HangKong_StarTrail.Views
         {
             // TODO: 实现预设导出功能
         }
-
         #endregion
 
 
         #region 无副作用的计算函数
         // 将屏幕坐标转换为物理坐标
-        private Vector2D ScreenToPhysicalPosition(Vector2D screenPos)
+        private Vector2D ScreenToRelativePhysicalPosition(Vector2D screenPos)
         {
             // 将屏幕坐标转换为相对于画布中心的坐标
             var relativePos = screenPos - _canvasCenter;
@@ -1026,16 +1028,40 @@ namespace HangKong_StarTrail.Views
             if (double.TryParse(input, out double result))
                 return result;
 
-            // 处理科学计数法格式 (例如: 1.87*10^9 或 234.19*10^7)
-            var parts = input.Split(new[] { '*', '^' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 3)
+            // 将上标字符转换为普通数字
+            string normalizedInput = input
+                .Replace("⁰", "0")
+                .Replace("¹", "1")
+                .Replace("²", "2")
+                .Replace("³", "3")
+                .Replace("⁴", "4")
+                .Replace("⁵", "5")
+                .Replace("⁶", "6")
+                .Replace("⁷", "7")
+                .Replace("⁸", "8")
+                .Replace("⁹", "9")
+                .Replace("⁻", "-");
+
+            // 处理科学计数法格式 (例如: 1.87×10^9 或 3.83×10⁸)
+            var parts = normalizedInput.Split('×', StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 2)
             {
-                if (double.TryParse(parts[0], out double coefficient) &&
-                    parts[1].Trim() == "10" &&
-                    int.TryParse(parts[2], out int exponent))
-                {
-                    return coefficient * Math.Pow(10, exponent);
-                }
+                // 获取系数部分
+                if (!double.TryParse(parts[0], out double coefficient))
+                    throw new FormatException("无效的系数格式");
+
+                // 处理指数部分
+                string expPart = parts[1];
+                if (!expPart.StartsWith("10"))
+                    throw new FormatException("无效的指数格式");
+
+                // 获取指数值
+                string exponentStr = expPart.Substring(2);
+                if (!int.TryParse(exponentStr, out int exponent))
+                    throw new FormatException("无效的指数值");
+
+                return coefficient * Math.Pow(10, exponent);
             }
 
             throw new FormatException("无效的数字格式");

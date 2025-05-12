@@ -8,7 +8,7 @@ namespace HangKong_StarTrail.Models
         public List<Body> Bodies { get; private set; } = new List<Body>();
 
         public const double G = 6.67430e-11f; // 万有引力常数
-
+        public double timeElapsed = 0; // 经过的时间
         public PhysicsEngine() { }
 
         public void Update(double deltaT)
@@ -42,6 +42,9 @@ namespace HangKong_StarTrail.Models
                 body.Velocity += body.Acceleration * deltaT;
                 body.Position += body.Velocity * deltaT;
             }
+
+            // 更新经过的时间
+            timeElapsed += deltaT;
         }
 
     }
