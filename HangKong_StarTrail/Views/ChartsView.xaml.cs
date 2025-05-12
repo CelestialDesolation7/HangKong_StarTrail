@@ -16,18 +16,37 @@ using LiveChartsCore.VisualElements;
 using SkiaSharp;
 using System.Windows.Threading;
 using System.Threading.Tasks;
+using LiveChartsCore.Defaults;
 
 namespace HangKong_StarTrail.Views
 {
+    /// <summary>
+    /// <summary>
+    /// ChartsView.xaml 的交互逻辑
+    /// </summary>
     public partial class ChartsView : UserControl, INotifyPropertyChanged
     {
-        private readonly DispatcherTimer _timer;
-        private readonly Random _random = new Random();
-        private int _currentIndex = 0;
-        private const int MaxPoints = 50;
+        // 速度-时间曲线图
+        private Dictionary<string, LineSeries<ObservablePoint>> _velocitySeries = new();
+        private double _velocityYMax = 10;
+        private double _velocityXMax = 10;
+        // 合力-时间曲线图
+        private Dictionary<string, LineSeries<ObservablePoint>> _forceSeries = new();
+        private double _forceYMax = 10;
+        private double _forceXMax = 10;
+        // Δv统计图
+        private ObservableCollection<double> _deltaVValues = new();
+        private double _deltaVMax = 1;
+        // 所有天体速度对比图
+        private ObservableCollection<double> _raceValues = new();
+        private List<string> _raceLabels = new();
 
-        public ISeries[] Series1 { get; set; }
-        public ISeries[] Series2 { get; set; }
+        private GravitySimulationForm _gravityForm;
+        private DispatcherTimer _timerVelocityForce;
+        private DispatcherTimer _timerDeltaV;
+
+        public ISeries[] Series1 { get; set; } = Array.Empty<ISeries>();
+        public ISeries[] Series2 { get; set; } = Array.Empty<ISeries>();
         public ISeries[] Series3 { get; set; }
         public ISeries[] Series4 { get; set; }
         public Axis[] XAxes1 { get; set; }
@@ -40,211 +59,171 @@ namespace HangKong_StarTrail.Views
         public Axis[] YAxes4 { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
-
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public ChartsView()
-        {
-            InitializeComponent();
-            InitializeCharts();
-            DataContext = this;
+        // ... existing code ...
+// ... existing code ...
+public ChartsView(GravitySimulationForm gravityForm)
+{
+    InitializeComponent();
+    _gravityForm = gravityForm;
+    InitializeCharts();
+    DataContext = this;
 
-            _timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(100)
-            };
-            _timer.Tick += Timer_Tick;
-            _timer.Start();
-        }
+    // 100ms定时器：速度-时间、受力-时间
+    _timerVelocityForce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+    _timerVelocityForce.Tick += TimerVelocityForce_Tick;
+    _timerVelocityForce.Start();
+
+    // 1s定时器：Δv统计
+    _timerDeltaV = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+    _timerDeltaV.Tick += TimerDeltaV_Tick;
+    _timerDeltaV.Start();
+}
+
+private void TimerVelocityForce_Tick(object sender, EventArgs e)
+{
+    string body = _gravityForm.FocusedBodyName;
+    double time = DateTime.Now.TimeOfDay.TotalSeconds; // 或仿真时间
+    double velocity = _gravityForm.CurrentVelocity;
+    double force = _gravityForm.CurrentForce;
+
+    UpdateVelocityTime(body, time, velocity);
+    UpdateForceTime(body, time, force);
+}
+
+private void TimerDeltaV_Tick(object sender, EventArgs e)
+{
+    int maneuverIndex = _gravityForm.FrameCount; // 或用实际变轨计数
+    double deltaV = _gravityForm.CurrentVelocity; // 示例，实际应为Δv
+    UpdateDeltaVCounts(maneuverIndex, deltaV);
+}
+// ... existing code ...
 
         private void InitializeCharts()
         {
-            // 初始化高度图表
-            Series1 = new ISeries[]
-            {
-                new LineSeries<double>
-                {
-                    Name = "Height",
-                    Values = new ObservableCollection<double>(),
-                    Stroke = new SolidColorPaint(SKColors.DodgerBlue, 2),
-                    GeometryStroke = new SolidColorPaint(SKColors.DodgerBlue, 2),
-                    GeometrySize = 8,
-                    XToolTipLabelFormatter = (chartPoint) => $"Height: {chartPoint.Coordinate.PrimaryValue:F2} m",
-                    EnableNullSplitting = false,
-                    LineSmoothness = 0.5
-                }
-            };
-
-            XAxes1 = new Axis[]
-            {
-                new Axis
-                {
-                    Name = "Time",
-                    NamePaint = new SolidColorPaint(SKColors.Black),
-                    LabelsPaint = new SolidColorPaint(SKColors.Black),
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
-                    MinLimit = 0,
-                    MaxLimit = MaxPoints
-                }
-            };
-
-            YAxes1 = new Axis[]
-            {
-                new Axis
-                {
-                    Name = "Height (m)",
-                    NamePaint = new SolidColorPaint(SKColors.Black),
-                    LabelsPaint = new SolidColorPaint(SKColors.Black),
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
-                    MinLimit = 0,
-                    MaxLimit = 10000
-                }
-            };
-
-            // 初始化速度图表
-            Series2 = new ISeries[]
-            {
-                new LineSeries<double>
-                {
-                    Name = "Speed(km/h)",
-                    Values = new ObservableCollection<double>(),
-                    Stroke = new SolidColorPaint(SKColors.Orange, 2),
-                    GeometryStroke = new SolidColorPaint(SKColors.Orange, 2),
-                    GeometrySize = 8,
-                    XToolTipLabelFormatter = (chartPoint) => $"Speed: {chartPoint.Coordinate.PrimaryValue:F2} km/h",
-                    EnableNullSplitting = false,
-                    LineSmoothness = 0.5
-                }
-            };
-
-            XAxes2 = new Axis[]
-            {
-                new Axis
-                {
-                    Name = "Time",
-                    NamePaint = new SolidColorPaint(SKColors.Black),
-                    LabelsPaint = new SolidColorPaint(SKColors.Black),
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
-                    MinLimit = 0,
-                    MaxLimit = MaxPoints
-                }
-            };
-
-            YAxes2 = new Axis[]
-            {
-                new Axis
-                {
-                    Name = "Speed (km/h)",
-                    NamePaint = new SolidColorPaint(SKColors.Black),
-                    LabelsPaint = new SolidColorPaint(SKColors.Black),
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
-                    MinLimit = 0,
-                    MaxLimit = 1000
-                }
-            };
-
-            // Δv统计图
+            // 速度-时间
+            Series1 = Array.Empty<ISeries>();
+            XAxes1 = new[] { new Axis { Name = "Time", MinLimit = 0 } };
+            YAxes1 = new[] { new Axis { Name = "Velocity", MinLimit = 0, MaxLimit = _velocityYMax } };
+            // 合力-时间
+            Series2 = Array.Empty<ISeries>();
+            XAxes2 = new[] { new Axis { Name = "Time", MinLimit = 0 } };
+            YAxes2 = new[] { new Axis { Name = "Force", MinLimit = 0, MaxLimit = _forceYMax } };
+            // Δv统计
             Series3 = new ISeries[]
             {
-                new ColumnSeries<double>
-                {
-                    Name = "DeltaV",
-                    Values = new ObservableCollection<double> { 0.2, 0.5, 0.3, 0.7, 0.4 },
-                    Stroke = new SolidColorPaint(SKColors.MediumPurple, 2),
-                    Fill = new SolidColorPaint(SKColors.MediumPurple.WithAlpha(128)),
-                    MaxBarWidth = 40
-                }
+                new ColumnSeries<double> { Name = "DeltaV", Values = _deltaVValues }
             };
-            XAxes3 = new Axis[]
-            {
-                new Axis
-                {
-                    Name = "Maneuver",
-                    NamePaint = new SolidColorPaint(SKColors.Black),
-                    LabelsPaint = new SolidColorPaint(SKColors.Black),
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
-                    Labels = new[] { "#1", "#2", "#3", "#4", "#5" }
-                }
-            };
-            YAxes3 = new Axis[]
-            {
-                new Axis
-                {
-                    Name = "Δv (km/s)",
-                    NamePaint = new SolidColorPaint(SKColors.Black),
-                    LabelsPaint = new SolidColorPaint(SKColors.Black),
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
-                    MinLimit = 0,
-                    MaxLimit = 1
-                }
-            };
-
-            // 所有天体速度对比图（Race Bar Chart）
+            XAxes3 = new[] { new Axis { Name = "Maneuver" } };
+            YAxes3 = new[] { new Axis { Name = "Δv", MinLimit = 0, MaxLimit = _deltaVMax } };
+            // 竞速条形图
             Series4 = new ISeries[]
             {
-                new RowSeries<double>
-                {
-                    Name = "Celestial Bodies",
-                    Values = new ObservableCollection<double> { 9623, 9486, 9366, 9352, 9195, 9191 },
-                    DataLabelsPaint = new SolidColorPaint(SKColors.White),
-                    DataLabelsPosition = LiveChartsCore.Measure.DataLabelsPosition.End,
-                    Fill = new SolidColorPaint(SKColors.MediumTurquoise),
-                    MaxBarWidth = 40
-                }
+                new RowSeries<double> { Name = "Race", Values = _raceValues }
             };
-            XAxes4 = new Axis[]
-            {
-                new Axis
-                {
-                    Name = "Speed (km/h)",
-                    NamePaint = new SolidColorPaint(SKColors.Black),
-                    LabelsPaint = new SolidColorPaint(SKColors.Black),
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1),
-                    MinLimit = 8800,
-                    MaxLimit = 10000
-                }
-            };
-            YAxes4 = new Axis[]
-            {
-                new Axis
-                {
-                    Labels = new[] { "Verstappen", "Sainz", "Hamilton", "Tsunoda", "Bottas", "Riccardo" },
-                    LabelsPaint = new SolidColorPaint(SKColors.Black),
-                    NamePaint = new SolidColorPaint(SKColors.Black)
-                }
-            };
+            XAxes4 = new[] { new Axis { Name = "Speed", MinLimit = 0, MaxLimit = 10 } };
+            YAxes4 = new[] { new Axis { Labels = _raceLabels.ToArray() } };
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        // 1. 速度-时间曲线
+        public void UpdateVelocityTime(string bodyName, double time, double velocity)
         {
-            // 模拟数据更新
-            var height = _random.NextDouble() * 10000;
-            var speed = _random.NextDouble() * 1000;
-
-            var heightSeries = (LineSeries<double>)Series1[0];
-            var speedSeries = (LineSeries<double>)Series2[0];
-
-            if (heightSeries?.Values == null || speedSeries?.Values == null) return;
-
-            var heightValues = (ObservableCollection<double>)heightSeries.Values;
-            var speedValues = (ObservableCollection<double>)speedSeries.Values;
-
-            if (heightValues.Count >= MaxPoints)
+            if (!_velocitySeries.ContainsKey(bodyName))
             {
-                heightValues.RemoveAt(0);
-                speedValues.RemoveAt(0);
+                var series = new LineSeries<ObservablePoint>
+                {
+                    Name = bodyName,
+                    Values = new ObservableCollection<ObservablePoint>()
+                };
+                _velocitySeries[bodyName] = series;
+                Series1 = _velocitySeries.Values.ToArray();
+                OnPropertyChanged(nameof(Series1));
             }
+            var values = (ObservableCollection<ObservablePoint>)_velocitySeries[bodyName].Values;
+            values.Add(new ObservablePoint(time, velocity));
+            // X轴自适应
+            if (time > _velocityXMax)
+            {
+                _velocityXMax = time * 1.1;
+                XAxes1[0].MaxLimit = _velocityXMax;
+                OnPropertyChanged(nameof(XAxes1));
+            }
+            // Y轴自适应
+            if (velocity > _velocityYMax)
+            {
+                _velocityYMax = velocity * 1.1;
+                YAxes1[0].MaxLimit = _velocityYMax;
+                OnPropertyChanged(nameof(YAxes1));
+            }
+        }
 
-            heightValues.Add(height);
-            speedValues.Add(speed);
+        // 2. 合力-时间曲线
+        public void UpdateForceTime(string bodyName, double time, double force)
+        {
+            if (!_forceSeries.ContainsKey(bodyName))
+            {
+                var series = new LineSeries<ObservablePoint>
+                {
+                    Name = bodyName,
+                    Values = new ObservableCollection<ObservablePoint>()
+                };
+                _forceSeries[bodyName] = series;
+                Series2 = _forceSeries.Values.ToArray();
+                OnPropertyChanged(nameof(Series2));
+            }
+            var values = (ObservableCollection<ObservablePoint>)_forceSeries[bodyName].Values;
+            values.Add(new ObservablePoint(time, force));
+            // X轴自适应
+            if (time > _forceXMax)
+            {
+                _forceXMax = time * 1.1;
+                XAxes2[0].MaxLimit = _forceXMax;
+                OnPropertyChanged(nameof(XAxes2));
+            }
+            // Y轴自适应
+            if (force > _forceYMax)
+            {
+                _forceYMax = force * 1.1;
+                YAxes2[0].MaxLimit = _forceYMax;
+                OnPropertyChanged(nameof(YAxes2));
+            }
+        }
 
-            _currentIndex++;
+        // 3. Δv统计
+        public void UpdateDeltaVCounts(int maneuverIndex, double deltaV)
+        {
+            while (_deltaVValues.Count <= maneuverIndex)
+                _deltaVValues.Add(0);
+            _deltaVValues[maneuverIndex] = deltaV;
+            if (deltaV > _deltaVMax)
+            {
+                _deltaVMax = deltaV * 1.1;
+                YAxes3[0].MaxLimit = _deltaVMax;
+                OnPropertyChanged(nameof(YAxes3));
+            }
+        }
 
-            // 更新第2个Δv条的值为0.8
-            UpdateDeltaV(1, 0.8);
+        // 4. 竞速条形图
+        public void UpdateAllVelocity(Dictionary<string, double> currentVelocities)
+        {
+            _raceValues.Clear();
+            _raceLabels.Clear();
+            double max = 10;
+            foreach (var kv in currentVelocities)
+            {
+                _raceLabels.Add(kv.Key);
+                _raceValues.Add(kv.Value);
+                if (kv.Value > max) max = kv.Value;
+            }
+            YAxes4[0].Labels = _raceLabels.ToArray();
+            XAxes4[0].MaxLimit = max * 1.1;
+            OnPropertyChanged(nameof(Series4));
+            OnPropertyChanged(nameof(YAxes4));
+            OnPropertyChanged(nameof(XAxes4));
         }
 
         private void OnBackClick(object sender, RoutedEventArgs e)
@@ -255,41 +234,6 @@ namespace HangKong_StarTrail.Views
             {
                 parentWindow.Close();
             }
-        }
-
-        public void UpdateDeltaV(int index, double value)
-        {
-            // 确保 Series3 已初始化
-            if (Series3 == null || Series3.Length == 0) return;
-            var columnSeries = Series3[0] as ColumnSeries<double>;
-            if (columnSeries == null) return;
-
-            var values = columnSeries.Values as ObservableCollection<double>;
-            if (values == null) return;
-
-            // 动态扩展长度
-            while (values.Count <= index)
-            {
-                values.Add(0);
-            }
-            values[index] = value;
-        }
-
-        // 动态更新第四张图表数据示例
-        public void UpdateRaceChart(double[] speeds)
-        {
-            if (Series4 == null || Series4.Length == 0) return;
-            var rowSeries = Series4[0] as RowSeries<double>;
-            if (rowSeries == null) return;
-            var values = rowSeries.Values as ObservableCollection<double>;
-            if (values == null) return;
-            values.Clear();
-            foreach (var s in speeds) values.Add(s);
-        }
-
-        public void UpdateRaceChartExample()
-        {
-            UpdateRaceChart(new double[] { 9700, 9500, 9400, 9300, 9200, 9100 });
         }
     }
 } 

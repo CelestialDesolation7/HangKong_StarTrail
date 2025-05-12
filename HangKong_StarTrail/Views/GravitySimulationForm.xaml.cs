@@ -80,6 +80,13 @@ namespace HangKong_StarTrail.Views
         private const int TARGET_FPS = 120;         // 目标帧率
         private const int FRAME_TIME_MS = 1000 / TARGET_FPS; // 每帧预期时间(ms)
         #endregion
+
+        public string FocusedBodyName => _focusedBody?.Name;
+
+        // 假设你有速度、受力等数据结构
+        public double CurrentVelocity { get; private set; }
+        public double CurrentForce { get; private set; }
+        public int FrameCount { get; private set; }
         #endregion
 
 
@@ -196,7 +203,7 @@ namespace HangKong_StarTrail.Views
 
         private void InitializeDebugWindow()
         {
-            _debugWindow = new DebugForm.DebugSimulationForm(UpdateDebugInfo);
+           _debugWindow = new DebugForm.DebugSimulationForm(UpdateDebugInfo);
             _debugWindow.Show();
         }
 

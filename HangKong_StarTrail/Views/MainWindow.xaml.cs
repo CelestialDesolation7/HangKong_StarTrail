@@ -21,6 +21,8 @@ namespace HangKong_StarTrail.Views
     /// </summary>
     public partial class MainWindow : Window
     {
+        private GravitySimulationForm _gravityForm;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -205,7 +207,7 @@ namespace HangKong_StarTrail.Views
 
         private void ViewCharts_Click(object sender, RoutedEventArgs e)
         {
-            var chartsView = new ChartsView();
+            var chartsView = new ChartsView(_gravityForm);
             var window = new Window
             {
                 Title = "仿真图表",
