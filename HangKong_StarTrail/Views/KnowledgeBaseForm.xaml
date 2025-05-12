@@ -240,41 +240,21 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        
-                        <!-- 收藏按钮 -->
-                        <Button x:Name="FavoritesButton"
-                                Content="我的收藏"
-                                Foreground="#E0E0FF"
-                                FontSize="16"
-                                Background="Transparent"
+                        <!-- 在此处添加开始测试按钮 -->
+                        <Button x:Name="StartTestButton"
+                                Content="开始测试"
+                                Foreground="White"
+                                FontSize="22"
+                                Background="#4169E1"
                                 BorderThickness="0"
                                 HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Left"
-                                Padding="20,12"
-                                Margin="0,5"
-                                Click="FavoritesButton_Click">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="border" 
-                                                        Background="{TemplateBinding Background}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}">
-                                                    <ContentPresenter Margin="{TemplateBinding Padding}"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#252550"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                                HorizontalContentAlignment="Center"
+                                Padding="0,16"
+                                Margin="20,40,20,0"
+                                Height="60"
+                                MinWidth="180"
+                                Click="StartTestButton_Click"
+                                Cursor="Hand"/>
                     </StackPanel>
                 </Border>
                 

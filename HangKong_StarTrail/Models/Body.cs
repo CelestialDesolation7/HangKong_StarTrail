@@ -18,13 +18,13 @@ namespace HangKong_StarTrail.Models
 
         // 绘制属性
         // 仅在初始化时对用户可见，之后不再修改
-        public int RenderRadius { get; set; }        // 绘制半径
+        public double PhysicalRadius { get; set; }        // 物理半径
         public bool IsCenter { get; set; }              // 是否为中心天体
         public SKColor DisplayColor { get; set; }                // 绘制颜色
         // 永远对用户隐藏
         public Vector2D DisplayPosition { get; set; }    // 画布上的位置
 
-        public Body(string name_in, Vector2D position_in, Vector2D velocity_in, double mass_in, int displayRadius_in, bool isCenter_in, SKColor color_in)
+        public Body(string name_in, Vector2D position_in, Vector2D velocity_in, double mass_in, double physicalRadius_in, bool isCenter_in, SKColor color_in)
         {
             Name = name_in;
             Position = position_in;
@@ -32,7 +32,7 @@ namespace HangKong_StarTrail.Models
             Mass = mass_in;
             IsCenter = isCenter_in;
             DisplayColor = color_in;
-            RenderRadius = displayRadius_in;
+            PhysicalRadius = physicalRadius_in;
 
             Force = Vector2D.ZeroVector; // 初始化力为零
             Acceleration = Vector2D.ZeroVector; // 初始化加速度为零

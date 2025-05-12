@@ -46,6 +46,5 @@ namespace HangKong_StarTrail.Models
             // 更新经过的时间
             timeElapsed += deltaT;
         }
-
     }
 }

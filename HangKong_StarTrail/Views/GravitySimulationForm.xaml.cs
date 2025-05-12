@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define DEBUG
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,13 +24,15 @@ using System.Threading;
 using System.Data.SQLite;
 using System.IO;
 
+
+
 namespace HangKong_StarTrail.Views
 {
     public partial class GravitySimulationForm : Window
     {
 
         #region 成员变量
-        #region 渲染相关控制器
+        #region 渲染相关后台控制器
         private Renderer _renderer; // 渲染器，包含物理引擎作为成员
         private DispatcherTimer _simulationTimer;   // 物理仿真计时器
         private DispatcherTimer _uiUpdateTimer;     // UI更新计时器
@@ -38,19 +42,19 @@ namespace HangKong_StarTrail.Views
         private readonly object _renderLock = new object();  // 渲染锁
         private int _frameCount;                    // 帧计数器
         private DateTime _lastFrameTime;            // 上一帧时间
-        private bool _isPhysicsUpdatePending;      // 是否有待处理的物理更新
         private DateTime _lastPhysicsUpdate;        // 上次物理更新时间
-        private const int MIN_PHYSICS_UPDATE_INTERVAL = 1; // 最小物理更新间隔(ms)
         private bool _isRenderingEnabled = true;    // 是否启用渲染
+        private bool _isFrameRendering = false; // 当前帧是否正在渲染
         #endregion
 
-        #region 参数设置成员
+        #region 仿真参数设置
         private double _timeStep; // 每帧物理仿真时间步长
-        private double _baseTimeStep;
+        private double _recommendedTimeStep;   //推荐时间步长
         private bool _isSimulationRunning = true; // 是否正在仿真
         private bool _isTimeReversed = false;   // 是否反向仿真
-        private bool _isAddingBody = false;
         private bool _isVelocityVisualizeMode = false;
+        private Body? _focusedBody = null;  // 当前聚焦的天体
+        private Body? _centerBody = null;   // 当前场景下的中心天体
         #endregion
 
         #region 画布相关参数成员
@@ -58,19 +62,19 @@ namespace HangKong_StarTrail.Views
         private double _zoomFactor = 1.0; // 缩放因子，初始为1
         private double _pixelToDistanceRatio; // 实际使用的比例尺 = 推荐比例尺 * 缩放因子
         private Vector2D _canvasCenter; // 画布中心点
-        private Vector2D _cameraOffset = Vector2D.ZeroVector;   // 相机偏移量
-        private bool _isFrameRendering = false; // 当前帧是否正在渲染
-        private Body? _focusedBody = null;  // 当前聚焦的天体
-        private Vector2D? _dragStartPosition; // 记录拖动开始时的物理位置
-        private Vector2D? _lastMousePosition; // 记录上一帧的鼠标位置（屏幕坐标）
+        private Vector2D? _lastPhysicalDistFromCanvasCenter; // 记录拖动开始时的物理位置
+        private Vector2D? _lastMouseCanvasPos; // 记录上一帧的鼠标位置（屏幕坐标）
         private bool _isMiddleButtonPressed;    // 中键是否按下
+        private Vector2D _cameraOffset = Vector2D.ZeroVector;   // 相机偏移量
         #endregion
 
+#if DEBUG
         #region 调试信息成员
         private DebugForm.DebugSimulationForm _debugWindow; // 调试窗口
         private string[] _debugInfo = new string[10]; // 用于存储调试信息的字符串
         private long[] _universalCounter = new long[10]; // 用于存储全局计数器
         #endregion
+#endif
 
         #region 常量
         private const double DESIRED_PIXEL_MOVEMENT = 5.0; // 期望每帧移动的像素数
@@ -79,6 +83,17 @@ namespace HangKong_StarTrail.Views
         private const double SLIDER_MAX_VALUE = 2.0; // 滑块的最大值
         private const int TARGET_FPS = 120;         // 目标帧率
         private const int FRAME_TIME_MS = 1000 / TARGET_FPS; // 每帧预期时间(ms)
+        private const int MIN_PHYSICS_UPDATE_INTERVAL = 1; // 最小物理更新间隔(ms)
+        // 窗口状态码
+        private const int WM_NCHITTEST = 0x0084;
+        private const int HTLEFT = 10;
+        private const int HTRIGHT = 11;
+        private const int HTTOP = 12;
+        private const int HTTOPLEFT = 13;
+        private const int HTTOPRIGHT = 14;
+        private const int HTBOTTOM = 15;
+        private const int HTBOTTOMLEFT = 16;
+        private const int HTBOTTOMRIGHT = 17;
         #endregion
 
         public string FocusedBodyName => _focusedBody?.Name;
@@ -96,34 +111,89 @@ namespace HangKong_StarTrail.Views
             InitializeComponent();
             InitializeSimulation();
             InitializeDebugWindow();
+            InitializeStatisticsRecord();
 
             // 等待控件完成布局后再计算推荐比例尺
             animationCanva.Loaded += (s, e) =>
             {
-                _zoomFactor = 1.0;
-                _pixelToDistanceRatio = _recommendedScale  = CalculateRecommendedScale();
-                _baseTimeStep = _timeStep = CalculateRecommendedTimeStep();
+                InitializeSettingParameters();
+                InitializeUIStatus();
                 UpdateDisplayPositions();
                 animationCanva.InvalidateVisual();
-                // 计算并设置推荐时间步长
+                // 设置同步
                 _renderer.SetTimeStep(_timeStep);
                 _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
             };
 
+
+        }
+
+        // 初始化所有参数设置
+        public void InitializeSettingParameters()
+        {
+            // 渲染控制器参数成员
+            _isFrameRendering = false;
+            _isRenderingEnabled = true;
+            _lastFrameTime = DateTime.Now;
+            _lastPhysicsUpdate = DateTime.Now;
+            // 画布相关参数成员
+            _recommendedScale = CalculateRecommendedScale();
+            _pixelToDistanceRatio = _recommendedScale;
+            _zoomFactor = 1.0;
+            _cameraOffset = Vector2D.ZeroVector;
+            _lastPhysicalDistFromCanvasCenter = null;
+            _lastMouseCanvasPos = null;
+            _isMiddleButtonPressed = false;
+            UpdateFocusComboBox();
             var centerBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.IsCenter);
             if (centerBody != null)
             {
-                FocusIOTextBox.SelectedItem = centerBody.Name;
+                FocusIOComboBox.SelectedItem = centerBody.Name;
                 _focusedBody = centerBody;
+                _centerBody = centerBody;
             }
             else
             {
                 // 如果没有中心天体，设置为自由模式
-                FocusIOTextBox.SelectedItem = "自由模式";
+                FocusIOComboBox.SelectedItem = "自由模式";
                 _focusedBody = null;
+                _centerBody = null;
             }
+            // 仿真相关参数成员
+            _recommendedTimeStep = _timeStep = CalculateRecommendedTimeStep();
+            _isSimulationRunning = false;
+            _isTimeReversed = false;
+            _isVelocityVisualizeMode = false;
         }
 
+        // 初始化统计记录
+        public void InitializeStatisticsRecord()
+        {
+            _frameCount = 0;
+            _lastFrameTime = DateTime.Now;
+            _lastPhysicsUpdate = DateTime.Now;
+            _renderer._physicsEngine.timeElapsed = 0;
+        }
+
+        // 初始化UI状态
+        public void InitializeUIStatus()
+        {
+            // 初始化帧率统计
+            _frameCount = 0;
+            _lastFrameTime = DateTime.Now;
+            _lastPhysicsUpdate = DateTime.Now;
+
+            // 初始化时间步长滑块
+            SimulationTimeStepSlider.Minimum = SLIDER_MIN_VALUE;
+            SimulationTimeStepSlider.Maximum = SLIDER_MAX_VALUE;
+            SimulationTimeStepSlider.Value = SLIDER_CENTER_VALUE;
+
+            // 初始化按钮状态
+            UpdateButtonStates();
+            UpdateAllUIMonitor(null, null);
+        }
+
+        // 仿真后台初始化，只会被调用一次
         private void InitializeSimulation()
         {
             // 初始化渲染器
@@ -144,25 +214,10 @@ namespace HangKong_StarTrail.Views
             _uiUpdateTimer.Tick += UpdateAllUIMonitor;
 
             // 使用CompositionTarget.Rendering替代DispatcherTimer进行渲染
-            CompositionTarget.Rendering += CompositionTarget_Rendering;
-
-
-            // 初始化时间步长滑块
-            SimulationTimeStepSlider.Minimum = SLIDER_MIN_VALUE;
-            SimulationTimeStepSlider.Maximum = SLIDER_MAX_VALUE;
-            SimulationTimeStepSlider.Value = SLIDER_CENTER_VALUE;
-
-            // 初始化按钮状态
-            UpdateButtonStates();
+            CompositionTarget.Rendering += RenderCaller;
 
             // 加载默认地月系数据
             LoadDefaultEarthMoonSystem();
-
-            // 初始化帧率统计
-            _frameCount = 0;
-            _lastFrameTime = DateTime.Now;
-            _lastPhysicsUpdate = DateTime.Now;
-            _isPhysicsUpdatePending = false;
         }
 
         private void LoadDefaultEarthMoonSystem()
@@ -173,7 +228,7 @@ namespace HangKong_StarTrail.Views
                 new Vector2D(0, 0),  // 位置在原点
                 new Vector2D(0, 0),  // 初始速度
                 5.972e24,            // 质量（kg）
-                20,                  // 显示半径
+                6730e3,                  // 物理半径
                 true,                // 中心天体
                 new SKColor(0, 0, 255) // 蓝色
             );
@@ -184,7 +239,7 @@ namespace HangKong_StarTrail.Views
                 new Vector2D(384400e3, 0),  // 地月距离（米）
                 new Vector2D(0, 1022),      // 月球轨道速度（m/s）
                 7.348e22,                   // 质量（kg）
-                10,                         // 显示半径
+                1734e3,                         // 物理半径
                 false,                      // 非中心天体
                 new SKColor(128, 128, 128)  // 灰色
             );
@@ -198,7 +253,7 @@ namespace HangKong_StarTrail.Views
         }
         #endregion
 
-
+#if DEBUG
         #region 调试函数
 
         private void InitializeDebugWindow()
@@ -213,16 +268,16 @@ namespace HangKong_StarTrail.Views
             var debugInfo = new System.Text.StringBuilder();
 
             debugInfo.AppendLine($"时间步长: {_timeStep:F2} 秒");
-            debugInfo.AppendLine($"基准步长: {_baseTimeStep:F2} 秒");
+            debugInfo.AppendLine($"基准步长: {_recommendedTimeStep:F2} 秒");
             debugInfo.AppendLine($"推荐比例尺: {_recommendedScale:F6}");
             debugInfo.AppendLine($"缩放因子: {_zoomFactor:F6}");
             debugInfo.AppendLine($"实际比例尺: {_pixelToDistanceRatio:F6}");
             debugInfo.AppendLine($"相机偏移(物理坐标): X={_cameraOffset.X:F2}, Y={_cameraOffset.Y:F2}");
             debugInfo.AppendLine($"画布中心: X={_canvasCenter.X:F2}, Y={_canvasCenter.Y:F2}");
 
-            if (_dragStartPosition.HasValue)
+            if (_lastPhysicalDistFromCanvasCenter.HasValue)
             {
-                debugInfo.AppendLine($"拖动起始位置(物理坐标): X={_dragStartPosition.Value.X:F2}, Y={_dragStartPosition.Value.Y:F2}");
+                debugInfo.AppendLine($"拖动起始位置(物理坐标): X={_lastPhysicalDistFromCanvasCenter.Value.X:F2}, Y={_lastPhysicalDistFromCanvasCenter.Value.Y:F2}");
             }
 
             if (centerBody != null)
@@ -249,10 +304,19 @@ namespace HangKong_StarTrail.Views
         }
 
         #endregion
-
+#endif
 
         #region 基本UI响应
-        private void UpdateAllUIMonitor(object sender, EventArgs e)
+        // 更新UI上所有的信息显示文本的行为集合
+        private void UpdateAllUIMonitor(object? sender, EventArgs? e)
+        {
+            FPSReporter(sender, e);
+            FocusDataReporter(sender, e);
+            SimulationStaticsReporter(sender, e);
+        }
+
+        // 汇报帧率到UI的行为集合
+        private void FPSReporter(object? sender, EventArgs? e)
         {
             // 帧数汇报
             var now = DateTime.Now;
@@ -264,6 +328,11 @@ namespace HangKong_StarTrail.Views
                 _frameCount = 0;
                 _lastFrameTime = now;
             }
+        }
+
+        // 汇报观测对象数据到UI的行为集合
+        private void FocusDataReporter(object? sender, EventArgs? e)
+        {
             // 汇报观测对象属性
             if (_focusedBody != null && _isSimulationRunning)
             {
@@ -283,6 +352,11 @@ namespace HangKong_StarTrail.Views
                 VelocityIOTextBox.Text = "N/A";
                 MassIOTextBox.Text = "N/A";
             }
+        }
+
+        // 汇报渲染统计数据到UI的行为集合
+        private void SimulationStaticsReporter(object? sender, EventArgs? e)
+        {
             // 汇报渲染状态
             BodyCountReportLabel.Text = $" {_renderer._physicsEngine.Bodies.Count} ";
             if (_renderer._physicsEngine.timeElapsed <= 3600 * 24)
@@ -306,13 +380,12 @@ namespace HangKong_StarTrail.Views
                 SimulationTimeUnitLabel.Text = "年";
             }
             ScaleReportLabel.Text = NumberFormat(1 / _pixelToDistanceRatio) + " m";
-
         }
 
+        // 更新UI上所有的按钮状态（包括图标替换，启用/禁用等）
         private void UpdateButtonStates()
         {
             // 在仿真运行时禁用部分修改相关按钮
-
             // 更新开始/暂停按钮文本
             var startPauseBtn = StartPauseBtn.Content as StackPanel;
             if (startPauseBtn != null)
@@ -332,11 +405,13 @@ namespace HangKong_StarTrail.Views
             }
         }
 
+        // 关闭窗口按钮处理函数
         private void ExitSimulationBtn_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
 
+        // 仿真开始/暂停按钮处理函数
         private void StartPauseBtn_Click(object sender, RoutedEventArgs e)
         {
             _isSimulationRunning = !_isSimulationRunning;
@@ -361,6 +436,7 @@ namespace HangKong_StarTrail.Views
             UpdateButtonStates();
         }
 
+        // 拖动窗口事件处理函数
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             try
@@ -384,6 +460,7 @@ namespace HangKong_StarTrail.Views
             }
         }
 
+        // 时间步长滑块值改变事件处理函数
         private void SimulationTimeStepSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (e.NewValue != 0)
@@ -391,41 +468,49 @@ namespace HangKong_StarTrail.Views
                 // 计算新的时间步长
                 double ratio = Math.Pow(2, e.NewValue - SLIDER_CENTER_VALUE); // 使用更小的底数来降低灵敏度
                 // 实时应用新的时间步长,但暂时不更新
-                _timeStep = _baseTimeStep * ratio;
+                _timeStep = _recommendedTimeStep * ratio;
                 _renderer.SetTimeStep(_timeStep);
                 _debugInfo[1] = $"当前滑块值：{e.NewValue}";
+                if (!_isSimulationRunning)
+                {
+                    UpdateDisplayPositions();
+                    animationCanva.InvalidateVisual();
+                }
             }
         }
 
+        // 时间步长滑块拖动完成事件处理函数
         private void SimulationTimeStepSlider_DragCompleted(object sender, DragCompletedEventArgs e)
         {
-            _baseTimeStep = _timeStep;
+            _recommendedTimeStep = _timeStep;
             SimulationTimeStepSlider.Value = SLIDER_CENTER_VALUE;
         }
 
+        // 更新焦点下拉框的函数
         private void UpdateFocusComboBox()
         {
             // 保存当前选中的项
-            var currentSelection = FocusIOTextBox.SelectedItem?.ToString();
+            var currentSelection = FocusIOComboBox.SelectedItem?.ToString();
             // 清空下拉框
-            FocusIOTextBox.Items.Clear();
+            FocusIOComboBox.Items.Clear();
             // 添加自由模式选项
-            FocusIOTextBox.Items.Add("自由模式");
+            FocusIOComboBox.Items.Add("自由模式");
             // 添加所有天体
             foreach (var body in _renderer._physicsEngine.Bodies)
             {
-                FocusIOTextBox.Items.Add(body.Name);
+                FocusIOComboBox.Items.Add(body.Name);
             }
             // 恢复选中项
             if (!string.IsNullOrEmpty(currentSelection))
             {
-                FocusIOTextBox.SelectedItem = currentSelection;
+                FocusIOComboBox.SelectedItem = currentSelection;
             }
         }
 
-        private void FocusIOTextBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // 焦点控制下拉框的选择改变事件处理函数
+        private void FocusIOComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selectedItem = FocusIOTextBox.SelectedItem?.ToString();
+            var selectedItem = FocusIOComboBox.SelectedItem?.ToString();
             if (string.IsNullOrEmpty(selectedItem)) return;
 
             if (selectedItem == "自由模式")
@@ -455,6 +540,7 @@ namespace HangKong_StarTrail.Views
             }
         }
 
+        // 画布缩放事件处理函数，更新画布像素尺寸
         private void AnimationCanva_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             var source = PresentationSource.FromVisual(animationCanva);
@@ -463,13 +549,15 @@ namespace HangKong_StarTrail.Views
             double pixelHeight = animationCanva.ActualHeight * matrix.M22;
             _canvasCenter = new Vector2D(pixelWidth / 2, pixelHeight / 2);
         }
+
+        // 窗口关闭时的线程处理函数
         protected override void OnClosed(EventArgs e)
         {
             // 停止所有计时器和任务
             _physicsUpdateCts?.Cancel();
             _simulationTimer?.Stop();
             _uiUpdateTimer?.Stop();
-            CompositionTarget.Rendering -= CompositionTarget_Rendering;
+            CompositionTarget.Rendering -= RenderCaller;
 
             // 等待物理更新任务完成
             if (_physicsUpdateTask != null && !_physicsUpdateTask.IsCompleted)
@@ -488,7 +576,324 @@ namespace HangKong_StarTrail.Views
             base.OnClosed(e);
         }
 
-        #region 拖动窗口
+        // 位置输入输出框的键盘事件处理函数
+        private void PositionIOTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
+            {
+                var originalText = PositionIOTextBox.Text;
+                try
+                {
+                    var parts = PositionIOTextBox.Text.Trim('(', ')').Split(',');
+                    if (parts.Length == 2)
+                    {
+                        double x = ParseScientificNumber(parts[0].Substring(0, parts[0].Length - 2));
+                        double y = ParseScientificNumber(parts[1].Substring(0, parts[1].Length - 2));
+                        _focusedBody.Position = new Vector2D(x, y);
+                        UpdateDisplayPositions();
+                        animationCanva.InvalidateVisual();
+
+                        // 更新显示
+                        PositionIOTextBox.Text = $"({FormatDistance(x)},{FormatDistance(y)})";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"无效的位置格式：{ex.Message}", "错误",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    // 恢复原始文本
+                    PositionIOTextBox.Text = originalText;
+                }
+            }
+        }
+
+        // 速度输入输出框的键盘事件处理函数
+        private void VelocityIOTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
+            {
+                var originalText = VelocityIOTextBox.Text;
+                _debugInfo[4] = $"原始文本：{originalText}";
+                try
+                {
+                    var parts = VelocityIOTextBox.Text.Trim('(', ')').Split(',');
+                    if (parts.Length == 2)
+                    {
+                        _debugInfo[3] = parts[0];
+                        _debugInfo[2] = parts[1];
+                        double vx = ParseScientificNumber(parts[0].Substring(0, parts[0].Length - 4));
+                        double vy = ParseScientificNumber(parts[1].Substring(0, parts[1].Length - 4));
+                        _focusedBody.Velocity = new Vector2D(vx, vy);
+
+                        // 更新显示
+                        VelocityIOTextBox.Text = $"({FormatVelocity(vx)},{FormatVelocity(vy)})";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"无效的速度格式：{ex.Message}", "错误",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    // 恢复原始文本
+                    VelocityIOTextBox.Text = originalText;
+                }
+            }
+        }
+
+        // 质量输入输出框的键盘事件处理函数
+        private void MassIOTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
+            {
+                var originalText = MassIOTextBox.Text;
+                try
+                {
+                    double mass = ParseScientificNumber(MassIOTextBox.Text.Substring(0, MassIOTextBox.Text.Length - 3));
+                    _focusedBody.Mass = mass;
+
+                    // 更新显示
+                    MassIOTextBox.Text = FormatMass(mass);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"无效的质量格式：{ex.Message}", "错误",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    // 恢复原始文本
+                    MassIOTextBox.Text = originalText;
+                }
+            }
+        }
+
+        // 速度可视化按钮的处理函数
+        private void VelocityVisualizeModeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _isVelocityVisualizeMode = !_isVelocityVisualizeMode;
+        }
+
+        // 速度长度因子输入框的键盘事件处理函数
+        private void VelocityLengthFactorIOTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                _renderer._velocityLengthFactor = double.Parse(VelocityLengthFactorIOTextBox.Text);
+            }
+            // 更新此输入框的值
+            VelocityLengthFactorIOTextBox.Text = _renderer._velocityLengthFactor.ToString();
+        }
+
+        // 最小显示半径输入框的键盘事件处理函数
+        private void MinimumDisplayRadiusIOTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                _renderer._minimumDisplayRadius = int.Parse(MinimumDisplayRadiusIOTextBox.Text);
+            }
+            // 更新此输入框的值
+            MinimumDisplayRadiusIOTextBox.Text = _renderer._minimumDisplayRadius.ToString();
+        }
+
+        // 重置焦点按钮的处理函数
+        private void FocusResetBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_centerBody != null)
+            {
+                _cameraOffset = Vector2D.ZeroVector;
+                _focusedBody = _centerBody;
+                FocusIOComboBox.SelectedItem = $"{_centerBody.Name}";
+            }
+            else
+            {
+                // 如果没有中心天体，设置为自由模式
+                FocusIOComboBox.SelectedItem = "自由模式";
+                _cameraOffset = Vector2D.ZeroVector;
+                _focusedBody = null;
+            }
+        }
+
+        // 导入场景按钮的处理函数
+        private void ImportSceneButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 如果仿真正在运行，则先暂停
+            if (_isSimulationRunning)
+            {
+                StartPauseBtn_Click(sender, e);
+            }
+
+            var sceneWindow = new SceneSelectionWindow();
+            if (sceneWindow.ShowDialog() == true)
+            {
+
+                try
+                {
+                    string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data\\scene.db");
+                    if (!File.Exists(dbPath))
+                    {
+                        MessageBox.Show("未找到预设场景数据库", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    using (var connection = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+                    {
+                        connection.Open();
+                        // 获取场景ID
+                        int sceneId;
+                        using (var command = new SQLiteCommand("SELECT SceneId FROM Scenes WHERE SceneName = @SceneName", connection))
+                        {
+                            command.Parameters.AddWithValue("@SceneName", sceneWindow.SelectedSceneName);
+                            sceneId = Convert.ToInt32(command.ExecuteScalar());
+                        }
+
+                        // 获取场景中的所有天体
+                        var bodies = new List<Body>();
+                        using (var command = new SQLiteCommand(
+                            "SELECT Name, PositionX, PositionY, VelocityX, VelocityY, Mass, IsCenter, " +
+                            "ColorR, ColorG, ColorB, ColorA, PhysicalRadius " +
+                            "FROM Bodies WHERE SceneId = @SceneId", connection))
+                        {
+                            command.Parameters.AddWithValue("@SceneId", sceneId);
+                            using (var reader = command.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    var body = new Body(
+                                        reader.GetString(0), // Name
+                                        new Vector2D(reader.GetDouble(1), reader.GetDouble(2)), // Position
+                                        new Vector2D(reader.GetDouble(3), reader.GetDouble(4)), // Velocity
+                                        reader.GetDouble(5), // Mass
+                                        reader.GetDouble(11), // PhysicalRadius
+                                        reader.GetInt32(6) != 0, // IsCenter
+                                        new SKColor(
+                                            (byte)reader.GetInt32(7),  // R
+                                            (byte)reader.GetInt32(8),  // G
+                                            (byte)reader.GetInt32(9),  // B
+                                            (byte)reader.GetInt32(10)  // A
+                                        )
+                                    );
+                                    bodies.Add(body);
+                                }
+                            }
+                        }
+
+                        // 更新物理引擎中的天体
+                        _renderer._physicsEngine.Bodies.Clear();
+                        foreach (var body in bodies)
+                        {
+                            _renderer.AddBody(body);
+                        }
+
+                        _timeStep = CalculateRecommendedTimeStep();
+                        _pixelToDistanceRatio = _recommendedScale = CalculateRecommendedScale();
+
+                        // 更新焦点天体下拉框
+                        UpdateFocusComboBox();
+                        // 重绘画布
+                        animationCanva.InvalidateVisual();
+                        // 重置必要的数据
+                        // 更新UI
+                        InitializeSettingParameters();
+                        InitializeStatisticsRecord();
+                        InitializeUIStatus();
+                        _renderer.InitializeRenderer();
+                        _renderer.SetTimeStep(_timeStep);
+                        _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"导入预设场景时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        // 导出场景按钮的处理函数
+        private void ExportSceneButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isSimulationRunning)
+            {
+                StartPauseBtn_Click(sender, e);
+            }
+
+            var sceneName = Microsoft.VisualBasic.Interaction.InputBox(
+                "请输入场景名称：",
+                "导出场景",
+                "新场景");
+
+            if (string.IsNullOrWhiteSpace(sceneName))
+            {
+                return;
+            }
+
+            try
+            {
+                string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data\\scene.db");
+                if (!File.Exists(dbPath))
+                {
+                    MessageBox.Show("未找到预设场景数据库", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                using (var connection = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+                {
+                    connection.Open();
+                    using (var transaction = connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            // 插入场景
+                            int sceneId;
+                            using (var command = new SQLiteCommand(
+                                "INSERT INTO Scenes (SceneName, CreateTime) VALUES (@SceneName, @CreateTime); " +
+                                "SELECT last_insert_rowid();", connection))
+                            {
+                                command.Parameters.AddWithValue("@SceneName", sceneName);
+                                command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
+                                sceneId = Convert.ToInt32(command.ExecuteScalar());
+                            }
+
+                            // 插入天体
+                            foreach (var body in _renderer._physicsEngine.Bodies)
+                            {
+                                using (var command = new SQLiteCommand(
+                                    "INSERT INTO Bodies (SceneId, Name, PositionX, PositionY, " +
+                                    "VelocityX, VelocityY, Mass, IsCenter, " +
+                                    "ColorR, ColorG, ColorB, ColorA, PhysicalRadius) " +
+                                    "VALUES (@SceneId, @Name, @PositionX, @PositionY, " +
+                                    "@VelocityX, @VelocityY, @Mass, @IsCenter, " +
+                                    "@ColorR, @ColorG, @ColorB, @ColorA, @PhysicalRadius)", connection))
+                                {
+                                    command.Parameters.AddWithValue("@SceneId", sceneId);
+                                    command.Parameters.AddWithValue("@Name", body.Name);
+                                    command.Parameters.AddWithValue("@PositionX", body.Position.X);
+                                    command.Parameters.AddWithValue("@PositionY", body.Position.Y);
+                                    command.Parameters.AddWithValue("@VelocityX", body.Velocity.X);
+                                    command.Parameters.AddWithValue("@VelocityY", body.Velocity.Y);
+                                    command.Parameters.AddWithValue("@Mass", body.Mass);
+                                    command.Parameters.AddWithValue("@IsCenter", body.IsCenter);
+                                    command.Parameters.AddWithValue("@ColorR", body.DisplayColor.Red);
+                                    command.Parameters.AddWithValue("@ColorG", body.DisplayColor.Green);
+                                    command.Parameters.AddWithValue("@ColorB", body.DisplayColor.Blue);
+                                    command.Parameters.AddWithValue("@ColorA", body.DisplayColor.Alpha);
+                                    command.Parameters.AddWithValue("@PhysicalRadius", body.PhysicalRadius);
+                                    command.ExecuteNonQuery();
+                                }
+                            }
+
+                            transaction.Commit();
+                            MessageBox.Show("场景导出成功！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        catch
+                        {
+                            transaction.Rollback();
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"导出场景时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // 窗口处理函数注册器
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
@@ -497,23 +902,7 @@ namespace HangKong_StarTrail.Views
             HwndSource.FromHwnd(handle)?.AddHook(WindowProc);
         }
 
-
-        // 用于处理窗口消息的常量
-        // 你不需要关心这些常量的具体含义
-        private const int WM_NCHITTEST = 0x0084;
-        private const int HTLEFT = 10;
-        private const int HTRIGHT = 11;
-        private const int HTTOP = 12;
-        private const int HTTOPLEFT = 13;
-        private const int HTTOPRIGHT = 14;
-        private const int HTBOTTOM = 15;
-        private const int HTBOTTOMLEFT = 16;
-        private const int HTBOTTOMRIGHT = 17;
-
-
         // 以下这一函数接管了Windows系统的窗口消息处理，手动实现了窗口的拖动和缩放监控
-        // 你不需要关心这个函数的实现细节
-        // 所以请不要展开它的函数体
         private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             if (msg == WM_NCHITTEST)
@@ -574,33 +963,25 @@ namespace HangKong_StarTrail.Views
 
         #endregion
 
-        #endregion
-
-
-
 
 
         #region 画面渲染相关操作
+        // 物理更新线程的主要函数
         private void SimulationTimer_Tick(object sender, EventArgs e)
         {
             if (!_isSimulationRunning) return;
-
             var now = DateTime.Now;
             var timeSinceLastUpdate = (now - _lastPhysicsUpdate).TotalMilliseconds;
-
             // 如果距离上次物理更新时间太短，跳过这次更新
             if (timeSinceLastUpdate < MIN_PHYSICS_UPDATE_INTERVAL)
             {
                 return;
             }
-
-            // 如果上一个物理更新任务还在运行，标记为待处理并返回
+            // 如果上一个物理更新任务还在运行，直接返回
             if (_physicsUpdateTask != null && !_physicsUpdateTask.IsCompleted)
             {
-                _isPhysicsUpdatePending = true;
                 return;
             }
-
             try
             {
                 // 创建新的物理更新任务
@@ -610,11 +991,9 @@ namespace HangKong_StarTrail.Views
                     {
                         if (_physicsUpdateCts?.Token.IsCancellationRequested == true)
                             return;
-
                         _renderer._physicsEngine.Update(_timeStep);
                         UpdateDisplayPositions();
                         _lastPhysicsUpdate = DateTime.Now;
-                        _isPhysicsUpdatePending = false;
                     }
                 });
             }
@@ -624,93 +1003,9 @@ namespace HangKong_StarTrail.Views
             }
         }
 
-        private void PositionIOTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
-            {
-                var originalText = PositionIOTextBox.Text;
-                try
-                {
-                    var parts = PositionIOTextBox.Text.Trim('(', ')').Split(',');
-                    if (parts.Length == 2)
-                    {
-                        double x = ParseScientificNumber(parts[0].Substring(0, parts[0].Length - 2));
-                        double y = ParseScientificNumber(parts[1].Substring(0, parts[1].Length - 2));
-                        _focusedBody.Position = new Vector2D(x, y);
-                        UpdateDisplayPositions();
-                        animationCanva.InvalidateVisual();
-
-                        // 更新显示
-                        PositionIOTextBox.Text = $"({FormatDistance(x)},{FormatDistance(y)})";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"无效的位置格式：{ex.Message}", "错误",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    // 恢复原始文本
-                    PositionIOTextBox.Text = originalText;
-                }
-            }
-        }
-
-        private void VelocityIOTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
-            {
-                var originalText = VelocityIOTextBox.Text;
-                _debugInfo[4] = $"原始文本：{originalText}";
-                try
-                {
-                    var parts = VelocityIOTextBox.Text.Trim('(', ')').Split(',');
-                    if (parts.Length == 2)
-                    {
-                        _debugInfo[3] = parts[0];
-                        _debugInfo[2] = parts[1];
-                        double vx = ParseScientificNumber(parts[0].Substring(0, parts[0].Length - 4));
-                        double vy = ParseScientificNumber(parts[1].Substring(0, parts[1].Length - 4));
-                        _focusedBody.Velocity = new Vector2D(vx, vy);
-
-                        // 更新显示
-                        VelocityIOTextBox.Text = $"({FormatVelocity(vx)},{FormatVelocity(vy)})";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"无效的速度格式：{ex.Message}", "错误",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    // 恢复原始文本
-                    VelocityIOTextBox.Text = originalText;
-                }
-            }
-        }
-
-        private void MassIOTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
-            {
-                var originalText = MassIOTextBox.Text;
-                try
-                {
-                    double mass = ParseScientificNumber(MassIOTextBox.Text.Substring(0, MassIOTextBox.Text.Length - 3));
-                    _focusedBody.Mass = mass;
-
-                    // 更新显示
-                    MassIOTextBox.Text = FormatMass(mass);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"无效的质量格式：{ex.Message}", "错误",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    // 恢复原始文本
-                    MassIOTextBox.Text = originalText;
-                }
-            }
-        }
-
+        // 更新所有天体的显示位置
         private void UpdateDisplayPositions()
         {
-            _debugInfo[5] = "进入 UpdateDisplayPositions";
             if (_focusedBody != null)
             {
                 // 如果有焦点天体，将其置于画布中心
@@ -732,70 +1027,65 @@ namespace HangKong_StarTrail.Views
                     body.DisplayPosition = PhysicalToScreenPosition(relativePosition);
                 }
             }
-            _universalCounter[1]++;
-            _debugInfo[1] = $"UpdateDisplayPositions调用次数{_universalCounter[1]}";
-            _debugInfo[5] = "完成 UpdateDisplayPositions";
         }
 
+        // 滚轮缩放事件处理函数
         private void AnimationCanva_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            _debugInfo[5] = "进入 AnimationCanva_MouseWheel";
             // 根据滚轮方向调整缩放因子
             double zoomFactor = e.Delta > 0 ? 1.1 : 0.9;
             _zoomFactor *= zoomFactor;
-
-            // 限制缩放因子范围
-            _zoomFactor = Math.Max(0.1, Math.Min(10.0, _zoomFactor));
 
             // 更新实际使用的比例尺
             _pixelToDistanceRatio = _recommendedScale * _zoomFactor;
             _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
 
-            // 只在暂停模式下更新显示
+            // 只在暂停模式下显式更新显示
             if (!_isSimulationRunning)
             {
                 UpdateDisplayPositions();
                 animationCanva.InvalidateVisual();
             }
-            _debugInfo[5] = "完成 AnimationCanva_MouseWheel";
         }
 
+        // 自由模式移动事件入口函数
         private void AnimationCanva_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.MiddleButton == MouseButtonState.Pressed)
             {
-                if (_focusedBody == null) // 只在没有焦点天体时允许拖动
+                // 只在没有焦点天体时允许拖动
+                if (_focusedBody == null)
                 {
                     _isMiddleButtonPressed = true;
                     var mousePos = e.GetPosition(animationCanva);
-                    _lastMousePosition = new Vector2D(mousePos.X, mousePos.Y);
+                    _lastMouseCanvasPos = new Vector2D(mousePos.X, mousePos.Y);
 
                     // 将鼠标位置转换为物理坐标
-                    _dragStartPosition = ScreenToRelativePhysicalPosition(_lastMousePosition.Value);
+                    _lastPhysicalDistFromCanvasCenter = CaculatePhysicalDistFromCanvasCenter(_lastMouseCanvasPos.Value);
                     animationCanva.CaptureMouse();
                 }
             }
         }
 
+        // 自由模式移动事件拖动函数
         private void AnimationCanva_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isMiddleButtonPressed && _lastMousePosition.HasValue && _dragStartPosition.HasValue)
+            if (_isMiddleButtonPressed && _lastMouseCanvasPos.HasValue && _lastPhysicalDistFromCanvasCenter.HasValue)
             {
-                _debugInfo[5] = "进入 AnimationCanva_MouseMove";
-                var currentMousePos = e.GetPosition(animationCanva);
-                var currentMouseVector = new Vector2D(currentMousePos.X, currentMousePos.Y);
+                var newMouseCanvasPos = e.GetPosition(animationCanva);
+                var newMouseCanvasPosVec2D = new Vector2D(newMouseCanvasPos.X, newMouseCanvasPos.Y);
 
                 // 计算鼠标移动的物理位移
-                var currentPhysicalPos = ScreenToRelativePhysicalPosition(currentMouseVector);
-                var physicalDelta = currentPhysicalPos - _dragStartPosition.Value;
-                var pixelDelta = currentMouseVector - _lastMousePosition.Value;
+                var currentPhysicalDistFromCanvasCenter = CaculatePhysicalDistFromCanvasCenter(newMouseCanvasPosVec2D);
+                var physicalDelta = currentPhysicalDistFromCanvasCenter - _lastPhysicalDistFromCanvasCenter.Value;
+                var pixelDelta = newMouseCanvasPosVec2D - _lastMouseCanvasPos.Value;
                 _renderer.UpdateStarOffset((float)pixelDelta.X, (float)pixelDelta.Y);
                 // 更新相机偏移
                 _cameraOffset -= physicalDelta;
 
                 // 更新拖动起始位置为当前位置
-                _dragStartPosition = currentPhysicalPos;
-                _lastMousePosition = currentMouseVector;
+                _lastPhysicalDistFromCanvasCenter = currentPhysicalDistFromCanvasCenter;
+                _lastMouseCanvasPos = newMouseCanvasPosVec2D;
 
                 // 只在暂停模式下更新显示
                 if (!_isSimulationRunning)
@@ -803,76 +1093,30 @@ namespace HangKong_StarTrail.Views
                     UpdateDisplayPositions();
                     animationCanva.InvalidateVisual();
                 }
-                _debugInfo[5] = "完成 AnimationCanva_MouseMove";
             }
         }
 
+        // 自由模式移动事件退出函数
         private void AnimationCanva_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (e.MiddleButton == MouseButtonState.Released)
             {
                 _isMiddleButtonPressed = false;
-                _lastMousePosition = null;
-                _dragStartPosition = null;
+                _lastMouseCanvasPos = null;
+                _lastPhysicalDistFromCanvasCenter = null;
                 animationCanva.ReleaseMouseCapture();
             }
         }
 
-        private void AnimationCanva_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (_isAddingBody && !_isSimulationRunning)
-            {
-                try
-                {
-                    var position = e.GetPosition(animationCanva);
-                    var worldPosition = new Vector2D(
-                        (position.X - animationCanva.ActualWidth / 2) / _pixelToDistanceRatio + _cameraOffset.X,
-                        (position.Y - animationCanva.ActualHeight / 2) / _pixelToDistanceRatio + _cameraOffset.Y
-                    );
-
-                    // 创建新天体
-                    var newBody = new Body(
-                        $"Body_{_renderer._physicsEngine.Bodies.Count + 1}",
-                        worldPosition,
-                        new Vector2D(0, 0), // 初始速度
-                        1.0, // 默认质量
-                        10, // 默认半径
-                        false,
-                        new SKColor(255, 0, 0) // 红色
-                    );
-
-                    _renderer.AddBody(newBody);
-                    _isAddingBody = false;
-
-                    // 强制重绘
-                    animationCanva.InvalidateVisual();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"添加天体时发生错误：{ex.Message}", "错误",
-                                    MessageBoxButton.OK, MessageBoxImage.Error);
-                    _isAddingBody = false;
-                }
-            }
-        }
-
+        // 画布绘制事件对应的处理委托
         private void OnPaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
-            var canvas = e.Surface.Canvas;
-
-            // 渲染星空背景
-            _renderer.RenderBackground(canvas);
-            // 渲染天体
-            _renderer.RenderBodies(canvas);
-            // 渲染速度箭头
-            if (_isVelocityVisualizeMode)
-            {
-                _renderer.RenderVelocityArrow(canvas);
-            }
+            RenderOneFrame(e.Surface.Canvas);
             _frameCount++;
         }
 
-        private void CompositionTarget_Rendering(object sender, EventArgs e)
+        // 调用渲染的委托函数
+        private void RenderCaller(object sender, EventArgs e)
         {
             if (!_isRenderingEnabled) return;
 
@@ -884,6 +1128,20 @@ namespace HangKong_StarTrail.Views
                 }
             }
         }
+
+        // 渲染单帧的所有行为的集合
+        private void RenderOneFrame(SKCanvas canvas)
+        {
+            // 渲染星空背景
+            _renderer.RenderBackground(canvas);
+            // 渲染天体
+            _renderer.RenderBodies(canvas);
+            // 渲染速度箭头
+            if (_isVelocityVisualizeMode)
+            {
+                _renderer.RenderVelocityArrow(canvas);
+            }
+        }
         #endregion
 
 
@@ -891,11 +1149,6 @@ namespace HangKong_StarTrail.Views
 
 
         #region 待实现功能
-        private void VelocityVisualizeModeBtn_Click(object sender, RoutedEventArgs e)
-        {
-            _isVelocityVisualizeMode = !_isVelocityVisualizeMode;
-            // TODO: 实现速度设置模式的具体功能
-        }
 
         private void ResetSimulationBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -910,214 +1163,22 @@ namespace HangKong_StarTrail.Views
             VelocityIOTextBox.Text = "";
             MassIOTextBox.Text = "";
             PositionIOTextBox.Text = "";
-            FocusIOTextBox.SelectedIndex = -1;
+            FocusIOComboBox.SelectedIndex = -1;
 
             LoadDefaultEarthMoonSystem();
         }
-
-        private void FocusResetBtn_Click(object sender, RoutedEventArgs e)
-        {
-            var centerBody = _renderer._physicsEngine.Bodies.Where(b => b.IsCenter);
-            if (centerBody.Any())
-            {
-                _cameraOffset = Vector2D.ZeroVector;
-                _focusedBody = centerBody.First();
-                FocusIOTextBox.SelectedItem = $"{centerBody.First().Name}";
-            }
-            else
-            {
-                // 如果没有中心天体，设置为自由模式
-                FocusIOTextBox.SelectedItem = "自由模式";
-                _cameraOffset = Vector2D.ZeroVector;
-                _focusedBody = null;
-            }
-        }
-
         private void TimeReverseBtn_Click(object sender, RoutedEventArgs e)
         {
             _isTimeReversed = !_isTimeReversed;
         }
 
 
-        private void ImportSceneButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_isSimulationRunning)
-            {
-                StartPauseBtn_Click(sender, e);
-            }
-
-            var sceneWindow = new SceneSelectionWindow();
-            if (sceneWindow.ShowDialog() == true)
-            {
-
-                try
-                {
-                    string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data\\scene.db");
-                    if (!File.Exists(dbPath))
-                    {
-                        MessageBox.Show("未找到预设场景数据库", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-
-                    using (var connection = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
-                    {
-                        connection.Open();
-                        // 获取场景ID
-                        int sceneId;
-                        using (var command = new SQLiteCommand("SELECT SceneId FROM Scenes WHERE SceneName = @SceneName", connection))
-                        {
-                            command.Parameters.AddWithValue("@SceneName", sceneWindow.SelectedSceneName);
-                            sceneId = Convert.ToInt32(command.ExecuteScalar());
-                        }
-
-                        // 获取场景中的所有天体
-                        var bodies = new List<Body>();
-                        using (var command = new SQLiteCommand(
-                            "SELECT Name, PositionX, PositionY, VelocityX, VelocityY, Mass, IsCenter, " +
-                            "ColorR, ColorG, ColorB, ColorA, DisplayRadius " +
-                            "FROM Bodies WHERE SceneId = @SceneId", connection))
-                        {
-                            command.Parameters.AddWithValue("@SceneId", sceneId);
-                            using (var reader = command.ExecuteReader())
-                            {
-                                while (reader.Read())
-                                {
-                                    var body = new Body(
-                                        reader.GetString(0), // Name
-                                        new Vector2D(reader.GetDouble(1), reader.GetDouble(2)), // Position
-                                        new Vector2D(reader.GetDouble(3), reader.GetDouble(4)), // Velocity
-                                        reader.GetDouble(5), // Mass
-                                        Convert.ToInt32(reader.GetDouble(11)), // DisplayRadius
-                                        reader.GetInt32(6) != 0, // IsCenter
-                                        new SKColor(
-                                            (byte)reader.GetInt32(7),  // R
-                                            (byte)reader.GetInt32(8),  // G
-                                            (byte)reader.GetInt32(9),  // B
-                                            (byte)reader.GetInt32(10)  // A
-                                        )
-                                    );
-                                    bodies.Add(body);
-                                }
-                            }
-                        }
-
-                        // 更新物理引擎中的天体
-                        _renderer._physicsEngine.Bodies.Clear();
-                        foreach (var body in bodies)
-                        {
-                            _renderer.AddBody(body);
-                        }
-
-                        _timeStep = CalculateRecommendedTimeStep();
-                        _pixelToDistanceRatio = _recommendedScale = CalculateRecommendedScale();
-                        
-                        // 更新天体列表
-                        UpdateFocusComboBox();
-                        UpdateDisplayPositions();
-                        // 重绘画布
-                        animationCanva.InvalidateVisual();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"导入预设场景时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        private void ExportSceneButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_isSimulationRunning)
-            {
-                StartPauseBtn_Click(sender, e);
-            }
-
-            var sceneName = Microsoft.VisualBasic.Interaction.InputBox(
-                "请输入场景名称：",
-                "导出场景",
-                "新场景");
-
-            if (string.IsNullOrWhiteSpace(sceneName))
-            {
-                return;
-            }
-
-            try
-            {
-                string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data\\scene.db");
-                if (!File.Exists(dbPath))
-                {
-                    MessageBox.Show("未找到预设场景数据库", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-                using (var connection = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
-                {
-                    connection.Open();
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        try
-                        {
-                            // 插入场景
-                            int sceneId;
-                            using (var command = new SQLiteCommand(
-                                "INSERT INTO Scenes (SceneName, CreateTime) VALUES (@SceneName, @CreateTime); " +
-                                "SELECT last_insert_rowid();", connection))
-                            {
-                                command.Parameters.AddWithValue("@SceneName", sceneName);
-                                command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
-                                sceneId = Convert.ToInt32(command.ExecuteScalar());
-                            }
-
-                            // 插入天体
-                            foreach (var body in _renderer._physicsEngine.Bodies)
-                            {
-                                using (var command = new SQLiteCommand(
-                                    "INSERT INTO Bodies (SceneId, Name, PositionX, PositionY, " +
-                                    "VelocityX, VelocityY, Mass, IsCenter, " +
-                                    "ColorR, ColorG, ColorB, ColorA, DisplayRadius) " +
-                                    "VALUES (@SceneId, @Name, @PositionX, @PositionY, " +
-                                    "@VelocityX, @VelocityY, @Mass, @IsCenter, " +
-                                    "@ColorR, @ColorG, @ColorB, @ColorA, @DisplayRadius)", connection))
-                                {
-                                    command.Parameters.AddWithValue("@SceneId", sceneId);
-                                    command.Parameters.AddWithValue("@Name", body.Name);
-                                    command.Parameters.AddWithValue("@PositionX", body.Position.X);
-                                    command.Parameters.AddWithValue("@PositionY", body.Position.Y);
-                                    command.Parameters.AddWithValue("@VelocityX", body.Velocity.X);
-                                    command.Parameters.AddWithValue("@VelocityY", body.Velocity.Y);
-                                    command.Parameters.AddWithValue("@Mass", body.Mass);
-                                    command.Parameters.AddWithValue("@IsCenter", body.IsCenter);
-                                    command.Parameters.AddWithValue("@ColorR", body.DisplayColor.Red);
-                                    command.Parameters.AddWithValue("@ColorG", body.DisplayColor.Green);
-                                    command.Parameters.AddWithValue("@ColorB", body.DisplayColor.Blue);
-                                    command.Parameters.AddWithValue("@ColorA", body.DisplayColor.Alpha);
-                                    command.Parameters.AddWithValue("@DisplayRadius", body.RenderRadius);
-                                    command.ExecuteNonQuery();
-                                }
-                            }
-
-                            transaction.Commit();
-                            MessageBox.Show("场景导出成功！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                        catch
-                        {
-                            transaction.Rollback();
-                            throw;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"导出场景时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
         #endregion
 
 
         #region 无副作用的计算函数
         // 将屏幕坐标转换为物理坐标
-        private Vector2D ScreenToRelativePhysicalPosition(Vector2D screenPos)
+        private Vector2D CaculatePhysicalDistFromCanvasCenter(Vector2D screenPos)
         {
             // 将屏幕坐标转换为相对于画布中心的坐标
             var relativePos = screenPos - _canvasCenter;
@@ -1240,6 +1301,7 @@ namespace HangKong_StarTrail.Views
             throw new FormatException("无效的数字格式");
         }
 
+        // 计算推荐的时间步长
         private double CalculateRecommendedTimeStep()
         {
             if (_renderer._physicsEngine.Bodies.Count == 0)
@@ -1263,6 +1325,7 @@ namespace HangKong_StarTrail.Views
             return Math.Max(0.1, Math.Min(100000.0, recommendedTimeStep));
         }
 
+        // 计算推荐的缩放比例
         private double CalculateRecommendedScale()
         {
             if (_renderer._physicsEngine.Bodies.Count < 2)
@@ -1302,6 +1365,5 @@ namespace HangKong_StarTrail.Views
             return scale;
         }
         #endregion
-
     }
 }
