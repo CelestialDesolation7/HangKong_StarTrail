@@ -27,18 +27,20 @@
 
     <Grid>
         <!-- 背景图片 -->
-        <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg" 
+        <Image Source="/HangKong_StarTrail;component/StyleResources/Images/background.jpg"
                Stretch="UniformToFill"/>
-               
-        <Border BorderBrush="Gray" BorderThickness="2">
+
+        <Border BorderBrush="Gray"
+                BorderThickness="2">
             <Border.Background>
-                <SolidColorBrush Color="#FF2D2D30" Opacity="0.5"/>
+                <SolidColorBrush Color="#FF2D2D30"
+                        Opacity="0.5"/>
             </Border.Background>
-        
+
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"
-                                    MaxWidth="500"/>
+                                      MaxWidth="500"/>
                     <ColumnDefinition Width="5"/>
                     <!-- 左右侧之间的分割线 -->
                     <ColumnDefinition Width="3*"/>
@@ -51,11 +53,11 @@
 
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0"
-                                            EndPoint="0,1">
+                                             EndPoint="0,1">
                             <GradientStop Color="#343155"
-                                        Offset="0"/>
+                                          Offset="0"/>
                             <GradientStop Color="#3B2158"
-                                        Offset="1"/>
+                                          Offset="1"/>
                         </LinearGradientBrush>
                     </Border.Background>
 
@@ -74,12 +76,12 @@
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="SignOut"
-                                                        Width="20"
-                                                        Height="20"
-                                                        Margin="0,0,6,0"
-                                                        Foreground="White"/>
+                                                         Width="20"
+                                                         Height="20"
+                                                         Margin="0,0,6,0"
+                                                         Foreground="White"/>
                                         <TextBlock Text="退出"
-                                                VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
 
@@ -91,12 +93,12 @@
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="Refresh"
-                                                        Width="20"
-                                                        Height="20"
-                                                        Margin="0,0,6,0"
-                                                        Foreground="White"/>
+                                                         Width="20"
+                                                         Height="20"
+                                                         Margin="0,0,6,0"
+                                                         Foreground="White"/>
                                         <TextBlock Text="重置"
-                                                VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -114,12 +116,28 @@
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="Play"
-                                                        Width="20"
-                                                        Height="20"
-                                                        Margin="0,0,6,0"
-                                                        Foreground="White"/>
+                                                         Width="20"
+                                                         Height="20"
+                                                         Margin="0,0,6,0"
+                                                         Foreground="White"/>
                                         <TextBlock Text="开始仿真"
-                                                VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <!-- 数据显示模式切换按钮 -->
+                                <Button Style="{StaticResource IconTextButtonStyle}"
+                                        Margin="10 0 10 0"
+                                        x:Name="VelocityDispModeBtn"
+                                        Click="VelocityDispModeBtn_Click">
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center">
+                                        <fa:ImageAwesome Icon="ArrowCircleOutlineUp"
+                                                         Width="20"
+                                                         Height="20"
+                                                         Margin="0,0,6,0"
+                                                         Foreground="White"/>
+                                        <TextBlock Text="向量模式"
+                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -128,32 +146,33 @@
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Center">
                                 <fa:ImageAwesome Icon="Sliders"
-                                                Foreground="White"
-                                                Height="30"
-                                                Margin="5"/>
+                                                 Foreground="White"
+                                                 Height="30"
+                                                 Margin="5"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                        FontSize="22"
-                                        Text="操作面板"/>
+                                           FontSize="22"
+                                           Text="操作面板"/>
                             </StackPanel>
 
                             <!-- 仿真时间速度 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center">
                                 <fa:ImageAwesome Icon="Tachometer"
-                                             Foreground="White"
-                                             Height="20"
-                                             Margin="5"/>
+                                                 Foreground="White"
+                                                 Height="20"
+                                                 Margin="5"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="时间流速"/>
+                                           Text="时间流速"/>
                             </StackPanel>
 
                             <hc:PreviewSlider x:Name="SimulationTimeStepSlider"
-                                          Margin="10,0"
-                                          Height="30"
-                                          ValueChanged="SimulationTimeStepSlider_ValueChanged"
-                                          Thumb.DragCompleted="SimulationTimeStepSlider_DragCompleted"/>
+                                              Margin="10,0"
+                                              Height="30"
+                                              ValueChanged="SimulationTimeStepSlider_ValueChanged"
+                                              Thumb.DragCompleted="SimulationTimeStepSlider_DragCompleted"/>
 
-                            <!-- 添加 / 删除天体 --><!--
+                            <!-- 添加 / 删除天体 -->
+                            <!--
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Center">
                                 <Button Style="{StaticResource IconTextButtonStyle}"
@@ -190,96 +209,96 @@
 
                             <!-- 天体速度设置 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center">
                                 <fa:ImageAwesome Icon="Rocket"
-                                             Foreground="White"
-                                             Height="20"
-                                             Margin="5"/>
+                                                 Foreground="White"
+                                                 Height="20"
+                                                 Margin="5"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="天体速度"/>
+                                           Text="天体速度"/>
                             </StackPanel>
                             <hc:TextBox x:Name="VelocityIOTextBox"
-                                 Style="{StaticResource InputTextBoxStyle}"
-                                 Text=""
-                                 KeyDown="VelocityIOTextBox_KeyDown"/>
+                                        Style="{StaticResource InputTextBoxStyle}"
+                                        Text=""
+                                        KeyDown="VelocityIOTextBox_KeyDown"/>
 
                             <!-- 天体质量设置 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center">
                                 <fa:ImageAwesome Icon="BalanceScale"
-                                             Foreground="White"
-                                             Height="20"
-                                             Margin="5"/>
+                                                 Foreground="White"
+                                                 Height="20"
+                                                 Margin="5"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="天体质量"/>
+                                           Text="天体质量"/>
                             </StackPanel>
                             <hc:TextBox x:Name="MassIOTextBox"
-                                 Style="{StaticResource InputTextBoxStyle}"
-                                 Text=""
-                                 KeyDown="MassIOTextBox_KeyDown"/>
+                                        Style="{StaticResource InputTextBoxStyle}"
+                                        Text=""
+                                        KeyDown="MassIOTextBox_KeyDown"/>
 
                             <!-- 天体位置设置 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center">
                                 <fa:ImageAwesome Icon="Map"
-                                             Foreground="White"
-                                             Height="20"
-                                             Margin="5"/>
+                                                 Foreground="White"
+                                                 Height="20"
+                                                 Margin="5"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="天体位置"/>
+                                           Text="天体位置"/>
                             </StackPanel>
                             <hc:TextBox x:Name="PositionIOTextBox"
-                                 Style="{StaticResource InputTextBoxStyle}"
-                                 Text=""
-                                 KeyDown="PositionIOTextBox_KeyDown"/>
+                                        Style="{StaticResource InputTextBoxStyle}"
+                                        Text=""
+                                        KeyDown="PositionIOTextBox_KeyDown"/>
 
                             <!-- 当前观察对象 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center">
                                 <fa:ImageAwesome Icon="Eye"
-                                             Foreground="White"
-                                             Height="20"
-                                             Margin="5"/>
+                                                 Foreground="White"
+                                                 Height="20"
+                                                 Margin="5"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="当前观察对象"/>
+                                           Text="当前观察对象"/>
                             </StackPanel>
                             <hc:ComboBox Style="{StaticResource InputComboBoxStyle}"
-                                     AutomationProperties.HelpText="cesqwiybx"
-                                     x:Name="FocusIOComboBox"
-                                     ItemContainerStyle="{StaticResource ComboBoxItemStyle}"
-                                     SelectionChanged="FocusIOComboBox_SelectionChanged"/>
+                                         AutomationProperties.HelpText="cesqwiybx"
+                                         x:Name="FocusIOComboBox"
+                                         ItemContainerStyle="{StaticResource ComboBoxItemStyle}"
+                                         SelectionChanged="FocusIOComboBox_SelectionChanged"/>
 
 
                             <!-- 最小天体半径设置 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center">
                                 <fa:ImageAwesome Icon="Circle"
-                                             Foreground="White"
-                                             Height="20"
-                                             Margin="5"/>
+                                                 Foreground="White"
+                                                 Height="20"
+                                                 Margin="5"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="天体最小显示半径"/>
+                                           Text="天体最小显示半径"/>
                             </StackPanel>
                             <hc:TextBox x:Name="MinimumDisplayRadiusIOTextBox"
-                                 Style="{StaticResource InputTextBoxStyle}"
-                                 Text="15"
-                                 KeyDown="MinimumDisplayRadiusIOTextBox_KeyDown"/>
+                                        Style="{StaticResource InputTextBoxStyle}"
+                                        Text="15"
+                                        KeyDown="MinimumDisplayRadiusIOTextBox_KeyDown"/>
 
 
                             <!-- 速度向量显示长度比例 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center">
                                 <fa:ImageAwesome Icon="ArrowsAlt"
-                                             Foreground="White"
-                                             Height="20"
-                                             Margin="5"/>
+                                                 Foreground="White"
+                                                 Height="20"
+                                                 Margin="5"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="速度向量显示长度比例"/>
+                                           Text="速度向量显示长度比例"/>
                             </StackPanel>
                             <hc:TextBox x:Name="VelocityLengthFactorIOTextBox"
-                                 Style="{StaticResource InputTextBoxStyle}"
-                                 Text="60"
-                                 KeyDown="VelocityLengthFactorIOTextBox_KeyDown"/>
+                                        Style="{StaticResource InputTextBoxStyle}"
+                                        Text="60"
+                                        KeyDown="VelocityLengthFactorIOTextBox_KeyDown"/>
 
                             <!-- 时间流向控制/速度显示模式 -->
                             <StackPanel Orientation="Horizontal"
@@ -292,12 +311,12 @@
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="Backward"
-                                                        Width="20"
-                                                        Height="20"
-                                                        Margin="0,0,6,0"
-                                                        Foreground="White"/>
+                                                         Width="20"
+                                                         Height="20"
+                                                         Margin="0,0,6,0"
+                                                         Foreground="White"/>
                                         <TextBlock Text="时间反向"
-                                                VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                                 <!-- 速度设置模式按钮 -->
@@ -308,12 +327,12 @@
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="ArrowCircleOutlineUp"
-                                                        Width="20"
-                                                        Height="20"
-                                                        Margin="0,0,6,0"
-                                                        Foreground="White"/>
+                                                         Width="20"
+                                                         Height="20"
+                                                         Margin="0,0,6,0"
+                                                         Foreground="White"/>
                                         <TextBlock Text="速度可视"
-                                                VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -329,12 +348,12 @@
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="Upload"
-                                                        Width="20"
-                                                        Height="20"
-                                                        Margin="0,0,6,0"
-                                                        Foreground="White"/>
+                                                         Width="20"
+                                                         Height="20"
+                                                         Margin="0,0,6,0"
+                                                         Foreground="White"/>
                                         <TextBlock Text="加载预设"
-                                                VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                                 <Button x:Name="ExportSceneBtn"
@@ -344,99 +363,98 @@
                                     <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
                                         <fa:ImageAwesome Icon="Download"
-                                                        Width="20"
-                                                        Height="20"
-                                                        Margin="0,0,6,0"
-                                                        Foreground="White"/>
+                                                         Width="20"
+                                                         Height="20"
+                                                         Margin="0,0,6,0"
+                                                         Foreground="White"/>
                                         <TextBlock Text="导出预设"
-                                                VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
 
                             <!-- 帧率监控 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    Margin="0 8 0 0">
+                                        HorizontalAlignment="Center"
+                                        Margin="0 8 0 0">
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                   Text="当前帧率"
-                                   HorizontalAlignment="Center"
-                                   FontSize="20"
-                                   />
+                                           Text="当前帧率"
+                                           HorizontalAlignment="Center"
+                                           FontSize="20"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       x:Name="FrameReportTextBlock"
-                                        Text="NULL"
-                                        FontSize="20"
-                                        FontWeight="Normal"
-                                        HorizontalAlignment="Center"/>
+                                           x:Name="FrameReportTextBlock"
+                                           Text="NULL"
+                                           FontSize="20"
+                                           FontWeight="Normal"
+                                           HorizontalAlignment="Center"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                   Text="FPS"
-                                   FontSize="20"
-                                   FontWeight="Normal"
-                                   HorizontalAlignment="Center"/>
+                                           Text="FPS"
+                                           FontSize="20"
+                                           FontWeight="Normal"
+                                           HorizontalAlignment="Center"/>
                             </StackPanel>
 
                             <!-- 天体总数监控 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    Margin="0 0 0 0">
+                                        HorizontalAlignment="Center"
+                                        Margin="0 0 0 0">
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="天体总数"
-                                       HorizontalAlignment="Center"
-                                       FontSize="20"/>
+                                           Text="天体总数"
+                                           HorizontalAlignment="Center"
+                                           FontSize="20"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       x:Name="BodyCountReportLabel"
-                                       Text="NULL"
-                                       FontSize="20"
-                                       FontWeight="Normal"
-                                       HorizontalAlignment="Center"/>
+                                           x:Name="BodyCountReportLabel"
+                                           Text="NULL"
+                                           FontSize="20"
+                                           FontWeight="Normal"
+                                           HorizontalAlignment="Center"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="个"
-                                       FontSize="20"
-                                       FontWeight="Normal"
-                                       HorizontalAlignment="Center"/>
+                                           Text="个"
+                                           FontSize="20"
+                                           FontWeight="Normal"
+                                           HorizontalAlignment="Center"/>
                             </StackPanel>
 
                             <!-- 仿真时间监控 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    Margin="0 0 0 0">
+                                        HorizontalAlignment="Center"
+                                        Margin="0 0 0 0">
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="仿真时间"
-                                       HorizontalAlignment="Center"
-                                       FontSize="20"/>
+                                           Text="仿真时间"
+                                           HorizontalAlignment="Center"
+                                           FontSize="20"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       x:Name="SimulationTimeReportLabel"
-                                       Text="NULL"
-                                       FontSize="20"
-                                       FontWeight="Normal"
-                                       HorizontalAlignment="Center"/>
+                                           x:Name="SimulationTimeReportLabel"
+                                           Text="NULL"
+                                           FontSize="20"
+                                           FontWeight="Normal"
+                                           HorizontalAlignment="Center"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       x:Name="SimulationTimeUnitLabel"
-                                       Text="天"
-                                       FontSize="20"
-                                       FontWeight="Normal"
-                                       HorizontalAlignment="Center"/>
+                                           x:Name="SimulationTimeUnitLabel"
+                                           Text="天"
+                                           FontSize="20"
+                                           FontWeight="Normal"
+                                           HorizontalAlignment="Center"/>
                             </StackPanel>
 
                             <!-- 比例尺监控 -->
                             <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    Margin="0 0 0 0">
+                                        HorizontalAlignment="Center"
+                                        Margin="0 0 0 0">
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="比例尺"
-                                       HorizontalAlignment="Center"
-                                       FontSize="20"/>
+                                           Text="比例尺"
+                                           HorizontalAlignment="Center"
+                                           FontSize="20"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       x:Name="ScaleReportLabel"
-                                       Text="NULL"
-                                       FontSize="20"
-                                       FontWeight="Normal"
-                                       HorizontalAlignment="Center"/>
+                                           x:Name="ScaleReportLabel"
+                                           Text="NULL"
+                                           FontSize="20"
+                                           FontWeight="Normal"
+                                           HorizontalAlignment="Center"/>
                                 <TextBlock Style="{StaticResource LabelStyle}"
-                                       Text="每像素"
-                                       FontSize="20"
-                                       HorizontalAlignment="Center"/>
+                                           Text="每像素"
+                                           FontSize="20"
+                                           HorizontalAlignment="Center"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -445,33 +463,33 @@
 
                 <!-- 左右之间的分割控件 -->
                 <GridSplitter Grid.Column="1"
-                            Width="5"
-                            HorizontalAlignment="Stretch"
-                            Background="#222"/>
+                              Width="5"
+                              HorizontalAlignment="Stretch"
+                              Background="#222"/>
 
                 <!-- 右侧面板：包含动画显示和数据表格 -->
                 <Grid Grid.Column="2">
 
-                <!-- 画布 -->
-                <Border Margin="0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0"
-                                             EndPoint="0,1">
-                            <GradientStop Color="#3E3A65"
-                                          Offset="0"/>
-                            <GradientStop Color="#473765"
-                                          Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <skia:SKElement x:Name="animationCanva"
-                                    PaintSurface="OnPaintSurface"
-                                    SizeChanged="AnimationCanva_SizeChanged"
-                                    MouseWheel="AnimationCanva_MouseWheel"
-                                    MouseDown="AnimationCanva_MouseDown"
-                                    MouseUp="AnimationCanva_MouseUp"
-                                    MouseMove="AnimationCanva_MouseMove"
-                                    Margin="0,0,0,0"/>
-                </Border>
+                    <!-- 画布 -->
+                    <Border Margin="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0"
+                                                 EndPoint="0,1">
+                                <GradientStop Color="#3E3A65"
+                                              Offset="0"/>
+                                <GradientStop Color="#473765"
+                                              Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <skia:SKElement x:Name="animationCanva"
+                                        PaintSurface="OnPaintSurface"
+                                        SizeChanged="AnimationCanva_SizeChanged"
+                                        MouseWheel="AnimationCanva_MouseWheel"
+                                        MouseDown="AnimationCanva_MouseDown"
+                                        MouseUp="AnimationCanva_MouseUp"
+                                        MouseMove="AnimationCanva_MouseMove"
+                                        Margin="0,0,0,0"/>
+                    </Border>
 
                 </Grid>
             </Grid>

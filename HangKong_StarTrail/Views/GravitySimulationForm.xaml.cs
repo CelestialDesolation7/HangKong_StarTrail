@@ -47,6 +47,11 @@ namespace HangKong_StarTrail.Views
         private bool _isFrameRendering = false; // 当前帧是否正在渲染
         #endregion
 
+        #region 数据库相关成员
+        private SQLiteConnection? _dbConnection;    // 数据库连接
+        private int _currentSceneId = 1;           // 当前场景ID，默认为地月系统
+        #endregion
+
         #region 仿真参数设置
         private double _timeStep; // 每帧物理仿真时间步长
         private double _recommendedTimeStep;   //推荐时间步长
@@ -66,6 +71,7 @@ namespace HangKong_StarTrail.Views
         private Vector2D? _lastMouseCanvasPos; // 记录上一帧的鼠标位置（屏幕坐标）
         private bool _isMiddleButtonPressed;    // 中键是否按下
         private Vector2D _cameraOffset = Vector2D.ZeroVector;   // 相机偏移量
+        private bool _useVectorToDisplay = false; // 是否使用向量显示模式
         #endregion
 
 #if DEBUG
@@ -222,34 +228,94 @@ namespace HangKong_StarTrail.Views
 
         private void LoadDefaultEarthMoonSystem()
         {
-            // 地球数据
-            var earth = new Body(
-                "地球",
-                new Vector2D(0, 0),  // 位置在原点
-                new Vector2D(0, 0),  // 初始速度
-                5.972e24,            // 质量（kg）
-                6730e3,                  // 物理半径
-                true,                // 中心天体
-                new SKColor(0, 0, 255) // 蓝色
-            );
+            try
+            {
+                string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data\\scene.db");
+                if (!File.Exists(dbPath))
+                {
+                    MessageBox.Show("未找到预设场景数据库", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
-            // 月球数据
-            var moon = new Body(
-                "月球",
-                new Vector2D(384400e3, 0),  // 地月距离（米）
-                new Vector2D(0, 1022),      // 月球轨道速度（m/s）
-                7.348e22,                   // 质量（kg）
-                1734e3,                         // 物理半径
-                false,                      // 非中心天体
-                new SKColor(128, 128, 128)  // 灰色
-            );
+                // 建立数据库连接
+                _dbConnection = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                _dbConnection.Open();
 
-            _renderer.AddBody(earth);
-            _renderer.AddBody(moon);
+                // 加载地月系统场景
+                LoadScene(_currentSceneId);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"加载默认场景时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
-            _focusedBody = earth;
-            // 更新焦点下拉框
-            UpdateFocusComboBox();
+        // 加载指定场景ID的场景
+        private void LoadScene(int sceneId)
+        {
+            if (_dbConnection == null) return;
+            bool temp = _isVelocityVisualizeMode;
+            try
+            {
+                // 获取场景中的所有天体
+                var bodies = new List<Body>();
+                using (var command = new SQLiteCommand(
+                    "SELECT Name, PositionX, PositionY, VelocityX, VelocityY, Mass, IsCenter, " +
+                    "ColorR, ColorG, ColorB, ColorA, PhysicalRadius " +
+                    "FROM Bodies WHERE SceneId = @SceneId", _dbConnection))
+                {
+                    command.Parameters.AddWithValue("@SceneId", sceneId);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var body = new Body(
+                                reader.GetString(0), // Name
+                                new Vector2D(reader.GetDouble(1), reader.GetDouble(2)), // Position
+                                new Vector2D(reader.GetDouble(3), reader.GetDouble(4)), // Velocity
+                                reader.GetDouble(5), // Mass
+                                reader.GetDouble(11), // PhysicalRadius
+                                reader.GetInt32(6) != 0, // IsCenter
+                                new SKColor(
+                                    (byte)reader.GetInt32(7),  // R
+                                    (byte)reader.GetInt32(8),  // G
+                                    (byte)reader.GetInt32(9),  // B
+                                    (byte)reader.GetInt32(10)  // A
+                                )
+                            );
+                            bodies.Add(body);
+                        }
+                    }
+                }
+
+                // 更新物理引擎中的天体
+                _renderer._physicsEngine.Bodies.Clear();
+                foreach (var body in bodies)
+                {
+                    _renderer.AddBody(body);
+                }
+
+                _timeStep = CalculateRecommendedTimeStep();
+                _pixelToDistanceRatio = _recommendedScale = CalculateRecommendedScale();
+
+                // 更新焦点天体下拉框
+                UpdateFocusComboBox();
+                // 重绘画布
+                animationCanva.InvalidateVisual();
+                // 重置必要的数据
+                // 更新UI
+                InitializeSettingParameters();
+                InitializeStatisticsRecord();
+                InitializeUIStatus();
+                _renderer.InitializeRenderer();
+                _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
+                _renderer.SetTimeStep(_timeStep);
+                _isVelocityVisualizeMode = temp;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"加载场景时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         #endregion
 
@@ -258,7 +324,7 @@ namespace HangKong_StarTrail.Views
 
         private void InitializeDebugWindow()
         {
-           _debugWindow = new DebugForm.DebugSimulationForm(UpdateDebugInfo);
+            _debugWindow = new DebugForm.DebugSimulationForm(UpdateDebugInfo);
             _debugWindow.Show();
         }
 
@@ -292,7 +358,7 @@ namespace HangKong_StarTrail.Views
                 debugInfo.AppendLine($"\n{body.Name}:");
                 debugInfo.AppendLine($"物理位置: X={body.Position.X:F2}, Y={body.Position.Y:F2}");
                 debugInfo.AppendLine($"显示位置: X={body.DisplayPosition.X:F2}, Y={body.DisplayPosition.Y:F2}");
-                debugInfo.AppendLine($"速度: X={body.Velocity.X:F2}, Y={body.Velocity.Y:F2}");
+                debugInfo.AppendLine($"速度: {body.Velocity.Length}");
             }
 
             foreach (var info in _debugInfo)
@@ -307,6 +373,16 @@ namespace HangKong_StarTrail.Views
 #endif
 
         #region 基本UI响应
+        // 数据显示模式切换按钮处理函数
+        private void VelocityDispModeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _useVectorToDisplay = !_useVectorToDisplay;
+            FocusDataReporter(sender, e);
+            var velocityDispModeBtn = VelocityDispModeBtn.Content as StackPanel;
+            var text = velocityDispModeBtn.Children[1] as TextBlock;
+            text.Text = _useVectorToDisplay ? "标量模式" : "向量模式";
+        }
+
         // 更新UI上所有的信息显示文本的行为集合
         private void UpdateAllUIMonitor(object? sender, EventArgs? e)
         {
@@ -334,14 +410,20 @@ namespace HangKong_StarTrail.Views
         private void FocusDataReporter(object? sender, EventArgs? e)
         {
             // 汇报观测对象属性
-            if (_focusedBody != null && _isSimulationRunning)
+            if (_focusedBody != null)
             {
                 if (_focusedBody != null)
                 {
                     // 更新位置
                     PositionIOTextBox.Text = $"({FormatDistance(_focusedBody.Position.X)},{FormatDistance(_focusedBody.Position.Y)})";
-                    // 更新速度（向量形式）
-                    VelocityIOTextBox.Text = $"({FormatVelocity(_focusedBody.Velocity.X)},{FormatVelocity(_focusedBody.Velocity.Y)})";
+                    if (_useVectorToDisplay)
+                    {// 更新速度（向量形式）
+                        VelocityIOTextBox.Text = $"({FormatVelocity(_focusedBody.Velocity.X)},{FormatVelocity(_focusedBody.Velocity.Y)})";
+                    }
+                    else
+                    {
+                        VelocityIOTextBox.Text = $"{FormatVelocity(_focusedBody.Velocity.Length)}";
+                    }
                     // 更新质量
                     MassIOTextBox.Text = FormatMass(_focusedBody.Mass);
                 }
@@ -537,6 +619,7 @@ namespace HangKong_StarTrail.Views
             {
                 UpdateDisplayPositions();
                 animationCanva.InvalidateVisual();
+                FocusDataReporter(sender, e);
             }
         }
 
@@ -721,81 +804,23 @@ namespace HangKong_StarTrail.Views
             var sceneWindow = new SceneSelectionWindow();
             if (sceneWindow.ShowDialog() == true)
             {
-
                 try
                 {
-                    string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data\\scene.db");
-                    if (!File.Exists(dbPath))
+                    if (_dbConnection == null)
                     {
-                        MessageBox.Show("未找到预设场景数据库", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("数据库连接未初始化", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
-                    using (var connection = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+                    // 获取场景ID
+                    using (var command = new SQLiteCommand("SELECT SceneId FROM Scenes WHERE SceneName = @SceneName", _dbConnection))
                     {
-                        connection.Open();
-                        // 获取场景ID
-                        int sceneId;
-                        using (var command = new SQLiteCommand("SELECT SceneId FROM Scenes WHERE SceneName = @SceneName", connection))
-                        {
-                            command.Parameters.AddWithValue("@SceneName", sceneWindow.SelectedSceneName);
-                            sceneId = Convert.ToInt32(command.ExecuteScalar());
-                        }
-
-                        // 获取场景中的所有天体
-                        var bodies = new List<Body>();
-                        using (var command = new SQLiteCommand(
-                            "SELECT Name, PositionX, PositionY, VelocityX, VelocityY, Mass, IsCenter, " +
-                            "ColorR, ColorG, ColorB, ColorA, PhysicalRadius " +
-                            "FROM Bodies WHERE SceneId = @SceneId", connection))
-                        {
-                            command.Parameters.AddWithValue("@SceneId", sceneId);
-                            using (var reader = command.ExecuteReader())
-                            {
-                                while (reader.Read())
-                                {
-                                    var body = new Body(
-                                        reader.GetString(0), // Name
-                                        new Vector2D(reader.GetDouble(1), reader.GetDouble(2)), // Position
-                                        new Vector2D(reader.GetDouble(3), reader.GetDouble(4)), // Velocity
-                                        reader.GetDouble(5), // Mass
-                                        reader.GetDouble(11), // PhysicalRadius
-                                        reader.GetInt32(6) != 0, // IsCenter
-                                        new SKColor(
-                                            (byte)reader.GetInt32(7),  // R
-                                            (byte)reader.GetInt32(8),  // G
-                                            (byte)reader.GetInt32(9),  // B
-                                            (byte)reader.GetInt32(10)  // A
-                                        )
-                                    );
-                                    bodies.Add(body);
-                                }
-                            }
-                        }
-
-                        // 更新物理引擎中的天体
-                        _renderer._physicsEngine.Bodies.Clear();
-                        foreach (var body in bodies)
-                        {
-                            _renderer.AddBody(body);
-                        }
-
-                        _timeStep = CalculateRecommendedTimeStep();
-                        _pixelToDistanceRatio = _recommendedScale = CalculateRecommendedScale();
-
-                        // 更新焦点天体下拉框
-                        UpdateFocusComboBox();
-                        // 重绘画布
-                        animationCanva.InvalidateVisual();
-                        // 重置必要的数据
-                        // 更新UI
-                        InitializeSettingParameters();
-                        InitializeStatisticsRecord();
-                        InitializeUIStatus();
-                        _renderer.InitializeRenderer();
-                        _renderer.SetTimeStep(_timeStep);
-                        _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
+                        command.Parameters.AddWithValue("@SceneName", sceneWindow.SelectedSceneName);
+                        _currentSceneId = Convert.ToInt32(command.ExecuteScalar());
                     }
+
+                    // 加载选中的场景
+                    LoadScene(_currentSceneId);
                 }
                 catch (Exception ex)
                 {
@@ -824,66 +849,62 @@ namespace HangKong_StarTrail.Views
 
             try
             {
-                string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data\\scene.db");
-                if (!File.Exists(dbPath))
+                if (_dbConnection == null)
                 {
-                    MessageBox.Show("未找到预设场景数据库", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("数据库连接未初始化", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                using (var connection = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+
+                using (var transaction = _dbConnection.BeginTransaction())
                 {
-                    connection.Open();
-                    using (var transaction = connection.BeginTransaction())
+                    try
                     {
-                        try
+                        // 插入场景
+                        int sceneId;
+                        using (var command = new SQLiteCommand(
+                            "INSERT INTO Scenes (SceneName, CreateTime) VALUES (@SceneName, @CreateTime); " +
+                            "SELECT last_insert_rowid();", _dbConnection))
                         {
-                            // 插入场景
-                            int sceneId;
+                            command.Parameters.AddWithValue("@SceneName", sceneName);
+                            command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
+                            sceneId = Convert.ToInt32(command.ExecuteScalar());
+                        }
+
+                        // 插入天体
+                        foreach (var body in _renderer._physicsEngine.Bodies)
+                        {
                             using (var command = new SQLiteCommand(
-                                "INSERT INTO Scenes (SceneName, CreateTime) VALUES (@SceneName, @CreateTime); " +
-                                "SELECT last_insert_rowid();", connection))
+                                "INSERT INTO Bodies (SceneId, Name, PositionX, PositionY, " +
+                                "VelocityX, VelocityY, Mass, IsCenter, " +
+                                "ColorR, ColorG, ColorB, ColorA, PhysicalRadius) " +
+                                "VALUES (@SceneId, @Name, @PositionX, @PositionY, " +
+                                "@VelocityX, @VelocityY, @Mass, @IsCenter, " +
+                                "@ColorR, @ColorG, @ColorB, @ColorA, @PhysicalRadius)", _dbConnection))
                             {
-                                command.Parameters.AddWithValue("@SceneName", sceneName);
-                                command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
-                                sceneId = Convert.ToInt32(command.ExecuteScalar());
+                                command.Parameters.AddWithValue("@SceneId", sceneId);
+                                command.Parameters.AddWithValue("@Name", body.Name);
+                                command.Parameters.AddWithValue("@PositionX", body.Position.X);
+                                command.Parameters.AddWithValue("@PositionY", body.Position.Y);
+                                command.Parameters.AddWithValue("@VelocityX", body.Velocity.X);
+                                command.Parameters.AddWithValue("@VelocityY", body.Velocity.Y);
+                                command.Parameters.AddWithValue("@Mass", body.Mass);
+                                command.Parameters.AddWithValue("@IsCenter", body.IsCenter);
+                                command.Parameters.AddWithValue("@ColorR", body.DisplayColor.Red);
+                                command.Parameters.AddWithValue("@ColorG", body.DisplayColor.Green);
+                                command.Parameters.AddWithValue("@ColorB", body.DisplayColor.Blue);
+                                command.Parameters.AddWithValue("@ColorA", body.DisplayColor.Alpha);
+                                command.Parameters.AddWithValue("@PhysicalRadius", body.PhysicalRadius);
+                                command.ExecuteNonQuery();
                             }
-
-                            // 插入天体
-                            foreach (var body in _renderer._physicsEngine.Bodies)
-                            {
-                                using (var command = new SQLiteCommand(
-                                    "INSERT INTO Bodies (SceneId, Name, PositionX, PositionY, " +
-                                    "VelocityX, VelocityY, Mass, IsCenter, " +
-                                    "ColorR, ColorG, ColorB, ColorA, PhysicalRadius) " +
-                                    "VALUES (@SceneId, @Name, @PositionX, @PositionY, " +
-                                    "@VelocityX, @VelocityY, @Mass, @IsCenter, " +
-                                    "@ColorR, @ColorG, @ColorB, @ColorA, @PhysicalRadius)", connection))
-                                {
-                                    command.Parameters.AddWithValue("@SceneId", sceneId);
-                                    command.Parameters.AddWithValue("@Name", body.Name);
-                                    command.Parameters.AddWithValue("@PositionX", body.Position.X);
-                                    command.Parameters.AddWithValue("@PositionY", body.Position.Y);
-                                    command.Parameters.AddWithValue("@VelocityX", body.Velocity.X);
-                                    command.Parameters.AddWithValue("@VelocityY", body.Velocity.Y);
-                                    command.Parameters.AddWithValue("@Mass", body.Mass);
-                                    command.Parameters.AddWithValue("@IsCenter", body.IsCenter);
-                                    command.Parameters.AddWithValue("@ColorR", body.DisplayColor.Red);
-                                    command.Parameters.AddWithValue("@ColorG", body.DisplayColor.Green);
-                                    command.Parameters.AddWithValue("@ColorB", body.DisplayColor.Blue);
-                                    command.Parameters.AddWithValue("@ColorA", body.DisplayColor.Alpha);
-                                    command.Parameters.AddWithValue("@PhysicalRadius", body.PhysicalRadius);
-                                    command.ExecuteNonQuery();
-                                }
-                            }
-
-                            transaction.Commit();
-                            MessageBox.Show("场景导出成功！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
-                        catch
-                        {
-                            transaction.Rollback();
-                            throw;
-                        }
+
+                        transaction.Commit();
+                        MessageBox.Show("场景导出成功！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
                     }
                 }
             }
@@ -891,6 +912,19 @@ namespace HangKong_StarTrail.Views
             {
                 MessageBox.Show($"导出场景时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // 重置仿真按钮的处理函数
+        private void ResetSimulationBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // 如果仿真正在运行，则先暂停
+            if (_isSimulationRunning)
+            {
+                StartPauseBtn_Click(sender, e);
+            }
+
+            // 重新加载当前场景
+            LoadScene(_currentSceneId);
         }
 
         // 窗口处理函数注册器
@@ -991,7 +1025,14 @@ namespace HangKong_StarTrail.Views
                     {
                         if (_physicsUpdateCts?.Token.IsCancellationRequested == true)
                             return;
-                        _renderer._physicsEngine.Update(_timeStep);
+                        if (_isTimeReversed)
+                        {
+                            _renderer._physicsEngine.Update(-_timeStep);
+                        }
+                        else
+                        {
+                            _renderer._physicsEngine.Update(_timeStep);
+                        }
                         UpdateDisplayPositions();
                         _lastPhysicsUpdate = DateTime.Now;
                     }
@@ -1150,23 +1191,6 @@ namespace HangKong_StarTrail.Views
 
         #region 待实现功能
 
-        private void ResetSimulationBtn_Click(object sender, RoutedEventArgs e)
-        {
-            // 重置所有状态
-            _renderer._physicsEngine.Bodies.Clear();
-            _cameraOffset = Vector2D.ZeroVector;
-            _focusedBody = null;
-            _isTimeReversed = false;
-
-            // 重置UI
-            SimulationTimeStepSlider.Value = SLIDER_CENTER_VALUE;
-            VelocityIOTextBox.Text = "";
-            MassIOTextBox.Text = "";
-            PositionIOTextBox.Text = "";
-            FocusIOComboBox.SelectedIndex = -1;
-
-            LoadDefaultEarthMoonSystem();
-        }
         private void TimeReverseBtn_Click(object sender, RoutedEventArgs e)
         {
             _isTimeReversed = !_isTimeReversed;
