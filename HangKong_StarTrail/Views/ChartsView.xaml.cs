@@ -39,11 +39,12 @@ namespace HangKong_StarTrail.Views
         private double _deltaVMax = 1;
         // 所有天体速度对比图
         private ObservableCollection<double> _raceValues = new();
-        private List<string> _raceLabels = new();
+        private Dictionary<string, double> _raceLabels = new();
 
         private GravitySimulationForm _gravityForm;
         private DispatcherTimer _timerVelocityForce;
         private DispatcherTimer _timerDeltaV;
+        private DispatcherTimer _timerAllVelocity;
 
         public ISeries[] Series1 { get; set; } = Array.Empty<ISeries>();
         public ISeries[] Series2 { get; set; } = Array.Empty<ISeries>();
@@ -65,54 +66,122 @@ namespace HangKong_StarTrail.Views
         }
 
         // ... existing code ...
-// ... existing code ...
-public ChartsView(GravitySimulationForm gravityForm)
-{
-    InitializeComponent();
-    _gravityForm = gravityForm;
-    InitializeCharts();
-    DataContext = this;
+        // ... existing code ...
+        public ChartsView(GravitySimulationForm gravityForm)
+        {
+            InitializeComponent();
+            _gravityForm = gravityForm;
+            InitializeCharts();
+            DataContext = this;
 
-    // 100ms定时器：速度-时间、受力-时间
-    _timerVelocityForce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-    _timerVelocityForce.Tick += TimerVelocityForce_Tick;
-    _timerVelocityForce.Start();
+            // 100ms定时器：速度-时间、受力-时间
+            _timerVelocityForce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            _timerVelocityForce.Tick += TimerVelocityForce_Tick;
+            _timerVelocityForce.Start();
 
-    // 1s定时器：Δv统计
-    _timerDeltaV = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-    _timerDeltaV.Tick += TimerDeltaV_Tick;
-    _timerDeltaV.Start();
-}
+            // 1s定时器：Δv统计
+            _timerDeltaV = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _timerDeltaV.Tick += TimerDeltaV_Tick;
+            _timerDeltaV.Start();
 
-private void TimerVelocityForce_Tick(object sender, EventArgs e)
-{
-    string body = _gravityForm.FocusedBodyName;
-    double time = DateTime.Now.TimeOfDay.TotalSeconds; // 或仿真时间
-    double velocity = _gravityForm.CurrentVelocity;
-    double force = _gravityForm.CurrentForce;
+            // 1s定时器：竞速条形图
+            _timerAllVelocity = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _timerAllVelocity.Tick += TimerAllVelocity_Tick;
+            _timerAllVelocity.Start();
+        }
 
-    UpdateVelocityTime(body, time, velocity);
-    UpdateForceTime(body, time, force);
-}
+        private void TimerVelocityForce_Tick(object sender, EventArgs e)
+        {
+            if (_gravityForm == null || string.IsNullOrEmpty(_gravityForm.FocusedBodyName))
+                return;
+            string body = _gravityForm.FocusedBodyName;
+            double time = DateTime.Now.TimeOfDay.TotalSeconds; // 或仿真时间
+            double velocity = _gravityForm.CurrentVelocity;
+            double force = _gravityForm.CurrentForce;
 
-private void TimerDeltaV_Tick(object sender, EventArgs e)
-{
-    int maneuverIndex = _gravityForm.FrameCount; // 或用实际变轨计数
-    double deltaV = _gravityForm.CurrentVelocity; // 示例，实际应为Δv
-    UpdateDeltaVCounts(maneuverIndex, deltaV);
-}
-// ... existing code ...
+            UpdateVelocityTime(body, time, velocity);
+            UpdateForceTime(body, time, force);
+
+            string new_body;
+            if (body == "地球")
+            {
+                new_body = "Earth";
+            }
+            else if (body == "月球")
+            {
+                new_body = "Moon";
+            }
+            else
+            {
+                new_body = "UNKnow";
+            }
+
+            if (_raceLabels.ContainsKey(new_body))
+            {
+                // 存在：更新
+                _raceLabels[new_body] = velocity; // 或者更新具体值
+            }
+            else
+            {
+                // 不存在：添加
+                _raceLabels.Add(new_body, velocity);
+            }
+        }
+
+        private void TimerDeltaV_Tick(object sender, EventArgs e)
+        {
+            int maneuverIndex = _gravityForm.FrameCount; // 或用实际变轨计数
+            double deltaV = _gravityForm.CurrentVelocity; // 示例，实际应为Δv
+            UpdateDeltaVCounts(maneuverIndex, deltaV);
+        }
+
+        private void TimerAllVelocity_Tick(object sender, EventArgs e)
+        {
+            UpdateAllVelocity();
+        }
+
+        // ... existing code ...
 
         private void InitializeCharts()
         {
             // 速度-时间
             Series1 = Array.Empty<ISeries>();
-            XAxes1 = new[] { new Axis { Name = "Time", MinLimit = 0 } };
-            YAxes1 = new[] { new Axis { Name = "Velocity", MinLimit = 0, MaxLimit = _velocityYMax } };
+            XAxes1 = new[] {
+                new Axis {
+                    Name = "Time",
+                    MinLimit = 0,
+                    MinStep = 500,
+                    Labeler = value => $"{value:0}"
+                }
+            };
+            YAxes1 = new[] {
+                new Axis {
+                    Name = "Velocity",
+                    MinLimit = 0,
+                    MaxLimit = _velocityYMax,
+                    MinStep = 0.01,
+                    Labeler = value => $"{value:0.00}"
+                }
+            };
             // 合力-时间
             Series2 = Array.Empty<ISeries>();
-            XAxes2 = new[] { new Axis { Name = "Time", MinLimit = 0 } };
-            YAxes2 = new[] { new Axis { Name = "Force", MinLimit = 0, MaxLimit = _forceYMax } };
+            XAxes2 = new[] {
+                new Axis {
+                    Name = "Time",
+                    MinLimit = 0,
+                    MinStep = 500,
+                    Labeler = value => $"{value:0}"
+                }
+            };
+            YAxes2 = new[] {
+                new Axis {
+                    Name = "Force",
+                    MinLimit = 0,
+                    MaxLimit = _forceYMax,
+                    MinStep = 0.1,
+                    Labeler = value => value.ToString("0.##E+0") // 科学计数法显示
+                }
+            };
             // Δv统计
             Series3 = new ISeries[]
             {
@@ -126,7 +195,7 @@ private void TimerDeltaV_Tick(object sender, EventArgs e)
                 new RowSeries<double> { Name = "Race", Values = _raceValues }
             };
             XAxes4 = new[] { new Axis { Name = "Speed", MinLimit = 0, MaxLimit = 10 } };
-            YAxes4 = new[] { new Axis { Labels = _raceLabels.ToArray() } };
+            YAxes4 = new[] { new Axis { Labels = _raceLabels.Keys.ToArray() } };
         }
 
         // 1. 速度-时间曲线
@@ -145,12 +214,22 @@ private void TimerDeltaV_Tick(object sender, EventArgs e)
             }
             var values = (ObservableCollection<ObservablePoint>)_velocitySeries[bodyName].Values;
             values.Add(new ObservablePoint(time, velocity));
+
+            // 保持最多 10 条数据
+            while (values.Count > 10)
+            {
+                values.RemoveAt(0);
+            }
+
+
             // X轴自适应
+
+
             if (time > _velocityXMax)
             {
                 _velocityXMax = time * 1.1;
-                XAxes1[0].MaxLimit = _velocityXMax;
-                OnPropertyChanged(nameof(XAxes1));
+                // XAxes1[0].MaxLimit = _velocityXMax; // 由自适应逻辑替代
+                // OnPropertyChanged(nameof(XAxes1));
             }
             // Y轴自适应
             if (velocity > _velocityYMax)
@@ -158,6 +237,18 @@ private void TimerDeltaV_Tick(object sender, EventArgs e)
                 _velocityYMax = velocity * 1.1;
                 YAxes1[0].MaxLimit = _velocityYMax;
                 OnPropertyChanged(nameof(YAxes1));
+            }
+            // 横坐标自适应
+            var allTimes = _velocitySeries.Values
+                .SelectMany(series => ((ObservableCollection<ObservablePoint>)series.Values).Select(p => p.X))
+                .ToList();
+            if (allTimes.Count > 0)
+            {
+                double minTime = (double)allTimes.Min();
+                double maxTime = (double)allTimes.Max();
+                XAxes1[0].MinLimit = minTime;
+                XAxes1[0].MaxLimit = maxTime;
+                OnPropertyChanged(nameof(XAxes1));
             }
         }
 
@@ -177,12 +268,19 @@ private void TimerDeltaV_Tick(object sender, EventArgs e)
             }
             var values = (ObservableCollection<ObservablePoint>)_forceSeries[bodyName].Values;
             values.Add(new ObservablePoint(time, force));
+
+            // 保持最多 10 条数据
+            while (values.Count > 10)
+            {
+                values.RemoveAt(0);
+            }
+
             // X轴自适应
             if (time > _forceXMax)
             {
                 _forceXMax = time * 1.1;
-                XAxes2[0].MaxLimit = _forceXMax;
-                OnPropertyChanged(nameof(XAxes2));
+                // XAxes2[0].MaxLimit = _forceXMax; // 由自适应逻辑替代
+                // OnPropertyChanged(nameof(XAxes2));
             }
             // Y轴自适应
             if (force > _forceYMax)
@@ -190,6 +288,18 @@ private void TimerDeltaV_Tick(object sender, EventArgs e)
                 _forceYMax = force * 1.1;
                 YAxes2[0].MaxLimit = _forceYMax;
                 OnPropertyChanged(nameof(YAxes2));
+            }
+            // 横坐标自适应
+            var allTimes = _forceSeries.Values
+                .SelectMany(series => ((ObservableCollection<ObservablePoint>)series.Values).Select(p => p.X))
+                .ToList();
+            if (allTimes.Count > 0)
+            {
+                double minTime = (double)allTimes.Min();
+                double maxTime = (double)allTimes.Max();
+                XAxes2[0].MinLimit = minTime;
+                XAxes2[0].MaxLimit = maxTime;
+                OnPropertyChanged(nameof(XAxes2));
             }
         }
 
@@ -208,19 +318,37 @@ private void TimerDeltaV_Tick(object sender, EventArgs e)
         }
 
         // 4. 竞速条形图
-        public void UpdateAllVelocity(Dictionary<string, double> currentVelocities)
+        public void UpdateAllVelocity()
         {
-            _raceValues.Clear();
-            _raceLabels.Clear();
+            //_raceValues.Clear();
+            // _raceLabels.Clear();
             double max = 10;
-            foreach (var kv in currentVelocities)
-            {
-                _raceLabels.Add(kv.Key);
-                _raceValues.Add(kv.Value);
-                if (kv.Value > max) max = kv.Value;
-            }
-            YAxes4[0].Labels = _raceLabels.ToArray();
+            //foreach (var kv in currentVelocities)
+            //{
+            //    _raceLabels.Add(kv.Key);
+            //    _raceValues.Add(kv.Value);
+            //    if (kv.Value > max) max = kv.Value;
+            //}
+
+            YAxes4[0].Labels = _raceLabels.Keys.ToArray();
             XAxes4[0].MaxLimit = max * 1.1;
+
+            // 清空并重新填充 _raceValues
+            _raceValues.Clear();
+            foreach (var key in _raceLabels.Keys)
+            {
+                _raceValues.Add(_raceLabels[key]);
+            }
+
+            // 重建 Series4 并通知更新
+            Series4 = new ISeries[]
+            {
+                new RowSeries<double>
+                {
+                    Name = "Race",
+                    Values = _raceValues
+                }
+            };
             OnPropertyChanged(nameof(Series4));
             OnPropertyChanged(nameof(YAxes4));
             OnPropertyChanged(nameof(XAxes4));
