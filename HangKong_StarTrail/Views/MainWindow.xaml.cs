@@ -21,6 +21,8 @@ namespace HangKong_StarTrail.Views
     /// </summary>
     public partial class MainWindow : Window
     {
+        private GravitySimulationForm _gravityForm;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -116,6 +118,19 @@ namespace HangKong_StarTrail.Views
                 var gravitySimulationForm = new GravitySimulationForm();
                 gravitySimulationForm.Closed += (s, args) => this.Show(); // 确保关闭时显示主窗口
                 gravitySimulationForm.Show();
+
+                var chartsView = new ChartsView(gravitySimulationForm);
+                var window = new Window
+                {
+                    Title = "仿真图表",
+                    Content = chartsView,
+                    Width = 1200,
+                    Height = 800,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
+                window.Show();
+
+
                 this.Hide();
             }
             catch (Exception ex)
@@ -205,7 +220,7 @@ namespace HangKong_StarTrail.Views
 
         private void ViewCharts_Click(object sender, RoutedEventArgs e)
         {
-            var chartsView = new ChartsView();
+            var chartsView = new ChartsView(_gravityForm);
             var window = new Window
             {
                 Title = "仿真图表",

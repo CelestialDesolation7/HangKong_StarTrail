@@ -217,24 +217,26 @@
                                     </DataTemplate>
                                 </Button.ContentTemplate>
                             </Button>
-                            
-                            <Button Content="查看仿真图表" Style="{StaticResource MainButtonStyle}" Click="ViewCharts_Click" Margin="0,0,0,20">
-                                    <Button.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                            <GradientStop Color="#3B2F56" Offset="0"/>
-                                            <GradientStop Color="#5A4887" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Button.Background>
-                                    <Button.ContentTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <fontAwesome:FontAwesome Icon="BarChart" Margin="0,0,10,0"/>
-                                            <TextBlock Text="{Binding}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Button.ContentTemplate>
 
-                            </Button>
+                                <Button Content="查看仿真图表" Style="{StaticResource MainButtonStyle}" Click="ViewCharts_Click" Margin="0,0,0,20">
+                                    <Button.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#3B2F56" Offset="0"/>
+                                        <GradientStop Color="#5A4887" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Button.Background>
+                                <Button.Effect>
+                                    <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#5A4887" Opacity="0.5"/>
+                                </Button.Effect>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <fontAwesome:FontAwesome Icon="BarChart" Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
                             
                             <Button Content="退出系统" Style="{StaticResource MainButtonStyle}" Click="Exit_Click" Margin="0,0,0,20">
                                 <Button.Background>

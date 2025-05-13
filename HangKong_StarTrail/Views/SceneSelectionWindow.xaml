@@ -4,7 +4,7 @@
         Title="选择预设场景"
         Height="200"
         Width="400"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
     <Grid Margin="10">
         <Grid.RowDefinitions>
