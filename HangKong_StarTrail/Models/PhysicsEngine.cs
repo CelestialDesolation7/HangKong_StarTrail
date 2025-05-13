@@ -25,7 +25,8 @@ namespace HangKong_StarTrail.Models
                     if (other == body) continue;
                     Vector2D r = other.Position - body.Position;
                     double distance = r.Length;
-                    if (distance == 0) continue;  // 避免除零
+                    double surfaceDistance = distance - other.PhysicalRadius - body.PhysicalRadius;
+                    if (surfaceDistance < 0) continue;  // 避免除零
                     double forceMagnitude = G * body.Mass * other.Mass / (distance * distance);
                     Vector2D forceDirection = r.Normalize();
                     totalForce += forceDirection * forceMagnitude;

@@ -288,6 +288,15 @@ namespace HangKong_StarTrail.Views
                     }
                 }
 
+                var loadSceneNameCommand = new SQLiteCommand("SELECT SceneName FROM Scenes WHERE SceneId = @SceneId", _dbConnection);
+                loadSceneNameCommand.Parameters.AddWithValue("@SceneId", sceneId);
+                using (var reader = loadSceneNameCommand.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        SceneNameReportLabel.Text = reader.GetString(0);
+                    }
+                }
                 // 更新物理引擎中的天体
                 _renderer._physicsEngine.Bodies.Clear();
                 foreach (var body in bodies)
