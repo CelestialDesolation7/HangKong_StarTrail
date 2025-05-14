@@ -17,6 +17,7 @@ using SkiaSharp;
 using System.Windows.Threading;
 using System.Threading.Tasks;
 using LiveChartsCore.Defaults;
+using HangKong_StarTrail.Models;
 
 namespace HangKong_StarTrail.Views
 {
@@ -90,6 +91,23 @@ namespace HangKong_StarTrail.Views
             _timerAllVelocity.Start();
         }
 
+        private static readonly Dictionary<string, string> NameTranslation = new()
+{
+    { "太阳", "Sun" },
+    { "水星", "Mercury" },
+    { "金星", "Venus" },
+    { "地球", "Earth" },
+    { "月球", "Moon" },
+    { "火星", "Mars" },
+    { "木星", "Jupiter" },
+    { "土星", "Saturn" },
+    { "天王星", "Uranus" },
+    { "海王星", "Neptune" },
+    { "冥王星", "Pluto" },
+    { "卡戎", "Charon" }
+};
+
+
         private void TimerVelocityForce_Tick(object sender, EventArgs e)
         {
             if (_gravityForm == null || string.IsNullOrEmpty(_gravityForm.FocusedBodyName))
@@ -102,29 +120,25 @@ namespace HangKong_StarTrail.Views
             UpdateVelocityTime(body, time, velocity);
             UpdateForceTime(body, time, force);
 
-            string new_body;
-            if (body == "地球")
-            {
-                new_body = "Earth";
-            }
-            else if (body == "月球")
-            {
-                new_body = "Moon";
-            }
-            else
-            {
-                new_body = "UNKnow";
-            }
 
-            if (_raceLabels.ContainsKey(new_body))
+            List<Body> AllBody = _gravityForm.RendererInstance._physicsEngine.Bodies;
+            foreach (var tem_body in AllBody)
             {
-                // 存在：更新
-                _raceLabels[new_body] = velocity; // 或者更新具体值
-            }
-            else
-            {
-                // 不存在：添加
-                _raceLabels.Add(new_body, velocity);
+                // 读取每个 body 的属性，例如名称和速度
+                string new_body = NameTranslation.TryGetValue(tem_body.Name, out var translated)
+                                           ? translated
+                                           : "Unknown";
+
+                if (_raceLabels.ContainsKey(new_body))
+                {
+                    // 存在：更新
+                    _raceLabels[new_body] = tem_body.Velocity.Length; // 或者更新具体值
+                }
+                else
+                {
+                    // 不存在：添加
+                    _raceLabels.Add(new_body, tem_body.Velocity.Length);
+                }
             }
         }
 
@@ -192,10 +206,11 @@ namespace HangKong_StarTrail.Views
             // 竞速条形图
             Series4 = new ISeries[]
             {
-                new RowSeries<double> { Name = "Race", Values = _raceValues }
+                new ColumnSeries<double> { Name = "Race", Values = _raceValues }
             };
-            XAxes4 = new[] { new Axis { Name = "Speed", MinLimit = 0, MaxLimit = 10 } };
-            YAxes4 = new[] { new Axis { Labels = _raceLabels.Keys.ToArray() } };
+            XAxes4 = new[] { new Axis { Labels = _raceLabels.Keys.ToArray() } };
+            YAxes4 = new[] { new Axis { Name = "Speed", MinLimit = 0, MaxLimit = 10 } };
+
         }
 
         // 1. 速度-时间曲线
@@ -203,9 +218,14 @@ namespace HangKong_StarTrail.Views
         {
             if (!_velocitySeries.ContainsKey(bodyName))
             {
+
+                string new_bodyName = NameTranslation.TryGetValue(bodyName, out var translated)
+                                           ? translated
+                                           : "Unknown";
+
                 var series = new LineSeries<ObservablePoint>
                 {
-                    Name = bodyName,
+                    Name = new_bodyName,
                     Values = new ObservableCollection<ObservablePoint>()
                 };
                 _velocitySeries[bodyName] = series;
@@ -257,9 +277,12 @@ namespace HangKong_StarTrail.Views
         {
             if (!_forceSeries.ContainsKey(bodyName))
             {
+                string new_bodyName = NameTranslation.TryGetValue(bodyName, out var translated)
+                                           ? translated
+                                           : "Unknown";
                 var series = new LineSeries<ObservablePoint>
                 {
-                    Name = bodyName,
+                    Name = new_bodyName,
                     Values = new ObservableCollection<ObservablePoint>()
                 };
                 _forceSeries[bodyName] = series;
@@ -322,33 +345,55 @@ namespace HangKong_StarTrail.Views
         {
             //_raceValues.Clear();
             // _raceLabels.Clear();
-            double max = 10;
+            //double max = 10;
             //foreach (var kv in currentVelocities)
             //{
             //    _raceLabels.Add(kv.Key);
             //    _raceValues.Add(kv.Value);
             //    if (kv.Value > max) max = kv.Value;
             //}
+            if (_raceLabels == null || _raceLabels.Count == 0)
+                return;
 
-            YAxes4[0].Labels = _raceLabels.Keys.ToArray();
-            XAxes4[0].MaxLimit = max * 1.1;
-
-            // 清空并重新填充 _raceValues
+            // 清空旧数据
             _raceValues.Clear();
+
+            // 动态计算最大值
+            double max = _raceLabels.Values.Max();
+            if (max <= 0) max = 10; // 默认最小范围
+
+            // 填充新数据
             foreach (var key in _raceLabels.Keys)
             {
                 _raceValues.Add(_raceLabels[key]);
             }
 
-            // 重建 Series4 并通知更新
-            Series4 = new ISeries[]
+            XAxes4[0].Labels = _raceLabels.Keys.ToArray();
+            XAxes4[0].MinStep = 1; // 防止自动跳过标签
+            XAxes4[0].LabelsRotation = 90; // 或其他角度
+            //XAxes4[0].TextSize = 10; // 设置字体大小为10
+
+            YAxes4[0].MaxLimit = max * 1.1;
+
+
+            // 复用已有的 Series 对象以提高性能
+            var columnSeries = Series4.FirstOrDefault() as ColumnSeries<double>;
+            if (columnSeries == null)
             {
-                new RowSeries<double>
+                Series4 = new ISeries[]
                 {
-                    Name = "Race",
-                    Values = _raceValues
-                }
-            };
+            new ColumnSeries<double>
+            {
+                Name = "Race",
+                Values = _raceValues
+            }
+                };
+            }
+            else
+            {
+                columnSeries.Values = _raceValues;
+            }
+
             OnPropertyChanged(nameof(Series4));
             OnPropertyChanged(nameof(YAxes4));
             OnPropertyChanged(nameof(XAxes4));

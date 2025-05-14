@@ -108,6 +108,17 @@ namespace HangKong_StarTrail.Views
         public double CurrentVelocity { get; private set; }
         public double CurrentForce { get; private set; }
         public int FrameCount { get; private set; }
+
+
+        /// <summary>
+        /// 获取实例。
+        /// </summary>
+        public Renderer RendererInstance
+        {
+            get { return _renderer; }
+        }
+
+
         #endregion
 
 

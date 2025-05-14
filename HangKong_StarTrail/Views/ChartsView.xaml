@@ -104,7 +104,7 @@
                                         Background="Transparent"/>
 
                     <!-- 图表4：所有天体速度对比图 -->
-                    <TextBlock Grid.Row="2" Grid.Column="1" Text="所有天体速度对比图" FontSize="16" FontWeight="Bold" Margin="0,20,0,10"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="天体速度对比图" FontSize="16" FontWeight="Bold" Margin="0,20,0,10"/>
                     <lvc:CartesianChart Grid.Row="3" Grid.Column="1"
                                         Series="{Binding Series4}"
                                         XAxes="{Binding XAxes4}"
