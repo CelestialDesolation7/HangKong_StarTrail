@@ -118,7 +118,7 @@ namespace HangKong_StarTrail.Views
                 var gravitySimulationForm = new GravitySimulationForm();
                 gravitySimulationForm.Closed += (s, args) => this.Show(); // 确保关闭时显示主窗口
                 gravitySimulationForm.Show();
-
+                /*
                 var chartsView = new ChartsView(gravitySimulationForm);
                 var window = new Window
                 {
@@ -129,7 +129,7 @@ namespace HangKong_StarTrail.Views
                     WindowStartupLocation = WindowStartupLocation.CenterScreen
                 };
                 window.Show();
-
+                //*/
 
                 this.Hide();
             }

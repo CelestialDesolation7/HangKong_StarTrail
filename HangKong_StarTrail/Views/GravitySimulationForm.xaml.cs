@@ -1,5 +1,4 @@
-﻿#define DEBUG
-
+﻿#undef DEBUG
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,7 +115,9 @@ namespace HangKong_StarTrail.Views
         {
             InitializeComponent();
             InitializeSimulation();
+#if DEBUG
             InitializeDebugWindow();
+#endif
             InitializeStatisticsRecord();
 
             // 等待控件完成布局后再计算推荐比例尺
@@ -326,7 +327,7 @@ namespace HangKong_StarTrail.Views
                 MessageBox.Show($"加载场景时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        #endregion
+#endregion
 
 #if DEBUG
         #region 调试函数
@@ -561,7 +562,6 @@ namespace HangKong_StarTrail.Views
                 // 实时应用新的时间步长,但暂时不更新
                 _timeStep = _recommendedTimeStep * ratio;
                 _renderer.SetTimeStep(_timeStep);
-                _debugInfo[1] = $"当前滑块值：{e.NewValue}";
                 if (!_isSimulationRunning)
                 {
                     UpdateDisplayPositions();
@@ -663,8 +663,9 @@ namespace HangKong_StarTrail.Views
                     // 忽略取消异常
                 }
             }
-
+#if DEBUG
             _debugWindow?.Close();
+#endif
             base.OnClosed(e);
         }
 
@@ -705,14 +706,11 @@ namespace HangKong_StarTrail.Views
             if (e.Key == Key.Enter && !_isSimulationRunning && _focusedBody != null)
             {
                 var originalText = VelocityIOTextBox.Text;
-                _debugInfo[4] = $"原始文本：{originalText}";
                 try
                 {
                     var parts = VelocityIOTextBox.Text.Trim('(', ')').Split(',');
                     if (parts.Length == 2)
                     {
-                        _debugInfo[3] = parts[0];
-                        _debugInfo[2] = parts[1];
                         double vx = ParseScientificNumber(parts[0].Substring(0, parts[0].Length - 4));
                         double vy = ParseScientificNumber(parts[1].Substring(0, parts[1].Length - 4));
                         _focusedBody.Velocity = new Vector2D(vx, vy);
@@ -871,11 +869,10 @@ namespace HangKong_StarTrail.Views
                         // 插入场景
                         int sceneId;
                         using (var command = new SQLiteCommand(
-                            "INSERT INTO Scenes (SceneName, CreateTime) VALUES (@SceneName, @CreateTime); " +
+                            "INSERT INTO Scenes (SceneName) VALUES (@SceneName); " +
                             "SELECT last_insert_rowid();", _dbConnection))
                         {
                             command.Parameters.AddWithValue("@SceneName", sceneName);
-                            command.Parameters.AddWithValue("@CreateTime", DateTime.Now);
                             sceneId = Convert.ToInt32(command.ExecuteScalar());
                         }
 
@@ -1004,7 +1001,7 @@ namespace HangKong_StarTrail.Views
             return IntPtr.Zero;
         }
 
-        #endregion
+#endregion
 
 
 
