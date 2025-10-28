@@ -107,6 +107,17 @@ namespace HangKong_StarTrail.Views
         public double CurrentVelocity { get; private set; }
         public double CurrentForce { get; private set; }
         public int FrameCount { get; private set; }
+
+
+        /// <summary>
+        /// 获取实例。
+        /// </summary>
+        public Renderer RendererInstance
+        {
+            get { return _renderer; }
+        }
+
+
         #endregion
 
 
@@ -119,6 +130,7 @@ namespace HangKong_StarTrail.Views
             InitializeDebugWindow();
 #endif
             InitializeStatisticsRecord();
+            SetInitialFocusBody();
 
             // 等待控件完成布局后再计算推荐比例尺
             animationCanva.Loaded += (s, e) =>
@@ -399,6 +411,16 @@ namespace HangKong_StarTrail.Views
             FPSReporter(sender, e);
             FocusDataReporter(sender, e);
             SimulationStaticsReporter(sender, e);
+            if (_focusedBody != null)
+            {
+                CurrentVelocity = _focusedBody.Velocity.Length;
+                CurrentForce = CalculateTotalForce(_focusedBody);
+            }
+            else
+            {
+                CurrentVelocity = 0;
+                CurrentForce = 0;
+            }
         }
 
         // 汇报帧率到UI的行为集合
@@ -606,29 +628,35 @@ namespace HangKong_StarTrail.Views
 
             if (selectedItem == "自由模式")
             {
-                // 如果当前有焦点天体，将其位置设为相机偏移
                 if (_focusedBody != null)
                 {
                     _cameraOffset = _focusedBody.Position;
                     _focusedBody = null;
                 }
-                // 清空UI数据显示
+                CurrentVelocity = 0;
+                CurrentForce = 0;
                 PositionIOTextBox.Text = "N/A";
                 VelocityIOTextBox.Text = "N/A";
                 MassIOTextBox.Text = "N/A";
             }
             else
             {
-                // 查找选中的天体
                 _focusedBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.Name == selectedItem);
+                if (_focusedBody != null)
+                {
+                    CurrentVelocity = _focusedBody.Velocity.Length;
+                    CurrentForce = CalculateTotalForce(_focusedBody);
+                }
+                else
+                {
+                    CurrentVelocity = 0;
+                    CurrentForce = 0;
+                }
             }
-
-            // 只在暂停模式下更新显示
             if (!_isSimulationRunning)
             {
                 UpdateDisplayPositions();
                 animationCanva.InvalidateVisual();
-                FocusDataReporter(sender, e);
             }
         }
 
@@ -1202,6 +1230,19 @@ namespace HangKong_StarTrail.Views
             _isTimeReversed = !_isTimeReversed;
         }
 
+        private void ShowChartsViewButton_Click(object sender, RoutedEventArgs e)
+        {
+            var chartsView = new ChartsView(this);
+            var window = new Window
+            {
+                Title = "仿真图表",
+                Content = chartsView,
+                Width = 1200,
+                Height = 800,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
+            };
+            window.Show();
+        }
 
         #endregion
 
@@ -1393,6 +1434,25 @@ namespace HangKong_StarTrail.Views
             // 计算推荐比例尺，确保最远距离的天体在画布上可见
             double scale = maxDimension / (maxDistance * 3); // 1.2是边距系数
             return scale;
+        }
+
+        // 假设你有合力的计算方法
+        private double CalculateTotalForce(Body body)
+        {
+            // 这里给出一个简单的合力计算示例（请根据你的物理引擎实际实现替换）
+            if (body == null) return 0;
+            var engine = _renderer._physicsEngine;
+            double totalForce = 0;
+            foreach (var other in engine.Bodies)
+            {
+                if (other == body) continue;
+                var r = other.Position - body.Position;
+                double distance = r.Length;
+                if (distance == 0) continue;
+                double force = 6.67430e-11 * body.Mass * other.Mass / (distance * distance);
+                totalForce += force;
+            }
+            return totalForce;
         }
         #endregion
     }
