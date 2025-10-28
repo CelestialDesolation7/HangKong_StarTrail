@@ -32,9 +32,9 @@ namespace HangKong_StarTrail.Views
 
         #region 成员变量
         #region 渲染相关后台控制器
-        private Renderer _renderer; // 渲染器，包含物理引擎作为成员
-        private DispatcherTimer _simulationTimer;   // 物理仿真计时器
-        private DispatcherTimer _uiUpdateTimer;     // UI更新计时器
+        private Renderer _renderer = null!; // 渲染器，包含物理引擎作为成员
+        private DispatcherTimer _simulationTimer = null!;   // 物理仿真计时器
+        private DispatcherTimer _uiUpdateTimer = null!;     // UI更新计时器
         private Task? _physicsUpdateTask;          // 物理更新任务
         private CancellationTokenSource? _physicsUpdateCts; // 物理更新取消令牌
         private readonly object _physicsLock = new object(); // 物理更新锁
@@ -101,7 +101,7 @@ namespace HangKong_StarTrail.Views
         private const int HTBOTTOMRIGHT = 17;
         #endregion
 
-        public string FocusedBodyName => _focusedBody?.Name;
+        public string? FocusedBodyName => _focusedBody?.Name;
 
         // 假设你有速度、受力等数据结构
         public double CurrentVelocity { get; private set; }
@@ -140,8 +140,11 @@ namespace HangKong_StarTrail.Views
                 UpdateDisplayPositions();
                 animationCanva.InvalidateVisual();
                 // 设置同步
-                _renderer.SetTimeStep(_timeStep);
-                _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
+                if (_renderer != null)
+                {
+                    _renderer.SetTimeStep(_timeStep);
+                    _renderer.SetPixelToDistanceRatio(_pixelToDistanceRatio);
+                }
             };
 
 
@@ -192,6 +195,24 @@ namespace HangKong_StarTrail.Views
             _lastFrameTime = DateTime.Now;
             _lastPhysicsUpdate = DateTime.Now;
             _renderer._physicsEngine.timeElapsed = 0;
+        }
+
+        // 设置初始焦点天体
+        private void SetInitialFocusBody()
+        {
+            // 在渲染器初始化后，尝试找到中心天体作为初始焦点
+            var centerBody = _renderer._physicsEngine.Bodies.FirstOrDefault(b => b.IsCenter);
+            if (centerBody != null)
+            {
+                _focusedBody = centerBody;
+                _centerBody = centerBody;
+            }
+            else
+            {
+                // 如果没有中心天体，设置为自由模式
+                _focusedBody = null;
+                _centerBody = null;
+            }
         }
 
         // 初始化UI状态
@@ -339,7 +360,7 @@ namespace HangKong_StarTrail.Views
                 MessageBox.Show($"加载场景时出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-#endregion
+        #endregion
 
 #if DEBUG
         #region 调试函数
@@ -401,8 +422,14 @@ namespace HangKong_StarTrail.Views
             _useVectorToDisplay = !_useVectorToDisplay;
             FocusDataReporter(sender, e);
             var velocityDispModeBtn = VelocityDispModeBtn.Content as StackPanel;
-            var text = velocityDispModeBtn.Children[1] as TextBlock;
-            text.Text = _useVectorToDisplay ? "标量模式" : "向量模式";
+            if (velocityDispModeBtn != null && velocityDispModeBtn.Children.Count > 1)
+            {
+                var text = velocityDispModeBtn.Children[1] as TextBlock;
+                if (text != null)
+                {
+                    text.Text = _useVectorToDisplay ? "标量模式" : "向量模式";
+                }
+            }
         }
 
         // 更新UI上所有的信息显示文本的行为集合
@@ -502,19 +529,22 @@ namespace HangKong_StarTrail.Views
             // 在仿真运行时禁用部分修改相关按钮
             // 更新开始/暂停按钮文本
             var startPauseBtn = StartPauseBtn.Content as StackPanel;
-            if (startPauseBtn != null)
+            if (startPauseBtn != null && startPauseBtn.Children.Count > 1)
             {
                 var icon = startPauseBtn.Children[0] as FontAwesome.WPF.ImageAwesome;
                 var text = startPauseBtn.Children[1] as TextBlock;
-                if (_isSimulationRunning)
+                if (icon != null && text != null)
                 {
-                    icon.Icon = FontAwesome.WPF.FontAwesomeIcon.Pause;
-                    text.Text = "暂停仿真";
-                }
-                else
-                {
-                    icon.Icon = FontAwesome.WPF.FontAwesomeIcon.Play;
-                    text.Text = "开始仿真";
+                    if (_isSimulationRunning)
+                    {
+                        icon.Icon = FontAwesome.WPF.FontAwesomeIcon.Pause;
+                        text.Text = "暂停仿真";
+                    }
+                    else
+                    {
+                        icon.Icon = FontAwesome.WPF.FontAwesomeIcon.Play;
+                        text.Text = "开始仿真";
+                    }
                 }
             }
         }
@@ -1029,13 +1059,13 @@ namespace HangKong_StarTrail.Views
             return IntPtr.Zero;
         }
 
-#endregion
+        #endregion
 
 
 
         #region 画面渲染相关操作
         // 物理更新线程的主要函数
-        private void SimulationTimer_Tick(object sender, EventArgs e)
+        private void SimulationTimer_Tick(object? sender, EventArgs e)
         {
             if (!_isSimulationRunning) return;
             var now = DateTime.Now;
@@ -1191,7 +1221,7 @@ namespace HangKong_StarTrail.Views
         }
 
         // 调用渲染的委托函数
-        private void RenderCaller(object sender, EventArgs e)
+        private void RenderCaller(object? sender, EventArgs e)
         {
             if (!_isRenderingEnabled) return;
 
